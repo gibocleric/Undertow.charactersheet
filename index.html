@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Creator</title>
+
+    <style>
+        body {
+            background-color: #202020;
+            color: white;
+            font-family: Georgia, serif;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background-color: #333333;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        input {
+            width: 95%;
+            padding: 10px;
+            margin: 8px 0 20px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #777777;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #999999;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Character Creator</h1>
+
+        <label for="name">Character Name</label>
+        <input type="text" id="name" placeholder="Enter name">
+
+        <label for="occupation">Occupation</label>
+        <input type="text" id="occupation" placeholder="Enter occupation">
+
+        <label for="age">Age</label>
+        <input type="number" id="age" placeholder="Enter age" min="1">
+
+        <button onclick="createCharacter()">Create Character</button>
+
+        <div id="result"></div>
+
+    </div>
+
+    <script>
+        function createCharacter() {
+
+            const name = document.getElementById("name").value;
+            const occupation = document.getElementById("occupation").value;
+            const age = document.getElementById("age").value;
+
+            if (!name || !occupation || !age || Number(age) < 1) {
+                alert("Please complete all fields.");
+                return;
+            }
+
+            document.getElementById("result").innerHTML = `
+                <hr>
+                <h2>Character Created</h2>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Occupation:</strong> ${occupation}</p>
+                <p><strong>Age:</strong> ${age}</p>
+            `;
+        }
+    </script>
+
+</body>
+</html>
+
