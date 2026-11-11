@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Character Creator</title>
 
-    <!-- PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -25,7 +24,7 @@
             border-radius: 10px;
         }
 
-        input {
+        input, select {
             box-sizing: border-box;
             width: 100%;
             padding: 10px;
@@ -52,99 +51,217 @@
         #result {
             margin-top: 20px;
         }
+
+        .stats {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #777;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <h1>Character Creator</h1>
+    <h1>Character Creator</h1>
 
-        <label for="name">Character Name</label>
-        <input type="text" id="name" placeholder="Enter name">
+    <h2>Basic Information</h2>
 
-        <label for="occupation">Occupation</label>
-        <input type="text" id="occupation" placeholder="Enter occupation">
+    <label for="name">Character Name</label>
+    <input type="text" id="name" placeholder="Enter name">
 
-        <label for="age">Age</label>
-        <input type="number" id="age" placeholder="Enter age" min="1" step="1">
+    <label for="occupation">Occupation</label>
+    <input type="text" id="occupation" placeholder="Enter occupation">
 
-        <button onclick="createCharacter()">Create Character</button>
+    <label for="age">Age</label>
+    <input type="number" id="age" placeholder="Enter age" min="1" step="1">
 
-        <div id="result"></div>
+    <button onclick="createCharacter()">Create Character</button>
 
-        <button id="pdfButton" onclick="downloadPDF()" hidden>
+    <div id="result"></div>
+
+    <!-- Attribute Selection -->
+
+    <div class="stats" id="statsSection" hidden>
+
+        <h2>Attribute Distribution</h2>
+
+        <p>Assign one unique value to each attribute.</p>
+
+        <label for="influence">Influence</label>
+        <select id="influence">
+            <option value="">Choose Value</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+
+        <label for="strength">Strength</label>
+        <select id="strength">
+            <option value="">Choose Value</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+
+        <label for="knowledge">Knowledge</label>
+        <select id="knowledge">
+            <option value="">Choose Value</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+
+        <label for="deadeye">Dead Eye</label>
+        <select id="deadeye">
+            <option value="">Choose Value</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+
+        <label for="resolve">Resolve</label>
+        <select id="resolve">
+            <option value="">Choose Value</option>
+            <option value="25">25</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="45">45</option>
+            <option value="50">50</option>
+        </select>
+
+        <button onclick="downloadPDF()">
             Download Character Sheet (PDF)
         </button>
 
     </div>
 
-    <script>
+</div>
 
-        function createCharacter() {
+<script>
 
-            const name = document.getElementById("name").value.trim();
-            const occupation = document.getElementById("occupation").value.trim();
-            const age = document.getElementById("age").value;
+    function createCharacter() {
 
-            if (!name || !occupation || !age ||
-                !Number.isInteger(Number(age)) || Number(age) < 1) {
+        const name = document.getElementById("name").value.trim();
+        const occupation = document.getElementById("occupation").value.trim();
+        const age = document.getElementById("age").value;
 
-                alert("Please complete all fields correctly.");
-                return;
-            }
-
-            document.getElementById("result").innerHTML = `
-                <hr>
-                <h2>Character Created</h2>
-                <p><strong>Name:</strong> ${name}</p>
-                <p><strong>Occupation:</strong> ${occupation}</p>
-                <p><strong>Age:</strong> ${age}</p>
-            `;
-
-            document.getElementById("pdfButton").hidden = false;
+        if (
+            !name ||
+            !occupation ||
+            !age ||
+            !Number.isInteger(Number(age)) ||
+            Number(age) < 1
+        ) {
+            alert("Please complete all fields correctly.");
+            return;
         }
 
+        document.getElementById("result").innerHTML = `
+            <hr>
+            <h2>Character Created</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Occupation:</strong> ${occupation}</p>
+            <p><strong>Age:</strong> ${age}</p>
+        `;
 
-        function downloadPDF() {
+        document.getElementById("statsSection").hidden = false;
+    }
 
-            const { jsPDF } = window.jspdf;
 
-            const name = document.getElementById("name").value.trim();
-            const occupation = document.getElementById("occupation").value.trim();
-            const age = document.getElementById("age").value;
+    function downloadPDF() {
 
-            if (!name || !occupation || !age ||
-                !Number.isInteger(Number(age)) || Number(age) < 1) {
-                alert("Please complete all fields correctly.");
-                return;
-            }
+        const { jsPDF } = window.jspdf;
 
-            const doc = new jsPDF();
+        const name = document.getElementById("name").value.trim();
+        const occupation = document.getElementById("occupation").value.trim();
+        const age = document.getElementById("age").value;
 
-            // Title
-            doc.setFont("times", "bold");
-            doc.setFontSize(24);
-            doc.text("Character Sheet", 20, 25);
+        const stats = {
+            "Influence": document.getElementById("influence").value,
+            "Strength": document.getElementById("strength").value,
+            "Knowledge": document.getElementById("knowledge").value,
+            "Dead Eye": document.getElementById("deadeye").value,
+            "Resolve": document.getElementById("resolve").value
+        };
 
-            // Divider
-            doc.setLineWidth(0.5);
-            doc.line(20, 32, 190, 32);
+        // Check that every stat has a value
 
-            // Character information
-            doc.setFont("times", "normal");
-            doc.setFontSize(14);
-
-            doc.text("Name: " + name, 20, 50);
-            doc.text("Occupation: " + occupation, 20, 65);
-            doc.text("Age: " + age, 20, 80);
-
-            // Save PDF
-            doc.save(name + "_Character_Sheet.pdf");
+        if (Object.values(stats).some(value => value === "")) {
+            alert("Please assign a value to every attribute.");
+            return;
         }
 
-    </script>
+        // Check that all values are unique
+
+        const values = Object.values(stats);
+
+        if (new Set(values).size !== 5) {
+            alert("Each attribute must have a unique value. You cannot use the same value twice.");
+            return;
+        }
+
+        // Generate PDF
+
+        const doc = new jsPDF();
+
+        // Title
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(24);
+        doc.text("Character Sheet", 20, 25);
+
+        doc.setLineWidth(0.5);
+        doc.line(20, 32, 190, 32);
+
+        // Basic Information
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
+        doc.text("Character Information", 20, 48);
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(12);
+
+        doc.text("Name: " + name, 20, 60);
+        doc.text("Occupation: " + occupation, 20, 72);
+        doc.text("Age: " + age, 20, 84);
+
+        // Attributes
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(16);
+        doc.text("Attributes", 20, 110);
+
+        doc.setFont("times", "normal");
+        doc.setFontSize(13);
+
+        let y = 125;
+
+        for (const [attribute, value] of Object.entries(stats)) {
+            doc.text(attribute + ": " + value, 25, y);
+            y += 12;
+        }
+
+        // Save PDF
+
+        doc.save(name + "_Character_Sheet.pdf");
+    }
+
+</script>
 
 </body>
 </html>
