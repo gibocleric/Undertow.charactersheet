@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Character Creator</title>
 
+    <!-- PDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         body {
             background-color: #202020;
@@ -23,7 +26,8 @@
         }
 
         input {
-            width: 95%;
+            box-sizing: border-box;
+            width: 100%;
             padding: 10px;
             margin: 8px 0 20px;
             border-radius: 5px;
@@ -33,6 +37,7 @@
         button {
             width: 100%;
             padding: 12px;
+            margin-top: 10px;
             background-color: #777777;
             color: white;
             border: none;
@@ -42,6 +47,10 @@
 
         button:hover {
             background-color: #999999;
+        }
+
+        #result {
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -59,23 +68,30 @@
         <input type="text" id="occupation" placeholder="Enter occupation">
 
         <label for="age">Age</label>
-        <input type="number" id="age" placeholder="Enter age" min="1">
+        <input type="number" id="age" placeholder="Enter age" min="1" step="1">
 
         <button onclick="createCharacter()">Create Character</button>
 
         <div id="result"></div>
 
+        <button id="pdfButton" onclick="downloadPDF()" hidden>
+            Download Character Sheet (PDF)
+        </button>
+
     </div>
 
     <script>
+
         function createCharacter() {
 
-            const name = document.getElementById("name").value;
-            const occupation = document.getElementById("occupation").value;
+            const name = document.getElementById("name").value.trim();
+            const occupation = document.getElementById("occupation").value.trim();
             const age = document.getElementById("age").value;
 
-            if (!name || !occupation || !age || Number(age) < 1) {
-                alert("Please complete all fields.");
+            if (!name || !occupation || !age ||
+                !Number.isInteger(Number(age)) || Number(age) < 1) {
+
+                alert("Please complete all fields correctly.");
                 return;
             }
 
@@ -86,9 +102,49 @@
                 <p><strong>Occupation:</strong> ${occupation}</p>
                 <p><strong>Age:</strong> ${age}</p>
             `;
+
+            document.getElementById("pdfButton").hidden = false;
         }
+
+
+        function downloadPDF() {
+
+            const { jsPDF } = window.jspdf;
+
+            const name = document.getElementById("name").value.trim();
+            const occupation = document.getElementById("occupation").value.trim();
+            const age = document.getElementById("age").value;
+
+            if (!name || !occupation || !age ||
+                !Number.isInteger(Number(age)) || Number(age) < 1) {
+                alert("Please complete all fields correctly.");
+                return;
+            }
+
+            const doc = new jsPDF();
+
+            // Title
+            doc.setFont("times", "bold");
+            doc.setFontSize(24);
+            doc.text("Character Sheet", 20, 25);
+
+            // Divider
+            doc.setLineWidth(0.5);
+            doc.line(20, 32, 190, 32);
+
+            // Character information
+            doc.setFont("times", "normal");
+            doc.setFontSize(14);
+
+            doc.text("Name: " + name, 20, 50);
+            doc.text("Occupation: " + occupation, 20, 65);
+            doc.text("Age: " + age, 20, 80);
+
+            // Save PDF
+            doc.save(name + "_Character_Sheet.pdf");
+        }
+
     </script>
 
 </body>
 </html>
-
