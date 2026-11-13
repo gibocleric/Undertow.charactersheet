@@ -300,8 +300,14 @@
       document.getElementById('skills-continue').disabled = totals.total !== budget || !skillInputs.every((input) => input.value !== '' && input.checkValidity()) || !reserveInput.checkValidity();
     }
 
+    // Reserved points count toward the same budget, so edits must refresh skill caps and totals.
+    reserveInput.addEventListener('input', updateSkills);
+
     document.getElementById('character-form').addEventListener('submit', (event) => {
       event.preventDefault();
+      // Starting a new character must not reuse the prior character's final form or save id.
+      activeSaveId = null;
+      finalReady = false;
       document.getElementById('character-screen').hidden = true;
       document.getElementById('stats-screen').hidden = false;
       const difficulty = new FormData(event.currentTarget).get('difficulty');
@@ -320,6 +326,7 @@
     document.getElementById('stats-form').addEventListener('submit', (event) => {
       event.preventDefault();
       initialStatSelects.forEach((select) => { stats[select.name] = Number(select.value); });
+      reserveInput.value = '0';
       buildSkills();
       document.getElementById('stats-screen').hidden = true;
       document.getElementById('skills-screen').hidden = false;
@@ -337,6 +344,9 @@
     function buildFinalPage() {
       if (finalReady) return;
       const form = document.getElementById('final-form');
+      form.replaceChildren();
+      finalStatSelects.length = 0;
+      finalSkillInputs = [];
       const initial = new FormData(document.getElementById('character-form'));
       [['Character name', 'final-name', 'text', initial.get('name')], ['Occupation', 'final-occupation', 'text', initial.get('occupation')], ['Age', 'final-age', 'number', initial.get('age')]].forEach(([labelText, id, type, value]) => {
         const wrap = document.createElement('div');
@@ -593,7 +603,7 @@
     function saveCurrentCharacter() {
       updateFinalPage();
       if (document.getElementById('print-button').disabled) return;
-      const id = activeSaveId || (crypto.randomUUID ? crypto.randomUUID() : `character-${Date.now()}`);
+      const id = activeSaveId || globalThis.crypto?.randomUUID?.() || `character-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const saved = readSavedCharacters();
       const character = collectFinalCharacter(id);
       const index = saved.findIndex((entry) => entry.id === id);
@@ -666,6 +676,3 @@
   </script>
 </body>
 </html>
-
-
-
