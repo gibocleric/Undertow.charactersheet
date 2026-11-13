@@ -1,1 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Undertow Character Builder</title>
+  <style>
+    @font-face { font-family: "Trade Winds"; src: url("./fonts/trade-winds.ttf") format("truetype"); font-style: normal; font-weight: 400; }
+    @font-face { font-family: "Libre Baskerville"; src: url("./fonts/libre-baskerville-regular.ttf") format("truetype"); font-style: normal; font-weight: 400; }
+    @font-face { font-family: "Libre Baskerville"; src: url("./fonts/libre-baskerville-bold.ttf") format("truetype"); font-style: normal; font-weight: 700; }
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #202632; background: #f3f0e8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    main { width: min(100%, 680px); background: #fffdf8; border: 1px solid #ddd6c8; border-radius: 16px; padding: clamp(24px, 5vw, 40px); box-shadow: 0 16px 44px #29251c14; }
+    h1 { margin: 0 0 8px; font: 700 2rem Georgia, serif; }
+    h2 { margin: 0 0 8px; font: 700 1.25rem Georgia, serif; }
+    .intro { color: #626b77; margin: 0 0 24px; line-height: 1.5; }
+    form { display: grid; gap: 18px; }
+    label, legend { display: block; font-weight: 650; margin-bottom: 7px; }
+    input, select { width: 100%; border: 1px solid #c9c5ba; border-radius: 9px; padding: 11px 12px; font: inherit; background: white; color: inherit; }
+    input:focus, select:focus { outline: 3px solid #dcc7a8; border-color: #754c24; }
+    fieldset { border: 0; margin: 0; padding: 0; }
+    .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+    .choice { margin: 0; }
+    .choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .choice span { display: block; border: 1px solid #c9c5ba; border-radius: 9px; padding: 11px 8px; text-align: center; cursor: pointer; }
+    .choice input:checked + span { border-color: #754c24; background: #f4eadb; color: #583719; box-shadow: inset 0 0 0 1px #754c24; }
+    .choice input:focus-visible + span { outline: 3px solid #dcc7a8; }
+    .back-button { display: block; margin: 0 0 12px auto; padding: 5px 12px; font-size: 1.4rem; line-height: 1; }
+    .stat-row, .skill-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px; align-items: center; gap: 12px; }
+    .stat-row label, .skill-row label { margin: 0; }
+    .category { border-top: 1px solid #e3ded3; padding-top: 16px; }
+    .category-description { color: #626b77; margin: 0 0 12px; line-height: 1.45; }
+    .skill-list { display: grid; gap: 9px; }
+    .skill-row input { text-align: right; }
+    .error { color: #a12d28; font-size: .9rem; min-height: 1.2em; }
+    .skill-error { grid-column: 1 / -1; color: #a12d28; font-size: .85rem; }
+    input[aria-invalid="true"] { border-color: #a12d28; }
+    .allocation-total { position: sticky; bottom: 8px; margin: 0; padding: 12px 14px; border-radius: 10px; background: #f4eadb; color: #583719; font-weight: 700; }
+    button { border: 0; border-radius: 9px; padding: 12px 16px; background: #754c24; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover { background: #583719; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .derived-list { display: grid; gap: 8px; }
+    .saved-list { display: grid; gap: 10px; }
+    .saved-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 12px; border: 1px solid #c9c5ba; border-radius: 9px; }
+    .saved-card p { margin: 0; }
+    .saved-actions { display: flex; gap: 8px; }
+    .saved-actions button { padding: 8px 10px; }
+    .derived-row { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; border-bottom: 1px solid #ddd6c8; }
+    .final-skill-header, .final-skill-row { display: grid; grid-template-columns: minmax(100px, 1.4fr) repeat(3, minmax(0, .7fr)); align-items: center; gap: 7px; }
+    .final-skill-header { color: #754c24; font-size: .8rem; font-weight: 700; }
+    .final-skill-row label { margin: 0; }
+    .final-skill-row input, .final-skill-output { text-align: right; }
+    .print-only { display: none; }
+    [hidden] { display: none !important; }
+    @media (max-width: 480px) {
+      main { padding: 22px 18px; }
+      .stat-row, .skill-row { grid-template-columns: minmax(0, 1fr) 100px; }
+      .final-skill-header, .final-skill-row { grid-template-columns: minmax(82px, 1.2fr) repeat(3, minmax(0, .7fr)); gap: 4px; font-size: .78rem; }
+    }
+    @media print {
+      @page { margin: 0.5in; }
+      body { display: block; padding: 0; background: white; }
+      main { display: none; }
+      #print-sheet { display: block !important; font: 9pt/1.35 "Libre Baskerville", "Times New Roman", serif; color: #111; }
+      .print-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+      .print-head h1 { font: 700 18pt "Libre Baskerville", "Times New Roman", serif; }
+      .print-brand { font: 10pt "Trade Winds", cursive; }
+      .print-meta { margin: 6px 0 12px; }
+      .print-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; }
+      .print-summary section, .print-skills-grid section { margin: 0; break-inside: avoid; }
+      #print-sheet h2 { font: 700 11pt "Libre Baskerville", "Times New Roman", serif; border-bottom: 1px solid #777; padding-bottom: 3px; margin: 10px 0 5px; }
+      .print-row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-bottom: 1px solid #ddd; }
+      .print-skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; align-items: start; }
+      .print-skill-header, .print-skill-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .45fr) minmax(0, .8fr) minmax(0, .9fr); gap: 5px; font-size: 7pt; line-height: 1.2; }
+      .print-skill-header { font-weight: 700; border-bottom: 1px solid #999; padding-bottom: 3px; }
+      .print-skill-header span:not(:first-child), .print-skill-row span:not(:first-child) { text-align: right; }
+      .print-skill-row { padding: 3px 0; border-bottom: 1px solid #ddd; }
+      .print-skill-row span:first-child { overflow-wrap: anywhere; }
+      .print-reserve { margin-top: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="character-screen">
+      <h1>Character Builder</h1>
+      <p class="intro">Start your character by filling in the details below.</p>
+      <form id="character-form">
+        <div><label for="name">Character name</label><input id="name" name="name" type="text" autocomplete="off" required></div>
+        <div><label for="occupation">Occupation</label><input id="occupation" name="occupation" type="text" required></div>
+        <div><label for="age">Age</label><input id="age" name="age" type="number" min="0" step="1" required></div>
+        <fieldset><legend>Choose a difficulty</legend><div class="choices">
+          <label class="choice"><input type="radio" name="difficulty" value="Easy" required><span>Easy</span></label>
+          <label class="choice"><input type="radio" name="difficulty" value="Moderate"><span>Moderate</span></label>
+          <label class="choice"><input type="radio" name="difficulty" value="Normal"><span>Normal</span></label>
+          <label class="choice"><input type="radio" name="difficulty" value="Difficult"><span>Difficult</span></label>
+          <label class="choice"><input type="radio" name="difficulty" value="Extreme"><span>Extreme</span></label>
+        </div></fieldset>
+        <button type="submit">Continue</button>
+      </form>
+      <section class="category saved-library" aria-labelledby="saved-heading">
+        <h2 id="saved-heading">Saved Characters</h2>
+        <p class="intro">Saved on this browser and device.</p>
+        <div id="saved-character-list" class="saved-list"></div>
+      </section>
+    </section>
+
+    <section id="stats-screen" hidden>
+      <button class="back-button" type="button" data-back="character-screen" aria-label="Back to character details">←</button>
+      <h1 id="stats-title">Choose Major Stats</h1>
+      <p id="difficulty-message" class="intro" hidden></p>
+      <form id="stats-form">
+        <p class="intro">Choose one unique value for each!</p>
+        <div id="stats-fields"></div>
+        <button type="submit">Continue to skills</button>
+      </form>
+    </section>
+
+    <section id="skills-screen" hidden>
+      <button class="back-button" type="button" data-back="stats-screen" aria-label="Back to major stats">←</button>
+      <h1>Distribute Skill Points</h1>
+      <p class="intro">Each skill starts at its category value and cannot go below it or exceed 80. Distribute 100 + your full Knowledge value in bonus points across skills or reserve points for perks later. Enter whole numbers only.</p>
+      <form id="skills-form">
+        <div id="skill-groups"></div>
+        <div class="skill-row"><label for="reserve-points">Reserve for perks later</label><input id="reserve-points" type="number" min="0" step="1" value="0" required></div>
+        <p class="allocation-total" id="allocation-total" aria-live="polite"></p>
+        <p id="skills-error" class="error" role="alert"></p>
+        <button id="skills-continue" type="submit" disabled>Continue</button>
+      </form>
+    </section>
+
+    <section id="perks-screen" hidden>
+      <button class="back-button" type="button" data-back="skills-screen" aria-label="Back to skills">←</button>
+      <h1>Perks</h1>
+      <p class="intro">Not configured</p>
+      <button id="to-final-button" type="button">Continue to Final Changes</button>
+    </section>
+
+    <section id="final-screen" hidden>
+      <button class="back-button" type="button" data-back="perks-screen" aria-label="Back to perks">←</button>
+      <h1>Final Changes</h1>
+      <p class="intro">Review or change your character. Skill values must stay between their category value and 80, and skill increases plus reserved perk points must use the full point budget.</p>
+      <form id="final-form"></form>
+      <p class="allocation-total" id="final-total" aria-live="polite"></p>
+      <p id="final-error" class="error" role="alert"></p>
+      <button id="save-character-button" type="button" disabled>Save Character</button>
+      <p id="save-status" class="error" role="status" aria-live="polite"></p>
+      <button id="print-button" type="button" disabled>Print / Save as PDF</button>
+    </section>
+  </main>
+  <section id="print-sheet" class="print-only" hidden aria-label="Character sheet"></section>
+
+  <script>
+    const statValues = ['25', '30', '35', '40', '50'];
+    const categories = {
+      strength: { label: 'Strength', short: 'Str', description: 'The physical ability to move heavy things or pack a punch.', skills: ['Brawl', 'Strongarm', 'Scale', 'Throw'] },
+      perceive: { label: 'Perceive', short: 'Per', description: 'The ability to move quickly or how dexterously you can act.', skills: ['Dexterity', 'Firearm', 'Reflex', 'Stealth', 'Notice'] },
+      resolve: { label: 'Resolve', short: 'Res', description: 'The ability to show willpower, endurance, or patience.', skills: ['Endurance', 'Repair', 'Navigate', 'Demolition and trap', 'Machine', 'Track'] },
+      knowledge: { label: 'Knowledge', short: 'Knw', description: 'How much you know and how quickly you can learn.', skills: ['Technology', 'Chemistry', 'Anatomy', 'Superstition', 'Scholarship', 'History'] },
+      influence: { label: 'Influence', short: 'Inf', description: 'The ability to bend those around you to your will.', skills: ['Charm', 'Persuade', 'Bluff', 'Psychology'] }
+    };
+    const categoryKeys = Object.keys(categories);
+    const stats = {};
+    let skillInputs = [];
+    let finalStats = {};
+    let finalSkillInputs = [];
+    let finalReserve;
+    const reserveInput = document.getElementById('reserve-points');
+    const savedCharactersKey = 'undertow-saved-characters-v1';
+    let activeSaveId = null;
+
+    function addStatSelects(container, prefix, initial = {}) {
+      return categoryKeys.map((key) => {
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        const label = document.createElement('label');
+        const id = `${prefix}-${key}`;
+        label.htmlFor = id;
+        label.textContent = categories[key].label;
+        const select = document.createElement('select');
+        select.id = id;
+        select.name = key;
+        select.required = true;
+        select.add(new Option('Choose a value', ''));
+        statValues.forEach((value) => select.add(new Option(value, value)));
+        select.value = initial[key] || '';
+        select.addEventListener('change', () => updateUniqueOptions(container));
+        row.append(label, select);
+        container.append(row);
+        return select;
+      });
+    }
+
+    function updateUniqueOptions(container) {
+      const selects = [...container.querySelectorAll('select')];
+      const selected = selects.map((select) => select.value).filter(Boolean);
+      selects.forEach((select) => [...select.options].slice(1).forEach((option) => {
+        option.disabled = selected.includes(option.value) && option.value !== select.value;
+      }));
+    }
+
+    const statsFields = document.getElementById('stats-fields');
+    const initialStatSelects = addStatSelects(statsFields, 'stat');
+    const finalStatSelects = [];
+
+    function budgetFor(values) { return 100 + (Number(values.knowledge) || 0); }
+    function bonusOf(input) { return input.value === '' ? 0 : Math.max(0, Number(input.value) - Number(input.min || 0)); }
+    function clampAllocation(inputs, reserve, budget) {
+      inputs.forEach((input) => {
+        const otherSpent = inputs.filter((other) => other !== input).reduce((sum, other) => sum + bonusOf(other), 0);
+        const available = Math.max(0, budget - otherSpent - (Number(reserve.value) || 0));
+        const maxValue = Math.min(80, Number(input.min || 0) + available);
+        input.max = String(maxValue);
+        if (input.value !== '' && Number(input.value) > maxValue) input.value = String(maxValue);
+      });
+      let skillSpent = inputs.reduce((sum, input) => sum + bonusOf(input), 0);
+      reserve.max = String(Math.max(0, budget - skillSpent));
+      if (Number(reserve.value) > Number(reserve.max)) reserve.value = reserve.max;
+      skillSpent = inputs.reduce((sum, input) => sum + bonusOf(input), 0);
+      return { skillSpent, reserveSpent: Number(reserve.value) || 0, total: skillSpent + (Number(reserve.value) || 0) };
+    }
+
+    function makeSkillInput(skill, category, value, prefix) {
+      const row = document.createElement('div');
+      row.className = prefix === 'final' ? 'final-skill-row' : 'skill-row';
+      const label = document.createElement('label');
+      const id = `${prefix}-${skill.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+      label.htmlFor = id;
+      label.textContent = skill;
+      const input = document.createElement('input');
+      input.id = id;
+      input.name = skill;
+      input.dataset.category = category;
+      input.type = 'number';
+      input.min = String(value);
+      input.max = '80';
+      input.step = '1';
+      input.value = String(value);
+      input.required = true;
+      row.append(label, input);
+      let hardOutput, extremeOutput;
+      if (prefix === 'final') {
+        hardOutput = document.createElement('span');
+        hardOutput.className = 'final-skill-output';
+        extremeOutput = document.createElement('span');
+        extremeOutput.className = 'final-skill-output';
+        row.append(hardOutput, extremeOutput);
+        input.dataset.hardOutput = `hard-${id}`;
+        input.dataset.extremeOutput = `extreme-${id}`;
+        hardOutput.id = input.dataset.hardOutput;
+        extremeOutput.id = input.dataset.extremeOutput;
+      }
+      const error = document.createElement('span');
+      error.className = 'skill-error';
+      error.id = `error-${id}`;
+      error.setAttribute('aria-live', 'polite');
+      row.append(error);
+      input.setAttribute('aria-describedby', error.id);
+      input.addEventListener('input', () => prefix === 'final' ? updateFinalPage() : updateSkills());
+      return input;
+    }
+
+    function buildSkills() {
+      const host = document.getElementById('skill-groups');
+      host.replaceChildren();
+      skillInputs = [];
+      categoryKeys.forEach((key) => {
+        const group = document.createElement('section');
+        group.className = 'category';
+        const heading = document.createElement('h2');
+        heading.textContent = categories[key].label;
+        const description = document.createElement('p');
+        description.className = 'category-description';
+        description.textContent = categories[key].description;
+        const list = document.createElement('div');
+        list.className = 'skill-list';
+        categories[key].skills.forEach((skill) => {
+          const input = makeSkillInput(skill, key, stats[key], 'skill');
+          skillInputs.push(input);
+          list.append(input.closest('.skill-row'));
+        });
+        group.append(heading, description, list);
+        host.append(group);
+      });
+    }
+
+    function updateSkills() {
+      const budget = budgetFor(stats);
+      const totals = clampAllocation(skillInputs, reserveInput, budget);
+      skillInputs.forEach((input) => {
+        const error = document.getElementById(`error-${input.id}`);
+        let message = '';
+        if (input.value !== '' && input.validity.rangeUnderflow) message = `Too low: minimum is ${input.min} (${categories[input.dataset.category].label}).`;
+        if (input.value !== '' && input.validity.rangeOverflow && Number(input.max) >= 80) message = 'Too high: maximum is 80.';
+        error.textContent = message;
+        input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      });
+      document.getElementById('allocation-total').textContent = `Bonus points used: ${totals.total} / ${budget} (skills plus reserve)`;
+      document.getElementById('skills-continue').disabled = totals.total !== budget || !skillInputs.every((input) => input.value !== '' && input.checkValidity()) || !reserveInput.checkValidity();
+    }
+
+    document.getElementById('character-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      document.getElementById('character-screen').hidden = true;
+      document.getElementById('stats-screen').hidden = false;
+      const difficulty = new FormData(event.currentTarget).get('difficulty');
+      const statsForm = document.getElementById('stats-form');
+      const message = document.getElementById('difficulty-message');
+      if (difficulty !== 'Normal') {
+        message.textContent = 'Sorry this difficulty has not been configured yet!';
+        message.hidden = false;
+        statsForm.hidden = true;
+      } else {
+        message.hidden = true;
+        statsForm.hidden = false;
+      }
+    });
+
+    document.getElementById('stats-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      initialStatSelects.forEach((select) => { stats[select.name] = Number(select.value); });
+      buildSkills();
+      document.getElementById('stats-screen').hidden = true;
+      document.getElementById('skills-screen').hidden = false;
+      updateSkills();
+    });
+
+    document.getElementById('skills-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!event.currentTarget.reportValidity()) return;
+      document.getElementById('skills-screen').hidden = true;
+      document.getElementById('perks-screen').hidden = false;
+    });
+
+    let finalReady = false;
+    function buildFinalPage() {
+      if (finalReady) return;
+      const form = document.getElementById('final-form');
+      const initial = new FormData(document.getElementById('character-form'));
+      [['Character name', 'final-name', 'text', initial.get('name')], ['Occupation', 'final-occupation', 'text', initial.get('occupation')], ['Age', 'final-age', 'number', initial.get('age')]].forEach(([labelText, id, type, value]) => {
+        const wrap = document.createElement('div');
+        const label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = labelText;
+        const input = document.createElement('input');
+        input.id = id;
+        input.name = id;
+        input.type = type;
+        input.value = value || '';
+        input.required = true;
+        if (type === 'number') { input.min = '0'; input.step = '1'; }
+        input.addEventListener('input', updateFinalPage);
+        wrap.append(label, input);
+        form.append(wrap);
+      });
+
+      const statWrap = document.createElement('fieldset');
+      const legend = document.createElement('legend');
+      legend.textContent = 'Major stats';
+      statWrap.append(legend);
+      finalStatSelects.push(...addStatSelects(statWrap, 'final-stat', stats));
+      form.append(statWrap);
+
+      categoryKeys.forEach((key) => {
+        const group = document.createElement('section');
+        group.className = 'category';
+        const heading = document.createElement('h2');
+        heading.id = `final-heading-${key}`;
+        const header = document.createElement('div');
+        header.className = 'final-skill-header';
+        ['Skill', 'Value', 'Hard success', 'Extreme success'].forEach((text) => {
+          const cell = document.createElement('span');
+          cell.textContent = text;
+          header.append(cell);
+        });
+        const list = document.createElement('div');
+        list.className = 'skill-list';
+        categories[key].skills.forEach((skill) => {
+          const source = skillInputs.find((input) => input.name === skill);
+          const input = makeSkillInput(skill, key, Number(source.value), 'final');
+          finalSkillInputs.push(input);
+          list.append(input.closest('.final-skill-row'));
+        });
+        group.append(heading, header, list);
+        form.append(group);
+      });
+
+      const reserveRow = document.createElement('div');
+      reserveRow.className = 'skill-row';
+      const reserveLabel = document.createElement('label');
+      reserveLabel.htmlFor = 'final-reserve';
+      reserveLabel.textContent = 'Reserve for perks later';
+      finalReserve = document.createElement('input');
+      finalReserve.id = 'final-reserve';
+      finalReserve.type = 'number';
+      finalReserve.min = '0';
+      finalReserve.step = '1';
+      finalReserve.value = reserveInput.value;
+      finalReserve.required = true;
+      finalReserve.addEventListener('input', updateFinalPage);
+      reserveRow.append(reserveLabel, finalReserve);
+      form.append(reserveRow);
+
+      const derived = document.createElement('section');
+      derived.className = 'category derived-list';
+      const derivedTitle = document.createElement('h2');
+      derivedTitle.textContent = 'Derived values';
+      derived.append(derivedTitle);
+      [['Reputation (Inf)', 'reputation'], ['Base health ((Res + Str) / 2)', 'base-health'], ['Limb health ((Res + Str) / 4)', 'limb-health'], ['Stress die', 'stress-die'], ['Move die', 'move-die']].forEach(([labelText, id]) => {
+        const row = document.createElement('div');
+        row.className = 'derived-row';
+        const label = document.createElement('span');
+        label.textContent = labelText;
+        const output = document.createElement('strong');
+        output.id = `final-${id}`;
+        row.append(label, output);
+        derived.append(row);
+      });
+      form.insertBefore(derived, form.querySelector('.category'));
+      finalReady = true;
+      updateFinalPage();
+    }
+
+    function moveDieFor(perceive) {
+      return perceive >= 50 ? '1d10' : perceive >= 40 ? '1d8' : perceive >= 35 ? '1d6' : perceive >= 30 ? '1d4' : '1d2';
+    }
+
+    function updateFinalPage() {
+      if (!finalReady) return;
+      const currentStats = Object.fromEntries(finalStatSelects.map((select) => [select.name, Number(select.value)]));
+      updateUniqueOptions(document.getElementById('final-form'));
+      const budget = budgetFor(currentStats);
+      finalSkillInputs.forEach((input) => { input.min = String(currentStats[input.dataset.category] || 0); });
+      const totals = clampAllocation(finalSkillInputs, finalReserve, budget);
+      finalSkillInputs.forEach((input) => {
+        const message = input.value !== '' && input.validity.rangeUnderflow ? `Too low: minimum is ${input.min} (${categories[input.dataset.category].label}).` : input.value !== '' && input.validity.rangeOverflow && Number(input.max) >= 80 ? 'Too high: maximum is 80.' : '';
+        document.getElementById(`error-${input.id}`).textContent = message;
+        input.setAttribute('aria-invalid', message ? 'true' : 'false');
+        document.getElementById(input.dataset.hardOutput).textContent = input.value === '' ? '' : String(Math.ceil(Number(input.value) / 2));
+        document.getElementById(input.dataset.extremeOutput).textContent = input.value === '' ? '' : String(Math.ceil(Number(input.value) / 5));
+      });
+      categoryKeys.forEach((key) => {
+        document.getElementById(`final-heading-${key}`).textContent = `${categories[key].label} (${categories[key].short} ${currentStats[key] || '—'})`;
+      });
+      document.getElementById('final-total').textContent = `Bonus points used: ${totals.total} / ${budget} (skills plus reserve)`;
+      document.getElementById('final-reputation').textContent = String(currentStats.influence || 0);
+      document.getElementById('final-base-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 2));
+      document.getElementById('final-limb-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 4));
+      document.getElementById('final-stress-die').textContent = '1d6';
+      document.getElementById('final-move-die').textContent = moveDieFor(currentStats.perceive || 0);
+      const invalidStats = new Set(finalStatSelects.map((select) => select.value).filter(Boolean)).size !== 5 || finalStatSelects.some((select) => !select.value);
+      const invalidSkills = finalSkillInputs.some((input) => input.value === '' || !input.checkValidity());
+      const invalidDetails = !['final-name', 'final-occupation', 'final-age'].every((id) => document.getElementById(id).checkValidity());
+      const valid = !invalidStats && !invalidSkills && !invalidDetails && finalReserve.checkValidity() && totals.total === budget;
+      document.getElementById('save-character-button').disabled = !valid;
+      document.getElementById('final-error').textContent = valid ? '' : invalidStats ? 'Choose a unique value for each major stat.' : invalidSkills ? 'Correct the highlighted skill values.' : invalidDetails ? 'Complete the character details.' : `Use exactly ${budget} bonus points across skills and reserve.`;
+      document.getElementById('print-button').disabled = !valid;
+    }
+
+    function addPrintRow(parent, label, value) {
+      const row = document.createElement('div');
+      row.className = 'print-row';
+      const name = document.createElement('strong');
+      name.textContent = label;
+      const result = document.createElement('span');
+      result.textContent = value;
+      row.append(name, result);
+      parent.append(row);
+    }
+
+    function preparePrintSheet() {
+      const sheet = document.getElementById('print-sheet');
+      sheet.replaceChildren();
+      const head = document.createElement('header');
+      head.className = 'print-head';
+      const title = document.createElement('h1');
+      title.textContent = document.getElementById('final-name').value;
+      const brand = document.createElement('span');
+      brand.className = 'print-brand';
+      brand.textContent = 'Undertow';
+      head.append(title, brand);
+      sheet.append(head);
+      const details = document.createElement('p');
+      details.className = 'print-meta';
+      const difficulty = new FormData(document.getElementById('character-form')).get('difficulty');
+      details.textContent = `${document.getElementById('final-occupation').value} · Age ${document.getElementById('final-age').value} · ${difficulty} difficulty`;
+      sheet.append(details);
+      const summary = document.createElement('div');
+      summary.className = 'print-summary';
+      const derived = document.createElement('section');
+      const derivedTitle = document.createElement('h2');
+      derivedTitle.textContent = 'Derived values';
+      derived.append(derivedTitle);
+      [['Reputation (Inf)', 'final-reputation'], ['Base health ((Res + Str) / 2)', 'final-base-health'], ['Limb health ((Res + Str) / 4)', 'final-limb-health'], ['Stress die', 'final-stress-die'], ['Move die', 'final-move-die']].forEach(([label, id]) => addPrintRow(derived, label, document.getElementById(id).textContent));
+      const major = document.createElement('section');
+      const majorTitle = document.createElement('h2');
+      majorTitle.textContent = 'Major stats';
+      major.append(majorTitle);
+      finalStatSelects.forEach((select) => addPrintRow(major, categories[select.name].label, select.value));
+      summary.append(derived, major);
+      sheet.append(summary);
+      const grid = document.createElement('div');
+      grid.className = 'print-skills-grid';
+      categoryKeys.forEach((key) => {
+        const group = document.createElement('section');
+        const heading = document.createElement('h2');
+        heading.textContent = `${categories[key].label} (${categories[key].short} ${finalStatSelects.find((select) => select.name === key).value})`;
+        group.append(heading);
+        const header = document.createElement('div');
+        header.className = 'print-skill-header';
+        ['Skill', 'Value', 'Hard success', 'Extreme success'].forEach((text) => {
+          const cell = document.createElement('span');
+          cell.textContent = text;
+          header.append(cell);
+        });
+        group.append(header);
+        finalSkillInputs.filter((input) => input.dataset.category === key).forEach((input) => {
+          const row = document.createElement('div');
+          row.className = 'print-skill-row';
+          [input.name, input.value, String(Math.ceil(Number(input.value) / 2)), String(Math.ceil(Number(input.value) / 5))].forEach((text) => {
+            const cell = document.createElement('span');
+            cell.textContent = text;
+            row.append(cell);
+          });
+          group.append(row);
+        });
+        grid.append(group);
+      });
+      sheet.append(grid);
+      const reserve = document.createElement('p');
+      reserve.className = 'print-reserve';
+      reserve.textContent = `Points reserved for perks: ${finalReserve.value || 0}`;
+      sheet.append(reserve);
+    }
+
+    function readSavedCharacters() {
+      try { return JSON.parse(localStorage.getItem(savedCharactersKey) || '[]'); }
+      catch { return []; }
+    }
+
+    function renderSavedCharacters() {
+      const list = document.getElementById('saved-character-list');
+      list.replaceChildren();
+      const saved = readSavedCharacters();
+      if (!saved.length) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No characters saved yet.';
+        list.append(empty);
+        return;
+      }
+      saved.forEach((character) => {
+        const card = document.createElement('div');
+        card.className = 'saved-card';
+        const summary = document.createElement('p');
+        summary.textContent = `${character.name} · ${character.occupation} · Age ${character.age}`;
+        const actions = document.createElement('div');
+        actions.className = 'saved-actions';
+        const loadButton = document.createElement('button');
+        loadButton.type = 'button';
+        loadButton.textContent = 'Load';
+        loadButton.addEventListener('click', () => loadSavedCharacter(character));
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+          const remaining = readSavedCharacters().filter((entry) => entry.id !== character.id);
+          localStorage.setItem(savedCharactersKey, JSON.stringify(remaining));
+          if (activeSaveId === character.id) activeSaveId = null;
+          renderSavedCharacters();
+        });
+        actions.append(loadButton, deleteButton);
+        card.append(summary, actions);
+        list.append(card);
+      });
+    }
+
+    function collectFinalCharacter(id) {
+      const difficulty = new FormData(document.getElementById('character-form')).get('difficulty') || 'Normal';
+      return {
+        id,
+        name: document.getElementById('final-name').value.trim(),
+        occupation: document.getElementById('final-occupation').value.trim(),
+        age: Number(document.getElementById('final-age').value),
+        difficulty,
+        stats: Object.fromEntries(finalStatSelects.map((select) => [select.name, Number(select.value)])),
+        skills: Object.fromEntries(finalSkillInputs.map((input) => [input.name, Number(input.value)])),
+        reserve: Number(finalReserve.value) || 0,
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function saveCurrentCharacter() {
+      updateFinalPage();
+      if (document.getElementById('print-button').disabled) return;
+      const id = activeSaveId || (crypto.randomUUID ? crypto.randomUUID() : `character-${Date.now()}`);
+      const saved = readSavedCharacters();
+      const character = collectFinalCharacter(id);
+      const index = saved.findIndex((entry) => entry.id === id);
+      if (index >= 0) saved[index] = character;
+      else saved.push(character);
+      try {
+        localStorage.setItem(savedCharactersKey, JSON.stringify(saved));
+        activeSaveId = id;
+        document.getElementById('save-status').textContent = 'Character saved in this browser.';
+        renderSavedCharacters();
+      } catch {
+        document.getElementById('save-status').textContent = 'Could not save. This browser may be out of storage space.';
+      }
+    }
+
+    function loadSavedCharacter(character) {
+      activeSaveId = character.id;
+      document.getElementById('name').value = character.name;
+      document.getElementById('occupation').value = character.occupation;
+      document.getElementById('age').value = character.age;
+      const difficulty = document.querySelector(`#character-form input[name="difficulty"][value="${character.difficulty}"]`);
+      if (difficulty) difficulty.checked = true;
+      categoryKeys.forEach((key) => { stats[key] = Number(character.stats[key]); });
+      initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
+      updateUniqueOptions(statsFields);
+      buildSkills();
+      skillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
+      reserveInput.value = String(character.reserve || 0);
+      updateSkills();
+      if (finalReady) {
+        document.getElementById('final-name').value = character.name;
+        document.getElementById('final-occupation').value = character.occupation;
+        document.getElementById('final-age').value = String(character.age);
+        finalStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
+        finalSkillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
+        finalReserve.value = String(character.reserve || 0);
+        updateFinalPage();
+      } else {
+        buildFinalPage();
+      }
+      document.querySelectorAll('main > section').forEach((section) => { section.hidden = true; });
+      document.getElementById('final-screen').hidden = false;
+      document.getElementById('save-status').textContent = `Loaded ${character.name}.`;
+      document.getElementById('final-screen').scrollIntoView({ block: 'start' });
+    }
+
+    document.getElementById('save-character-button').addEventListener('click', saveCurrentCharacter);
+    renderSavedCharacters();
+    document.querySelectorAll('.back-button').forEach((button) => button.addEventListener('click', () => {
+      const current = button.closest('section');
+      current.hidden = true;
+      const target = document.getElementById(button.dataset.back);
+      target.hidden = false;
+      target.scrollIntoView({ block: 'start' });
+    }));
+
+    document.getElementById('to-final-button').addEventListener('click', () => {
+      document.getElementById('perks-screen').hidden = true;
+      document.getElementById('final-screen').hidden = false;
+      buildFinalPage();
+      document.getElementById('final-screen').scrollIntoView({ block: 'start' });
+    });
+
+    document.getElementById('print-button').addEventListener('click', () => {
+      updateFinalPage();
+      if (document.getElementById('print-button').disabled) return;
+      preparePrintSheet();
+      Promise.all([document.fonts.load('10pt "Trade Winds"'), document.fonts.load('10pt "Libre Baskerville"')]).finally(() => window.print());
+    });
+  </script>
+</body>
+</html>
+
+
 
