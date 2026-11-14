@@ -10,8 +10,18 @@
     @font-face { font-family: "Libre Baskerville"; src: url("./fonts/libre-baskerville-bold.ttf") format("truetype"); font-style: normal; font-weight: 700; }
     :root { color-scheme: light; font-family: system-ui, sans-serif; color: #202632; background: #f3f0e8; }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 680px); background: #fffdf8; border: 1px solid #ddd6c8; border-radius: 16px; padding: clamp(24px, 5vw, 40px); box-shadow: 0 16px 44px #29251c14; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px;
+      background: #f3f0e8;
+    }
+    body:has(#perks-screen:not([hidden])) {
+      background: #f3f0e8;
+    }
+    main {
+      width: min(100%, 680px); background: rgba(255, 253, 248, .9); backdrop-filter: blur(2px);
+      border: 1px solid #ddd6c8; border-radius: 16px; padding: clamp(24px, 5vw, 40px);
+      box-shadow: 0 16px 44px #29251c14;
+    }
     h1 { margin: 0 0 8px; font: 700 2rem Georgia, serif; }
     h2 { margin: 0 0 8px; font: 700 1.25rem Georgia, serif; }
     .intro { color: #626b77; margin: 0 0 24px; line-height: 1.5; }
@@ -46,6 +56,46 @@
     .saved-card p { margin: 0; }
     .saved-actions { display: flex; gap: 8px; }
     .saved-actions button { padding: 8px 10px; }
+    .perk-title { margin-top: 34px; padding-top: 18px; border-top: 1px solid #ddd6c8; }
+    .perk-tree { display: grid; justify-items: center; gap: 24px; margin: 22px 0 34px; padding: 8px 0 18px; position: relative; }
+    .perk-tree > .perk-branch-art { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .perk-level { display: flex; justify-content: center; width: 100%; position: relative; z-index: 2; }
+    .perk-fork { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; position: relative; padding-top: 26px; }
+    .perk-trifork { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; width: 100%; position: relative; padding-top: 22px; }
+    .perk-lane { display: grid; align-content: start; justify-items: center; gap: 24px; position: relative; min-width: 0; }
+    #throw-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
+    #throw-perk-tree .perk-fork > .perk-lane:last-child { order: 1; }
+    #firearm-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
+    #firearm-perk-tree .perk-fork > .perk-lane:last-child { order: 1; }
+    .perk-subfork { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; width: 100%; position: relative; padding-top: 8px; }
+    .perk-node { appearance: none; isolation: isolate; overflow: visible; position: relative; z-index: 2; display: grid; justify-items: center; align-content: center; gap: 7px; width: min(100%, 330px); min-height: 190px; padding: 30px 38px; border: 0; border-radius: 0; background: transparent; color: #201e20; text-align: center; box-shadow: none; transition: transform .22s ease, filter .22s ease; }
+    .oak-leaf-art { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; overflow: visible; opacity: .25; filter: drop-shadow(0 7px 5px #211d1f66); transition: opacity .22s ease, filter .22s ease; pointer-events: none; }
+    .oak-leaf-art .leaf-outline { stroke: #211e20; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+    .oak-leaf-art .leaf-vein { fill: none; stroke: #292426; stroke-width: 2.3; stroke-linecap: round; opacity: .9; }
+    .oak-leaf-art .leaf-fine-vein { fill: none; stroke: #282426; stroke-width: 1.1; stroke-linecap: round; opacity: .55; }
+    .oak-leaf-art .leaf-texture { opacity: .2; mix-blend-mode: multiply; }
+    .perk-node:hover .oak-leaf-art, .perk-node:focus-visible .oak-leaf-art { opacity: 1; filter: drop-shadow(0 10px 8px #211d1f77); }
+    .perk-node[aria-pressed="true"] .oak-leaf-art { opacity: 1; filter: sepia(.8) saturate(1.25) hue-rotate(350deg) drop-shadow(0 0 6px #754c2488); }
+    .perk-node[aria-pressed="true"] .perk-name { color: #583719; }
+    .perk-node[aria-disabled="false"] { cursor: pointer; }
+    .perk-node[aria-disabled="true"] { cursor: not-allowed; }
+    .perk-node:not([aria-disabled="true"]):hover, .perk-node:focus-visible { transform: translateY(-3px) rotate(-1deg); }
+    .perk-name, .perk-description { position: relative; z-index: 1; text-shadow: 0 1px 2px #e4deddcc; }
+    .perk-name { font: 700 1.05rem Georgia, serif; color: #211e20; }
+    .perk-description { font-size: .85rem; font-weight: 600; line-height: 1.4; }
+    .perk-cost { position: absolute; z-index: 3; top: 8px; right: 17px; border: 1px solid #2b282a; border-radius: 999px; background: #3c383a; color: white; padding: 4px 9px; font-size: .75rem; font-weight: 700; opacity: 0; transform: translateY(4px); transition: opacity .15s ease, transform .15s ease; pointer-events: none; }
+    .perk-node:hover .perk-cost, .perk-node:focus-visible .perk-cost, .perk-node[aria-pressed="true"] .perk-cost { opacity: 1; transform: translateY(0); }
+    .perk-final-leaf { margin: 10px auto 0; width: min(84%, 290px); animation: leaf-fall 5.5s ease-in-out infinite alternate; }
+    .perk-final-leaf .oak-leaf-art { transform: rotate(8deg); }
+    @keyframes leaf-fall { from { transform: translateY(-3px) rotate(5deg); } to { transform: translateY(12px) rotate(13deg); } }
+    @media (prefers-reduced-motion: reduce) { .perk-final-leaf { animation: none; } }
+    .perk-status { padding: 12px 14px; border-radius: 10px; background: #f4eadb; color: #583719; font-weight: 700; }
+    @media (max-width: 560px) {
+      .perk-fork, .perk-subfork { grid-template-columns: 1fr; gap: 14px; }
+      .perk-trifork { grid-template-columns: 1fr; gap: 18px; }
+      .perk-trifork::before, .perk-trifork > .perk-lane::before { display: none; }
+      .perk-node { width: min(100%, 340px); min-height: 180px; padding: 30px 38px; }
+    }
     .derived-row { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; border-bottom: 1px solid #ddd6c8; }
     .final-skill-header, .final-skill-row { display: grid; grid-template-columns: minmax(100px, 1.4fr) repeat(3, minmax(0, .7fr)); align-items: center; gap: 7px; }
     .final-skill-header { color: #754c24; font-size: .8rem; font-weight: 700; }
@@ -79,6 +129,330 @@
       .print-skill-row span:first-child { overflow-wrap: anywhere; }
       .print-reserve { margin-top: 14px; }
     }
+    /* Antique chart styling */
+    main:has(#perks-screen:not([hidden])) {
+      width: min(100%, 680px);
+      background: transparent; border: 0; border-radius: 0; padding: 0;
+      box-shadow: none; backdrop-filter: none;
+    }
+    #perks-screen {
+      position: relative; isolation: isolate; margin: 0; padding: 26px;
+      height: min(860px, calc(100vh - 48px)); overflow-y: auto; overscroll-behavior: contain;
+      border: 32px solid transparent; border-image-source: url("./assets/perk-panel-frame.png");
+      border-image-slice: 74 58 74 58 fill; border-image-width: 32px 28px; border-image-repeat: round;
+      color: #392b1d; background: #efe1c2; box-shadow: none;
+    }
+    #perks-screen::before, #perks-screen::after { display: none; }
+    #perks-screen > * { position: relative; z-index: 1; }
+    #perks-screen > .map-compass { display: none; }
+    .cryptex-picker { display:grid; justify-items:center; gap:8px; margin:12px auto 24px; width:min(100%,360px); position:relative; z-index:3; }
+    .tree-wheel { position:relative; width:min(76vw,290px); aspect-ratio:1; border:9px ridge #77522d; border-radius:50%; background:radial-gradient(circle,#e5d1a2 0 53%,#a7824d 54% 58%,#4d351e 59% 61%,#cfb47b 62% 100%); box-shadow:inset 0 5px 12px #fff3c7a8,inset 0 -10px 18px #39271985,0 9px 18px #35241a70; }
+    .tree-wheel::before { content:""; position:absolute; inset:3px; border:2px solid #4b331e; border-radius:50%; box-shadow:0 0 0 3px #d8bd86,0 0 0 5px #684625; pointer-events:none; z-index:1; }
+    .tree-wheel::after { content:""; position:absolute; z-index:1; inset:2%; border-radius:50%; background:repeating-conic-gradient(from 0deg,#4c341d 0deg 1deg,transparent 1deg 7.5deg); mask:radial-gradient(circle,transparent 0 87%,#000 88% 92%,transparent 93%); opacity:.8; pointer-events:none; }
+    .wheel-disc::before { content:""; position:absolute; inset:7%; border:1px dashed #684b2d99; border-radius:50%; box-shadow:inset 0 0 0 3px #f0dfb766; pointer-events:none; }
+    .wheel-disc::after { content:"✦"; position:absolute; left:50%; top:50%; display:grid; place-items:center; width:32px; height:32px; border:1px solid #70502e; border-radius:50%; background:#e4d0a2; color:#77542c; font:700 1rem Georgia,serif; transform:translate(-50%,-50%); box-shadow:0 1px 4px #49321e88; }
+    .wheel-hub::before { content:""; position:absolute; inset:5px; border:1px solid #76552f99; border-radius:50%; pointer-events:none; }
+    .wheel-choice::before { content:attr(data-mark); display:block; margin-bottom:2px; color:#886638; font:700 .6rem Georgia,serif; letter-spacing:.12em; }
+    .wheel-choice[aria-pressed="true"]::before { color:#efd7a5; }
+    .wheel-disc { position:absolute; inset:12%; border:2px solid #694b2b; border-radius:50%; background:repeating-conic-gradient(transparent 0deg 11deg,#70502d22 11deg 12deg),conic-gradient(from -60deg,#b99a63 0deg 1deg,#e0cea4 1deg 119deg,#75542e 119deg 121deg,#d0b77f 121deg 239deg,#75542e 239deg 241deg,#ead9b1 241deg 359deg,#b99a63 359deg); box-shadow:inset 0 0 0 7px #f1e3bf70,inset 0 0 18px #59402766; transform:rotate(var(--wheel-rotation,0deg)); transition:transform .52s cubic-bezier(.18,.78,.22,1); }
+    .wheel-choice { position:absolute; z-index:2; min-width:75px; padding:6px 8px; border:1px solid #795a35; border-radius:16px; background:#f3e4bf; color:#57391d; font:700 .72rem "Libre Baskerville",Georgia,serif; letter-spacing:.07em; text-transform:uppercase; box-shadow:0 2px 5px #52371f66,inset 0 1px #fff8dc; }
+    .wheel-choice[aria-pressed="true"] { background:#754c24; color:#fff1d1; border-color:#3d2818; box-shadow:0 0 0 3px #e5c987,0 3px 7px #49311e88; }
+    .wheel-choice[data-tree-index="0"] { left:50%; top:12%; transform:translateX(-50%); }
+    .wheel-choice[data-tree-index="1"] { right:7%; bottom:24%; }
+    .wheel-choice[data-tree-index="2"] { left:7%; bottom:24%; }
+    .wheel-hub { position:absolute; z-index:3; left:50%; top:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; width:124px; height:124px; border:5px double #72502d; border-radius:50%; background:radial-gradient(circle at 35% 28%,#f5e7c2,#c5a66f 75%,#77552e); box-shadow:inset 0 2px 7px #fff9dc,0 3px 8px #50371f88; transform:translate(-50%,-50%); }
+    .cryptex-arrow { width:36px; height:22px; padding:0; border:1px solid #57391f; border-radius:7px; background:linear-gradient(#ddc58e,#a27b46); color:#342315; font:700 .74rem Georgia,serif; line-height:1; text-shadow:0 1px #fff4d7; box-shadow:inset 0 1px #fff7d8,0 1px 3px #3a291c55; }
+    .cryptex-name { max-width:108px; color:#3d2918; text-align:center; font:700 .78rem/1.2 "Libre Baskerville",Georgia,serif; letter-spacing:.08em; text-transform:uppercase; }
+    .cryptex-hint { margin:0; color:#684a2b; font-size:.78rem; text-align:center; }
+    .tree-wheel.turning { animation:wheel-pop .3s ease-out; }
+    @keyframes wheel-pop { 0% { transform:scale(.96); } 65% { transform:scale(1.035); } 100% { transform:scale(1); } }
+    .cryptex-reveal { animation:tree-reveal .42s ease-out both; }
+    @keyframes tree-reveal { from { opacity:0; transform:translateY(10px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @media (max-width: 380px) { .wheel-hub { width: 98px; height: 98px; } .cryptex-name { max-width: 84px; font-size: .68rem; } .cryptex-arrow { width: 30px; height: 19px; } .wheel-choice { min-width: 67px; padding: 5px 6px; font-size: .65rem; } }
+    @media (prefers-reduced-motion: reduce) { .tree-wheel.turning,.cryptex-reveal { animation:none; } .wheel-disc { transition:none; } }
+    #perks-screen h1 { color: #3a2a18; font: 700 2.05rem Georgia, serif; letter-spacing: .04em; }
+    #perks-screen .perk-title {
+      margin: 26px 0 8px; padding: 0; border: 0; text-align: center;
+      color: #754c24; font: 700 1.2rem Georgia, serif; letter-spacing: .18em; text-transform: uppercase;
+    }
+    #perks-screen .intro { max-width: 800px; color: #5d4931; }
+    .map-legend {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
+      margin: 10px 0 24px; color: #5c482e; font: 600 .82rem Georgia, serif;
+    }
+    .legend-marker { width: 11px; height: 11px; border: 2px solid #6f4d2c; border-radius: 50%; background: #bc7642; }
+    .legend-route { display: inline-block; width: 35px; border-top: 2px dotted #806444; }
+    .legend-route.solid { border-top-style: solid; border-top-color: #8e421e; }
+    #perks-screen .perk-tree {
+      position: relative; display: grid; justify-items: center; gap: 20px;
+      width: 100%; height: auto; aspect-ratio: auto; margin: 16px 0 30px; padding: 16px 10px;
+      overflow: visible; background: transparent;
+    }
+    #perks-screen .perk-tree > .perk-branch-art {
+      position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%;
+      overflow: visible; pointer-events: none;
+    }
+    #perks-screen .perk-level {
+      display: flex; justify-content: center; width: 100%; position: relative; z-index: 2;
+    }
+    #perks-screen .perk-fork {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px;
+      width: 100%; position: relative; padding-top: 18px;
+    }
+    #perks-screen .perk-trifork {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+      width: 100%; position: relative; padding-top: 18px;
+    }
+    #perks-screen .perk-lane {
+      display: grid; align-content: start; justify-items: center; gap: 17px;
+      position: relative; min-width: 0;
+    }
+    #perks-screen .perk-subfork {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;
+      width: 100%; position: relative; padding-top: 8px;
+    }
+    #perk-tree { display: grid; position: relative; width: 100%; height: auto; aspect-ratio: auto; margin: 16px 0 30px; padding: 16px 10px; overflow: visible; }
+    #perk-tree > .melee-stick { display: none; }
+    #perk-tree > .perk-level { display: flex; }
+    #perk-tree .perk-fork, #perk-tree .perk-lane, #perk-tree .perk-subfork { display: grid; }
+    .melee-tree-viewport { position: relative; width: 100%; overflow: visible; }
+    #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible {
+      appearance: none; isolation: isolate; position: relative; z-index: 2; overflow: visible;
+      display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; justify-items: start;
+      width: min(100%, 245px); min-height: 42px; height: auto; aspect-ratio: auto;
+      margin: 0; padding: 5px 8px; border: 0; border-radius: 0;
+      background: transparent; box-shadow: none; outline: none; transform: none;
+      color: #392b1d; text-align: left; cursor: url("./assets/dagger-cursor.svg") 5 2, pointer;
+    }
+    #perks-screen .perk-node::before {
+      content: ""; grid-column: 1; grid-row: 1; justify-self: center;
+      width: 11px; height: 11px; border: 2px solid #70512e; border-radius: 50%;
+      background: #c6864c; box-shadow: 0 0 0 2px #e8d6b2;
+      transition: background .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    #perks-screen .perk-node[aria-disabled="true"]::before { background: #eadfc8; }
+    #perks-screen .perk-node[aria-pressed="true"]::before {
+      background: #a33e20; border-color: #633018; box-shadow: 0 0 0 3px #c2935b, 0 0 0 5px #754c2440;
+      transform: scale(1.08);
+    }
+    #perks-screen .perk-node.needs-prerequisite::before { background: #d4a23b; }
+    #perks-screen .perk-node .perk-name {
+      grid-column: 2; grid-row: 1; display: block; margin: 0; padding: 2px 4px;
+      color: #3c2d1d; font: 700 .88rem Georgia, serif; letter-spacing: .01em;
+      text-shadow: 0 1px 0 #f5ead4, 0 0 4px #f5ead4;
+    }
+    #perks-screen .perk-node[aria-pressed="true"] .perk-name { color: #792f18; }
+    #perks-screen .perk-node:hover .perk-name, #perks-screen .perk-node:focus-visible .perk-name {
+      color: #70451f; text-decoration: underline dotted #916c3c; text-underline-offset: 3px;
+    }
+    #perks-screen .perk-node .perk-description, #perks-screen .perk-node .perk-cost { display: none !important; }
+    #perks-screen .perk-final-leaf { animation: none; }
+    #perks-screen .map-route {
+      fill: none; stroke: #806444; stroke-width: 2.2; stroke-dasharray: 1 8;
+      stroke-linecap: round; stroke-linejoin: round; opacity: .9;
+      transition: stroke .16s ease, stroke-width .16s ease;
+    }
+    #perks-screen .map-route.is-selected {
+      stroke: #8e421e; stroke-width: 3.1; stroke-dasharray: none; opacity: 1;
+    }
+    .map-tooltip {
+      position: fixed; z-index: 1000; width: min(320px, calc(100vw - 24px)); padding: 13px 15px;
+      border: 1px solid #99774a; border-radius: 7px; background: #f4e8cf; color: #332719;
+      box-shadow: 0 10px 28px #37281345; pointer-events: none; line-height: 1.42;
+      background-image: linear-gradient(145deg, #fbf4e5, #ecdbb8);
+    }
+    .map-tooltip[hidden] { display: none; }
+    .map-tooltip h3 { margin: 0 0 7px; color: #70451f; font: 700 1rem Georgia, serif; }
+    .map-tooltip p { margin: 0; font-size: .88rem; }
+    .map-tooltip .map-tooltip-cost { margin-top: 8px; color: #754c24; font-weight: 700; }
+    /* Hover feedback stays visual-only so the map never shifts under the pointer. */
+    #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible { transition: none; transform: none; }
+    #perks-screen .perk-node:hover .perk-name, #perks-screen .perk-node:focus-visible .perk-name { text-decoration: none; color: #3c2d1d; }
+    #perks-screen .perk-node::before { transition: none; }
+    .perk-detail-overlay {
+      position: fixed; z-index: 1200; inset: 0; display: grid; place-items: center;
+      padding: 16px; background: #1b1712a8; backdrop-filter: blur(2px);
+    }
+        .perk-detail-overlay { position: absolute; inset: 0; display: block; padding: 0; overflow: visible; background: transparent; backdrop-filter: none; pointer-events: none; }
+    #perks-screen > .perk-detail-overlay { position: fixed; inset: 0; z-index: 1200; width: 100vw; height: 100vh; }
+    .perk-paper { position: absolute; left: 0; top: 0; width: min(540px, 44vw); max-width: calc(100vw - 28px); aspect-ratio: 3 / 2; max-height: min(360px, 42vw); filter: drop-shadow(0 12px 18px #100d0a66); pointer-events: auto; }
+    .perk-paper-content { inset: 21% 16% 13%; }
+    .perk-detail-overlay[hidden] { display: none !important; }
+    .perk-detail-overlay { inset: 0 auto auto 0; width: 100%; height: 100%; pointer-events: none; }
+    .perk-paper { position: absolute; left: 0; top: 0; width: min(720px, 94vw, 132vh); aspect-ratio: 3 / 2;
+      max-height: 88vh; color: #392719; background: url("./assets/perk-paper.png") center / contain no-repeat;
+      filter: drop-shadow(0 18px 25px #100d0a70);
+    }
+    .perk-paper-content {
+      position: absolute; inset: 23% 17% 15%; display: flex; flex-direction: column;
+      align-items: center; min-width: 0; min-height: 0; text-align: center; overflow: hidden;
+      font-family: "Libre Baskerville", Baskerville, Georgia, serif;
+    }
+    .perk-paper-kicker { margin: 0 0 5px; color: #78552f; font-size: clamp(.62rem, 1.5vw, .78rem); letter-spacing: .17em; text-transform: uppercase; }
+    #perk-paper-title { max-width: 100%; margin: 0 0 4px; color: #482d18; font: 700 clamp(1rem, 3vw, 1.55rem) "Libre Baskerville", Georgia, serif; overflow-wrap: anywhere; }
+    .perk-paper-cost { margin: 0 0 8px; color: #72502b; font-size: clamp(.68rem, 1.6vw, .82rem); font-weight: 700; }
+    .perk-paper-description { width: 100%; max-height: 46%; margin: 0; overflow-y: auto; padding: 2px 5px; color: #392719; font-size: clamp(.74rem, 1.8vw, .98rem); line-height: 1.5; overflow-wrap: anywhere; white-space: normal; }
+    .perk-paper-status { width: 100%; min-height: 1.2em; margin: 5px 0 0; color: #7b321d; font-size: clamp(.65rem, 1.5vw, .78rem); font-weight: 700; overflow-wrap: anywhere; }
+    .perk-paper-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; margin-top: auto; padding-top: 6px; }
+    .perk-paper-actions button { min-width: 100px; padding: 8px 14px; font-size: .9rem; box-shadow: 0 2px 3px #432d1740; }
+    .perk-paper-actions .paper-exit { border: 1px solid #806342; background: #e4d0ae; color: #472f1c; }
+    .perk-paper-actions .paper-exit:hover { background: #d6bd96; }
+    .perk-paper-actions .paper-lose { border: 1px solid #73351f; background: #8b3c25; color: #fff8eb; }
+    .perk-paper-actions .paper-lose:hover { background: #6f2d1c; }
+    @media (max-width: 560px) {
+      .perk-paper { width: min(94vw, 105vh); }
+      .perk-paper-content { inset: 24% 15% 14%; }
+      .perk-paper-description { max-height: 43%; }
+      .perk-paper-actions { gap: 6px; }
+      .perk-paper-actions button { min-width: 86px; padding: 7px 10px; }
+    }
+    @media (max-width: 560px) {
+      #perks-screen { margin: 0; padding: 19px; border-width: 23px 20px; border-image-width: 23px 20px; height: calc(100vh - 48px); }
+      #perks-screen .perk-fork, #perks-screen .perk-subfork { grid-template-columns: 1fr; gap: 14px; }
+      #perks-screen .perk-trifork { grid-template-columns: 1fr; gap: 16px; }
+      #perks-screen .perk-node { width: min(100%, 245px); }
+      #perks-screen > .map-compass { top: 18px; right: 22px; width: 42px; height: 42px; }
+    }
+
+    /* Reference wheel artwork frames the perks screen; all controls sit on its center parchment. */
+    body:has(#perks-screen:not([hidden])) { width: 100vw; height: 100vh; min-height: 100vh; padding: 0; overflow: hidden; }
+    main:has(#perks-screen:not([hidden])) { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max(118vw, 127.754vh); max-width: none; height: max(118vh, 108.991vw); max-height: none; aspect-ratio: 1074 / 992; padding: 0; margin: 0; }
+    #perks-screen { position: relative; isolation: isolate; width: 100%; height: 100%; max-height: none; margin: 0; padding: 0; overflow: hidden; border: 0; color: #392b1d; background: transparent; box-shadow: none; }
+    #perks-screen::before { display: none !important; }
+    .wheel-paper-content { position: absolute; z-index: 2; left: 50%; top: 16%; transform: translateX(-50%); width: min(42%, 94vw); max-width: 100%; height: 68%; max-height: 82vh; display: flex; flex-direction: column; align-items: stretch; gap: 5px; overflow-y: auto; overflow-x: hidden; padding: 9px 12px 12px; color: #392b1d; scrollbar-color: #8b6a40 transparent; scrollbar-width: thin; font-family: "Libre Baskerville", Georgia, serif; }
+    #perks-screen .back-button { align-self: flex-end; margin: 0; padding: 1px 7px; font-size: 1rem; line-height: 1.3; }
+    #perks-screen h1 { margin: 0; text-align: center; font: 700 clamp(.84rem, 1.55vw, 1.15rem) Georgia, serif; letter-spacing: .03em; }
+    #perks-screen .intro { display: none; }
+    #perks-screen .perk-status { flex: 0 0 auto; margin: 0; padding: 5px 6px; border-radius: 5px; font-size: clamp(.53rem, .9vw, .68rem); line-height: 1.3; text-align: center; }
+    .time-period-picker { display: grid; gap: 2px; flex: 0 0 auto; width: 100%; margin: 1px 0 3px; }
+    .time-period-title { margin: 0; color: #674724; text-align: center; font: 700 clamp(.58rem, 1vw, .74rem) Georgia, serif; letter-spacing: .08em; }
+    .time-period-controls { display: flex; align-items: center; gap: 5px; width: 100%; }
+    #time-period-slider { flex: 1 1 auto; min-width: 0; width: 100%; height: 15px; margin: 0; padding: 0; accent-color: #754c24; }
+    #custom-period-button { flex: 0 0 auto; min-width: 0; padding: 4px 7px; border: 1px solid #806342; background: #e4d0ae; color: #472f1c; font-size: clamp(.52rem, .85vw, .65rem); line-height: 1.1; }
+    #custom-period-button:hover { background: #d6bd96; }
+    .time-period-current { min-height: 1em; margin: 0; color: #5d4931; text-align: center; font-size: clamp(.52rem, .85vw, .66rem); line-height: 1.15; }
+    .custom-period-editor { display: flex; gap: 4px; width: 100%; }
+    .custom-period-editor input { min-width: 0; padding: 4px 6px; font-size: .7rem; }
+    .custom-period-editor button { flex: 0 0 auto; padding: 4px 7px; font-size: .68rem; }
+    .cryptex-picker { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; width: 100%; margin: 0; }
+    .tree-choice-button { min-width: 0; flex: 1 1 auto; padding: 5px 7px; border: 1px solid #806342; border-radius: 5px; background: #e4d0ae; color: #472f1c; font: 700 clamp(.56rem, .9vw, .72rem) "Libre Baskerville", Georgia, serif; }
+    .tree-choice-button[aria-pressed="true"] { background: #754c24; color: #fff1d1; border-color: #3d2818; box-shadow: inset 0 0 0 1px #e5c987; }
+    .tree-choice-button:disabled { opacity: .45; cursor: not-allowed; }
+    .tree-wheel.skill-wheel-selector { position: relative; display: block; width: 100%; min-height: 0; aspect-ratio: 1074 / 992; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; animation: none; }
+    .tree-wheel.skill-wheel-selector::before, .tree-wheel.skill-wheel-selector::after { display: none !important; content: none !important; border: 0 !important; box-shadow: none !important; background: none !important; }
+    .skill-wheel-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; clip-path: circle(40.5% at 50% 50%); pointer-events: none; }
+    .wheel-caption { position: absolute; z-index: 4; display: block; pointer-events: none; }
+    .wheel-caption-melee { left: 35.5%; top: 12%; width: 29%; height: 20%; background: #927d57; }
+    .wheel-caption-firearm { left: 15%; top: 60%; width: 29%; height: 14%; background: #cdb887; }
+    .wheel-caption-throw { left: 61%; top: 60%; width: 29%; height: 14%; background: #cdb887; }
+    .skill-wheel-selector .wheel-choice { position: absolute; z-index: 2; min-width: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: transparent; text-transform: none; cursor: pointer; outline: none; }
+    .skill-wheel-selector .wheel-choice:hover, .skill-wheel-selector .wheel-choice:focus-visible { border: 0; background: transparent; outline: none; }
+    .skill-wheel-selector .wheel-choice[aria-pressed="true"] { border: 0; background: transparent; box-shadow: none; }
+    .wheel-choice-melee { left: 35%; top: 12%; width: 30%; height: 19%; }
+    .wheel-choice-throw { left: 64%; top: 59%; width: 27%; height: 17%; }
+    .wheel-choice-firearm { left: 9%; top: 59%; width: 34%; height: 17%; }
+    .skill-wheel-selector .cryptex-arrow { position: absolute; z-index: 3; left: 45.5%; width: 11%; height: 8%; min-height: 0; padding: 0; border: 0; border-radius: 12px; background: transparent; color: transparent; font-size: 0; box-shadow: none; cursor: pointer; }
+    .skill-wheel-selector .cryptex-arrow:hover, .skill-wheel-selector .cryptex-arrow:focus-visible { outline: none; background: transparent; }
+    .skill-wheel-selector .wheel-arrow-up { top: 39.5%; }
+    .skill-wheel-selector .wheel-arrow-down { top: 53.5%; }
+    .skill-wheel-selector .cryptex-name { position: absolute; z-index: 4; top: 47.4%; left: 39%; width: 22%; height: 7%; display: grid; place-items: center; max-width: none; padding: 1px 3px; border: 0; border-radius: 0; background: #cdb887; color: transparent; font-size: 0; line-height: 0; text-align: center; text-transform: uppercase; letter-spacing: .04em; text-shadow: none; box-shadow: none; pointer-events: none; }
+    .cryptex-picker { gap: 0; }
+    .cryptex-hint { margin-top: -2px; }
+    .tree-wheel.turning { animation: none; }
+    .cryptex-hint { display: none; }
+    .tree-wheel.turning { animation: none; }
+    #perks-screen .melee-tree-viewport, #perks-screen .perk-tree { width: 100%; min-width: 0; max-width: none; margin: 0; padding: 0; overflow: visible; }
+    #perks-screen .perk-tree { display: grid; gap: 4px; }
+    #perks-screen .perk-fork, #perks-screen .perk-subfork { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 10px; width: 100%; padding: 12px 0 0; }
+    #perks-screen .perk-trifork { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 8px; width: 100%; padding: 12px 0 0; }
+    #perks-screen .perk-lane { gap: 8px; width: 100%; }
+    #perks-screen .perk-level { width: 100%; }
+    #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible { width: 100%; min-height: 26px; height: auto; grid-template-columns: 15px minmax(0, 1fr); padding: 2px 3px; text-align: left; }
+    #perks-screen .perk-level > .perk-node { width: min(72%, 330px); justify-self: center; }
+    #perks-screen .perk-node::before { width: 8px; height: 8px; border-width: 1px; }
+    #perks-screen .perk-node .perk-name { padding: 1px 2px; font-size: clamp(.58rem, 1vw, .76rem); line-height: 1.2; overflow-wrap: anywhere; }
+    #perks-screen .perk-node[aria-pressed="true"] .perk-name { text-decoration: underline; text-decoration-style: solid; text-underline-offset: 3px; }
+    #perks-screen .perk-node.is-available .perk-name { text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 3px; }
+    #perks-screen .map-route.is-available { stroke: #a57937; stroke-width: 2.6; stroke-dasharray: 5 6; opacity: 1; }
+    #perks-screen .map-route.is-selected { stroke: #8e421e; stroke-width: 3.1; stroke-dasharray: none; opacity: 1; }
+    #perk-hover-tooltip { position: fixed; z-index: 1300; width: min(320px, calc(100vw - 20px)); padding: 10px 12px; border: 1px solid #99774a; border-radius: 7px; background: linear-gradient(145deg,#fbf4e5,#ecdbb8); color: #332719; box-shadow: 0 8px 24px #37281355; pointer-events: none; line-height: 1.4; }
+    #perk-hover-tooltip[hidden] { display: none !important; }
+    #perk-hover-tooltip strong { display: block; margin-bottom: 5px; color: #70451f; font: 700 .95rem Georgia, serif; }
+    #perk-hover-tooltip .tooltip-description { display: block; font-size: .82rem; }
+    #perk-hover-tooltip .tooltip-cost { display: block; margin-top: 6px; color: #754c24; font-size: .78rem; font-weight: 700; }
+    #perk-detail-overlay { display: none !important; }
+    #perks-screen #to-final-button { width: 100%; margin-top: 4px; padding: 6px 5px; font-size: clamp(.55rem, .9vw, .7rem); }
+    #perk-detail-overlay { position: fixed !important; inset: 0 !important; width: 100vw; height: 100vh; z-index: 1200; }
+    @media (max-width: 650px) { .wheel-paper-content { left: 50%; top: 13%; transform: translateX(-50%); width: min(92vw, 56%); height: 74%; max-height: 84vh; padding: 6px 8px 9px; } }
+    @media (max-width: 560px) { #perks-screen .perk-fork, #perks-screen .perk-subfork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; } #perks-screen .perk-trifork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; } #perks-screen .perk-node { min-height: 24px; } }
+    @media (max-width: 420px) { .wheel-paper-content { left: 50%; top: 10%; transform: translateX(-50%); width: 92vw; height: 80%; max-height: 86vh; padding: 4px 6px 7px; gap: 4px; } #perks-screen .perk-node .perk-name { font-size: .6rem; } .tree-choice-button { padding: 4px 5px; } }
+    /* Keep the entire perk interface inside the viewport frame. */
+    body:has(#perks-screen:not([hidden])) { width: 100vw; height: 100vh; min-height: 0; padding: 0; overflow: hidden; }
+    main:has(#perks-screen:not([hidden])) { position: fixed; inset: 0; transform: none; width: 100vw; height: 100vh; max-width: none; max-height: none; aspect-ratio: auto; padding: 0; margin: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+    #perks-screen { position: relative; isolation: isolate; width: 100%; height: 100%; max-height: 100%; margin: 0; padding: 0; overflow: hidden; border: 30px solid transparent; border-image-source: url("./assets/perk-panel-frame.png"); border-image-slice: 74 58 74 58 fill; border-image-width: 30px 27px; border-image-repeat: round; color: #392b1d; background: #efe1c2; box-shadow: none; }
+    #perks-screen .wheel-paper-content { position: relative; left: auto; top: auto; transform: none; width: 100%; max-width: none; height: 100%; max-height: none; margin: 0; padding: clamp(12px, 2.3vh, 28px) clamp(14px, 3vw, 40px); overflow-x: hidden; overflow-y: auto; }
+    #perks-screen .perk-title { margin-top: 20px; }
+    #perks-screen .time-period-title { font-size: clamp(.9rem, 1.4vw, 1.1rem); }
+    #perks-screen .time-period-current { font-size: clamp(.78rem, 1.1vw, .92rem); }
+    #perks-screen .tree-choice-button { font-size: clamp(.8rem, 1.1vw, .95rem); padding: 8px 10px; }
+    #perks-screen .perk-status { font-size: clamp(.78rem, 1.1vw, .9rem); }
+    #perks-screen .perk-node .perk-name { font-size: clamp(.82rem, 1.1vw, .95rem); }
+    @media (max-width: 560px) { #perks-screen { border-width: 21px 17px; border-image-width: 21px 17px; } #perks-screen .wheel-paper-content { padding: 10px 12px 16px; } #perks-screen .perk-fork, #perks-screen .perk-subfork { gap: 8px; } #perks-screen .perk-trifork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; } #perks-screen .perk-level > .perk-node { width: min(82%, 330px); } }
+    /* Keep the perks screen in the same card layout as the other builder pages. */
+    body:has(#perks-screen:not([hidden])) { display: grid; place-items: start center; width: auto; height: auto; min-height: 100vh; padding: 24px; overflow-x: hidden; overflow-y: auto; }
+    main:has(#perks-screen:not([hidden])) { position: static; inset: auto; transform: none; width: min(100%, 680px); max-width: 680px; height: auto; max-height: none; aspect-ratio: auto; margin: 0 auto; padding: clamp(24px, 5vw, 40px); border: 1px solid #ddd6c8; border-radius: 16px; background: rgba(255, 253, 248, .9); box-shadow: 0 16px 44px #29251c14; backdrop-filter: blur(2px); }
+    #perks-screen { position: relative; isolation: auto; width: 100%; height: auto; min-height: 0; max-height: none; margin: 0; padding: 0; overflow: visible; border: 0; border-image: none; border-radius: 0; color: #202632; background: transparent; box-shadow: none; }
+    #perks-screen .wheel-paper-content { position: static; left: auto; top: auto; transform: none; width: 100%; max-width: none; height: auto; max-height: none; margin: 0; padding: 0; overflow: visible; color: inherit; font-family: inherit; }
+    #perks-screen h1 { margin: 0 0 8px; color: #202632; text-align: left; font: 700 2rem Georgia, serif; letter-spacing: 0; }
+    #perks-screen .intro { display: block; max-width: 800px; margin: 0 0 16px; color: #626b77; }
+    #perks-screen .perk-title { margin: 24px 0 8px; color: #754c24; text-align: left; letter-spacing: .06em; }
+    #perks-screen .time-period-picker { margin: 12px 0 16px; }
+    #perks-screen .time-period-title { color: #202632; font-size: 1rem; letter-spacing: 0; text-align: left; }
+    #perks-screen .time-period-current { color: #626b77; font-size: .85rem; }
+    #perks-screen .tree-choice-button { font-size: .85rem; }
+    #perks-screen .perk-status { margin: 12px 0; padding: 10px 12px; border-radius: 9px; background: #f4eadb; color: #583719; font-size: .9rem; }
+    #perks-screen .perk-tree { margin: 12px 0 22px; padding: 6px 0; }
+    @media (max-width: 560px) { body:has(#perks-screen:not([hidden])) { padding: 14px; } main:has(#perks-screen:not([hidden])) { padding: 22px 18px; } #perks-screen .perk-fork, #perks-screen .perk-subfork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } #perks-screen .perk-trifork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } }
+    /* Clear, compact perk cards with visible selection and availability states. */
+    #perks-screen .perk-tree { gap: 14px; }
+    #perks-screen .perk-level { display: flex; justify-content: center; }
+    #perks-screen .perk-fork, #perks-screen .perk-subfork { gap: clamp(12px, 3vw, 26px); padding-top: 18px; }
+    #perks-screen .perk-trifork { gap: clamp(8px, 1.8vw, 16px); padding-top: 18px; }
+    #perks-screen .perk-lane { gap: 12px; }
+    #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible {
+      position: relative; min-height: 56px; width: 100%; grid-template-columns: 12px minmax(0, 1fr); justify-items: start; align-content: center; gap: 7px;
+      padding: 11px 12px; border: 1px solid #d9c8aa; border-radius: 12px; background: #fffdf8; color: #332b22; text-align: left;
+      box-shadow: 0 2px 7px #37281312; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+    #perks-screen .perk-level > .perk-node { width: min(82%, 360px); }
+    #perks-screen .perk-node::before { width: 9px; height: 9px; border: 2px solid #b9a582; background: #f3ecdf; }
+    #perks-screen .perk-node::after { content: "Locked"; position: absolute; top: 7px; right: 8px; color: #8a8174; font: 700 .58rem/1 system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+    #perks-screen .perk-node[aria-disabled="true"] { cursor: help; opacity: .76; }
+    #perks-screen .perk-node[aria-disabled="false"] { cursor: pointer; border-color: #b99358; background: #fffaf0; box-shadow: 0 3px 10px #76522318; opacity: 1; }
+    #perks-screen .perk-node[aria-disabled="false"]::after { content: "Ready"; color: #855a20; }
+    #perks-screen .perk-node[aria-pressed="true"] { border-color: #85502c; background: #f4e8d5; box-shadow: 0 3px 11px #754c2425; opacity: 1; }
+    #perks-screen .perk-node[aria-pressed="true"]::after { content: "Selected"; color: #75401f; }
+    #perks-screen .perk-node.needs-prerequisite { border-color: #bd903e; background: #fff8e7; opacity: 1; }
+    #perks-screen .perk-node.needs-prerequisite::after { content: "Path"; color: #94691f; }
+    #perks-screen .perk-node:not([aria-disabled="true"]):hover, #perks-screen .perk-node:focus-visible { z-index: 4; transform: translateY(-2px); border-color: #85502c; box-shadow: 0 7px 16px #37281320; outline: none; }
+    #perks-screen .perk-node:focus-visible { outline: 3px solid #b9935877; outline-offset: 2px; }
+    #perks-screen .perk-node .perk-name { padding: 2px 0; color: #342b20; font-size: clamp(.78rem, 1.15vw, .94rem); font-weight: 700; line-height: 1.25; text-decoration: none; }
+    #perks-screen .perk-node[aria-pressed="true"] .perk-name { color: #713f20; text-decoration: underline; text-underline-offset: 3px; }
+    #perks-screen .perk-node.is-available .perk-name { text-decoration: underline dashed; text-underline-offset: 3px; }
+    #perks-screen .map-route.is-available { stroke: #a57937; stroke-width: 2.5; stroke-dasharray: 5 5; opacity: .95; }
+    #perks-screen .map-route.is-selected { stroke: #8e421e; stroke-width: 3; stroke-dasharray: none; opacity: 1; }
+    #perk-hover-tooltip { padding: 13px 15px; border-color: #99774a; border-radius: 10px; background: #fffaf0; box-shadow: 0 10px 28px #37281333; }
+    #perk-hover-tooltip strong { font-size: 1rem; }
+    #perk-hover-tooltip .tooltip-description { font-size: .88rem; }
+    #custom-perk-editor { display: grid; gap: 10px; margin: 12px 0 16px; padding: 16px; border: 1px solid #ddd2bf; border-radius: 12px; background: #faf7f0; }
+    #custom-perk-editor .custom-perk-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    #custom-perk-editor label { display: grid; gap: 5px; color: #5a4935; font-size: .86rem; font-weight: 700; }
+    #custom-perk-editor input, #custom-perk-editor textarea, #custom-perk-editor select { width: 100%; padding: 9px 10px; border: 1px solid #cdbb9e; border-radius: 8px; background: #fffdf8; color: #332b22; font: inherit; }
+    #custom-perk-editor textarea { min-height: 78px; resize: vertical; }
+    #custom-perk-list { display: grid; gap: 10px; }
+    #custom-perk-list:empty { display: none; }
+    @media (max-width: 560px) { #custom-perk-editor .custom-perk-fields { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible { min-height: 54px; padding: 10px 8px; grid-template-columns: 10px minmax(0, 1fr); } #perks-screen .perk-node::after { top: 5px; right: 5px; font-size: .5rem; } #perks-screen .perk-level > .perk-node { width: 90%; } #perks-screen .perk-node .perk-name { padding-top: 6px; font-size: .75rem; } }
   </style>
 </head>
 <body>
@@ -131,17 +505,201 @@
     </section>
 
     <section id="perks-screen" hidden>
+      <div class="wheel-paper-content">
       <button class="back-button" type="button" data-back="skills-screen" aria-label="Back to skills">←</button>
       <h1>Perks</h1>
-      <p class="intro">Not configured</p>
+      <p class="intro">Hover over a perk to see its description and cost. Click to select it, then click again to remove it. Dashed branches show the next perks you can take; solid branches show perks you have selected.</p>
+      <div class="time-period-picker">
+        <label class="time-period-title" for="time-period-slider">Time period</label>
+        <div class="time-period-controls">
+          <input id="time-period-slider" type="range" min="0" max="7" step="1" value="0" list="time-period-options" aria-label="Time period">
+          <datalist id="time-period-options">
+            <option value="0" label="Fantasy"></option><option value="1" label="Greco-Roman"></option><option value="2" label="Medieval"></option><option value="3" label="Age of Exploration"></option><option value="4" label="Colonial age"></option><option value="5" label="early American"></option><option value="6" label="modern"></option><option value="7" label="Sci-fi"></option>
+          </datalist>
+          <button id="custom-period-button" type="button">Custom</button>
+        </div>
+        <p id="time-period-current" class="time-period-current" aria-live="polite">Currently set to: Fantasy</p>
+        <div id="custom-period-editor" class="custom-period-editor" hidden>
+          <input id="custom-period-name" type="text" maxlength="40" placeholder="Enter a time period" aria-label="Custom time period">
+          <button id="apply-custom-period" type="button">Set</button>
+        </div>
+      </div>
+      <p id="perk-status" class="perk-status" aria-live="polite"></p>
+      <div class="cryptex-picker" role="group" aria-label="Skill tree selector">
+        <button class="tree-choice-button" type="button" data-tree-index="0" aria-pressed="true">Melee</button>
+        <button class="tree-choice-button" type="button" data-tree-index="1" aria-pressed="false">Throw</button>
+        <button class="tree-choice-button" type="button" data-tree-index="2" aria-label="Firearm (Modern) skill tree. Available only in the modern period." aria-pressed="false">Firearm (Modern)</button>
+        <button class="tree-choice-button" type="button" data-tree-index="3" aria-pressed="false">Custom</button>
+      </div>
+      <div id="custom-perk-panel" hidden>
+        <form id="custom-perk-editor">
+          <strong>Create a custom perk</strong>
+          <div class="custom-perk-fields">
+            <label for="custom-perk-title">Title<input id="custom-perk-title" type="text" maxlength="60" required placeholder="Perk title"></label>
+            <label for="custom-perk-cost">Point cost<select id="custom-perk-cost" required></select></label>
+          </div>
+          <label for="custom-perk-description">Description<textarea id="custom-perk-description" maxlength="500" required placeholder="What does this perk do?"></textarea></label>
+          <button type="submit">Add perk</button>
+        </form>
+        <div id="custom-perk-list" class="perk-tree" aria-label="Custom perks"></div>
+        <p class="intro">Custom perks are available in every time period. Click a perk below to select it and spend its point cost.</p>
+      </div>
+      <p id="perk-hover-tooltip" role="tooltip" hidden><strong></strong><span class="tooltip-description"></span><span class="tooltip-cost"></span></p>
+      <div class="melee-tree-viewport"><div id="perk-tree" class="perk-tree" aria-label="Melee perk tree">
+
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="up-close" aria-pressed="false">
+            <span class="perk-name">Up close and personal</span><span class="perk-description">You have one melee weapon of your choice.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="hulk-smash" aria-pressed="false">
+              <span class="perk-name">Hulk smash</span><span class="perk-description">You deal an extra 1d4 using improvised and blunt weapons as well as your fists.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <div class="perk-subfork">
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="blocker" aria-pressed="false">
+                  <span class="perk-name">Blocker</span><span class="perk-description">You have -10 to brawl rolls to block a melee attack.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="leon" aria-pressed="false">
+                  <span class="perk-name">Leon S. Kennedy</span><span class="perk-description">You now have -10 to brawl to block anything.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+              </div>
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="grappler" aria-pressed="false">
+                  <span class="perk-name">Grappler</span><span class="perk-description">When you make an attack with a melee weapon, you may roll a stress die to roll Strongarm to grapple the person you attacked or any other creature within 5 ft.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="staying-sharp" aria-pressed="false">
+              <span class="perk-name">Staying sharp</span><span class="perk-description">You gain 1d6 to one type of sharp melee weapon (Can be rechosen when you take the final perk in this tree to be blunt or sharp)</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="footwork" aria-pressed="false">
+              <span class="perk-name">Footwork</span><span class="perk-description">You can move 1 extra square in combat while wielding a sharp weapon.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="riposte" aria-pressed="false">
+              <span class="perk-name">Riposte</span><span class="perk-description">Whenever an enemy fails a melee attack within 5 feet of you, you may make an attack against them if you are wielding a sharp melee weapon. If they attack you, you can roll dodge and attack them as well.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+        <div class="perk-level">
+          <button class="perk-node perk-final-leaf" type="button" data-perk="lethal-weapon" aria-pressed="false">
+            <span class="perk-name">Lethal weapon</span><span class="perk-description">All perks on this table apply to all types of melee weapons.</span><span class="perk-cost">Cost: 10 points</span>
+          </button>
+        </div>
+      </div>
+      </div>
+      <div id="throw-perk-tree" class="perk-tree" aria-label="Throw perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="thrower" aria-pressed="false">
+            <span class="perk-name">Thrower</span><span class="perk-description">You start out with 3 thrown weapons of your choice either sharp or blunt</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="not-sharpest-tool" aria-pressed="false">
+              <span class="perk-name">Not the sharpest tool</span><span class="perk-description">-10 to throw to use blunt objects.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="reflexive-throw" aria-pressed="false">
+              <span class="perk-name">Reflexive throw</span><span class="perk-description">You can roll Throw instead of Brawl to counter attack by rolling a stress die.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="knockback" aria-pressed="false">
+              <span class="perk-name">Knockback</span><span class="perk-description">On a successful throw you can roll a stress die to knock your target prone.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="sharpest-tool" aria-pressed="false">
+              <span class="perk-name">Sharpest tool</span><span class="perk-description">-10 to throwing sharp objects.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="precise-throw" aria-pressed="false">
+              <span class="perk-name">Precise throw</span><span class="perk-description">You have -10 to targeting shots with sharp objects.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+        <div class="perk-level">
+          <button class="perk-node perk-final-leaf" type="button" data-perk="perseus" aria-pressed="false">
+            <span class="perk-name">Perseus</span><span class="perk-description">Add 1d6 to all throw damage.</span><span class="perk-cost">Cost: 10 points</span>
+          </button>
+        </div>
+      </div>
+      <div id="firearm-perk-tree" class="perk-tree" aria-label="Modern firearm perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="second-amendment" aria-pressed="false">
+            <span class="perk-name">Second amendment</span><span class="perk-description">You have a handgun and 15 bullets.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="precise" aria-pressed="false">
+              <span class="perk-name">Precise</span><span class="perk-description">You have -10 to targeted shots if you don't move this round.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <div class="perk-subfork">
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="sure-shot" aria-pressed="false">
+                  <span class="perk-name">Sure shot</span><span class="perk-description">Once per instance of danger you can reroll either die of a percentile on a firearm roll.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="highest-caliber" aria-pressed="false">
+                  <span class="perk-name">Highest caliber</span><span class="perk-description">You have a sniper rifle, 15 bullets and a case for it.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="oswald" aria-pressed="false">
+                  <span class="perk-name">Oswald</span><span class="perk-description">You have a silencer for a sniper rifle with a -5 to head shots. You also need Booth.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="forty-seven" aria-pressed="false">
+                  <span class="perk-name">Booth</span><span class="perk-description">You have a silencer for your pistol.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="duck-for-cover" aria-pressed="false">
+                  <span class="perk-name">Duck for cover</span><span class="perk-description">You can fire a weapon and hide in the same turn in combat.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="quick-reload" aria-pressed="false">
+              <span class="perk-name">Quick Reload</span><span class="perk-description">You can reload and shoot in the same round.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <div class="perk-fork">
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="spray-and-pray" aria-pressed="false">
+                  <span class="perk-name">Spray and pray</span><span class="perk-description">You have an SMG and 45 bullets.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="quick-aim" aria-pressed="false">
+                  <span class="perk-name">Quick aim</span><span class="perk-description">On a firearm with multiple shots per round you can switch targets between shots.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="higher-caliber" aria-pressed="false">
+                  <span class="perk-name">Higher Caliber</span><span class="perk-description">You have a shotgun and 15 bullets.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="shotgun-specialist" aria-pressed="false">
+                  <span class="perk-name">Shotgun specialist</span><span class="perk-description">If there is more than one enemy within five feet of another while using a shotgun, you may inflict the damage to all enemies within that radius.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="perk-level">
+          <button class="perk-node perk-final-leaf" type="button" data-perk="locked-in" aria-pressed="false">
+            <span class="perk-name">Locked in</span>
+            <span class="perk-description">Its effect depends on the qualifying path: Shotgun Specialist: your shotgun deals +1d6 damage within melee range. Duck for Cover: while hidden, you can poison a shot; it deals an extra 1d4 damage each round until combat ends. Quick Aim: if you miss one shot with the SMG, you may roll a stress die to roll each bullet separately to see if they hit. Oswald: you may roll stress to make a sniper rifle head shot deal an extra 1d12.</span>
+            <span class="perk-cost">Cost: 10 points</span>
+          </button>
+        </div>
+      </div>
       <button id="to-final-button" type="button">Continue to Final Changes</button>
+      </div>
     </section>
 
     <section id="final-screen" hidden>
       <button class="back-button" type="button" data-back="perks-screen" aria-label="Back to perks">←</button>
       <h1>Final Changes</h1>
-      <p class="intro">Review or change your character. Skill values must stay between their category value and 80, and skill increases plus reserved perk points must use the full point budget.</p>
+      <p class="intro">Review or change your character. Skill values must stay between their category value and 80, and skill increases, perk costs, and remaining reserve must use the full point budget.</p>
       <form id="final-form"></form>
+      <p id="final-perk-list" class="intro"></p>
       <p class="allocation-total" id="final-total" aria-live="polite"></p>
       <p id="final-error" class="error" role="alert"></p>
       <button id="save-character-button" type="button" disabled>Save Character</button>
@@ -170,6 +728,390 @@
     const savedCharactersKey = 'undertow-saved-characters-v1';
     let activeSaveId = null;
 
+    // Recover details if an earlier script error let the browser submit the form as a GET.
+    const recoveredDetails = new URLSearchParams(window.location.search);
+    if (recoveredDetails.has('name') || recoveredDetails.has('occupation') || recoveredDetails.has('age')) {
+      document.getElementById('name').value = recoveredDetails.get('name') || '';
+      document.getElementById('occupation').value = recoveredDetails.get('occupation') || '';
+      document.getElementById('age').value = recoveredDetails.get('age') || '';
+      const difficultyValue = recoveredDetails.get('difficulty');
+      const recoveredDifficulty = [...document.querySelectorAll('#character-form input[name="difficulty"]')].find((input) => input.value === difficultyValue);
+      if (recoveredDifficulty) recoveredDifficulty.checked = true;
+      try { window.history.replaceState(null, '', window.location.pathname); } catch { /* file URLs may restrict history updates */ }
+    }
+    const perkDefinitions = {
+      'up-close': { cost: 5, requires: [] },
+      'hulk-smash': { cost: 5, requires: ['up-close'] },
+      blocker: { cost: 5, requires: ['hulk-smash'] },
+      leon: { cost: 5, requires: ['blocker'] },
+      grappler: { cost: 5, requires: ['hulk-smash'] },
+      'staying-sharp': { cost: 5, requires: ['up-close'] },
+      footwork: { cost: 5, requires: ['staying-sharp'] },
+      riposte: { cost: 5, requires: ['footwork'] },
+      'lethal-weapon': { cost: 10, requires: ['grappler', 'leon', 'riposte'] },
+      thrower: { cost: 5, requires: [] },
+      'not-sharpest-tool': { cost: 5, requires: ['thrower'] },
+      'reflexive-throw': { cost: 5, requires: ['not-sharpest-tool'] },
+      knockback: { cost: 5, requires: ['reflexive-throw'] },
+      'sharpest-tool': { cost: 5, requires: ['thrower'] },
+      'precise-throw': { cost: 5, requires: ['sharpest-tool'] },
+      perseus: { cost: 10, requires: ['knockback', 'precise-throw'] },
+      'second-amendment': { cost: 5, requires: [] },
+      precise: { cost: 5, requires: ['second-amendment'] },
+      'sure-shot': { cost: 5, requires: ['precise'] },
+      'highest-caliber': { cost: 5, requires: ['sure-shot'] },
+      'forty-seven': { cost: 5, requires: ['precise'] },
+      oswald: { cost: 10, requires: ['forty-seven', 'highest-caliber'] },
+      'duck-for-cover': { cost: 10, requires: ['forty-seven'] },
+      'quick-reload': { cost: 5, requires: ['second-amendment'] },
+      'spray-and-pray': { cost: 5, requires: ['quick-reload'] },
+      'quick-aim': { cost: 10, requires: ['spray-and-pray'] },
+      'higher-caliber': { cost: 5, requires: ['quick-reload'] },
+      'shotgun-specialist': { cost: 10, requires: ['higher-caliber'] },
+      'locked-in': { cost: 10, requires: [], requiresAny: [['shotgun-specialist'], ['duck-for-cover'], ['oswald'], ['quick-aim']] }
+    };
+    const meleePerkIds = ['up-close', 'hulk-smash', 'blocker', 'leon', 'grappler', 'staying-sharp', 'footwork', 'riposte', 'lethal-weapon'];
+    const throwPerkIds = ['thrower', 'not-sharpest-tool', 'reflexive-throw', 'knockback', 'sharpest-tool', 'precise-throw', 'perseus'];
+    const firearmPerkIds = ['second-amendment', 'precise', 'sure-shot', 'highest-caliber', 'forty-seven', 'oswald', 'duck-for-cover', 'quick-reload', 'spray-and-pray', 'quick-aim', 'higher-caliber', 'shotgun-specialist', 'locked-in'];
+    let customPerks = [];
+    let selectedPerks = new Set();
+    let prerequisiteHintTarget = null;
+
+    function perkPointsSpent() {
+      return [...selectedPerks].reduce((total, perk) => total + (perkDefinitions[perk]?.cost || 0), 0);
+    }
+
+    function perkNames(ids) {
+      return ids.filter((perk) => selectedPerks.has(perk)).map((perk) => document.querySelector(`.perk-node[data-perk="${perk}"] .perk-name`)?.textContent).filter(Boolean);
+    }
+
+    function perkRequirementsMet(perk) {
+      const definition = perkDefinitions[perk];
+      if (!definition) return false;
+      const required = (definition.requires || []).every((id) => selectedPerks.has(id));
+      const alternatives = definition.requiresAny;
+      return required && (!alternatives || alternatives.some((group) => group.every((id) => selectedPerks.has(id))));
+    }
+
+    function collectMissingPrerequisites(perk, missing = new Set(), ancestors = new Set()) {
+      if (ancestors.has(perk)) return missing;
+      const definition = perkDefinitions[perk];
+      if (!definition) return missing;
+      const nextAncestors = new Set(ancestors);
+      nextAncestors.add(perk);
+      (definition.requires || []).forEach((id) => {
+        if (selectedPerks.has(id)) return;
+        missing.add(id);
+        collectMissingPrerequisites(id, missing, nextAncestors);
+      });
+      const alternatives = definition.requiresAny;
+      if (alternatives?.length && !alternatives.some((group) => group.every((id) => selectedPerks.has(id)))) {
+        const candidatePaths = alternatives.map((group) => {
+          const path = new Set();
+          group.forEach((id) => {
+            if (selectedPerks.has(id)) return;
+            path.add(id);
+            collectMissingPrerequisites(id, path, nextAncestors);
+          });
+          return path;
+        }).sort((a, b) => a.size - b.size);
+        candidatePaths[0]?.forEach((id) => missing.add(id));
+      }
+      return missing;
+    }
+
+    function drawAllPerkBranches() {
+      document.querySelectorAll('.perk-tree[id]').forEach((tree) => {
+        const rect = tree.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        let svg = tree.querySelector(':scope > .perk-branch-art');
+        if (!svg) { svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.classList.add('perk-branch-art'); svg.setAttribute('aria-hidden', 'true'); tree.insertBefore(svg, tree.firstChild); }
+        svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height); svg.replaceChildren();
+        const nodes = new Map([...tree.querySelectorAll('.perk-node[data-perk]')].map((button) => [button.dataset.perk, button]));
+        const anchor = (button) => { const box = button.getBoundingClientRect(); return { x: box.left - rect.left + 19, y: box.top - rect.top + box.height / 2 }; };
+        nodes.forEach((child, childId) => {
+          const definition = perkDefinitions[childId] || {};
+          const parentIds = [...new Set([...(definition.requires || []), ...(definition.requiresAny || []).flat()])];
+          const selected = selectedPerks.has(childId);
+          const remaining = (Number(reserveInput.value) || 0) - perkPointsSpent();
+          const canAcquire = !selected && perkRequirementsMet(childId) && definition.cost <= remaining;
+          parentIds.forEach((parentId) => {
+            const parent = nodes.get(parentId);
+            if (!parent || !selectedPerks.has(parentId) || (!selected && !canAcquire)) return;
+            const from = anchor(parent), to = anchor(child);
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const middleX = (from.x + to.x) / 2;
+            line.setAttribute('d', 'M ' + from.x + ' ' + from.y + ' C ' + middleX + ' ' + from.y + ', ' + middleX + ' ' + to.y + ', ' + to.x + ' ' + to.y);
+            line.setAttribute('class', selected ? 'map-route is-selected' : 'map-route is-available'); svg.append(line);
+          });
+        });
+      });
+    }
+    const perkTreeChoices = [
+      { label: 'Melee', panel: document.querySelector('.melee-tree-viewport'), periods: ['all'] },
+      { label: 'Throw', panel: document.getElementById('throw-perk-tree'), periods: ['all'] },
+      { label: 'Firearm (Modern)', panel: document.getElementById('firearm-perk-tree'), periods: ['modern', 'custom'] },
+      { label: 'Custom', panel: document.getElementById('custom-perk-panel'), periods: ['all'] }
+    ];
+    const timePeriods = [
+      { id: 'fantasy', label: 'Fantasy' }, { id: 'greco-roman', label: 'Greco-Roman' },
+      { id: 'medieval', label: 'Medieval' }, { id: 'age-of-exploration', label: 'Age of Exploration' },
+      { id: 'colonial-age', label: 'Colonial age' }, { id: 'early-american', label: 'early American' },
+      { id: 'modern', label: 'modern' }, { id: 'sci-fi', label: 'Sci-fi' }
+    ];
+    let activeTimePeriod = timePeriods[0];
+    let activePerkTreeIndex = 0;
+    function availablePerkTreeIndices() {
+      return perkTreeChoices.map((choice, index) => choice.periods.includes('all') || choice.periods.includes(activeTimePeriod.id) ? index : -1).filter((index) => index >= 0);
+    }
+    function choosePerkTree(index) {
+      const available = availablePerkTreeIndices();
+      activePerkTreeIndex = available.includes(index) ? index : (available.includes(activePerkTreeIndex) ? activePerkTreeIndex : available[0]);
+      perkTreeChoices.forEach((choice, i) => {
+        choice.panel.hidden = i !== activePerkTreeIndex;
+        if (i === activePerkTreeIndex) { choice.panel.classList.remove('cryptex-reveal'); void choice.panel.offsetWidth; choice.panel.classList.add('cryptex-reveal'); }
+      });
+      document.querySelectorAll('.tree-choice-button').forEach((button) => {
+        const choiceIndex = Number(button.dataset.treeIndex);
+        const choice = perkTreeChoices[choiceIndex];
+        const availableForPeriod = choice.periods.includes('all') || choice.periods.includes(activeTimePeriod.id);
+        button.disabled = !availableForPeriod;
+        button.setAttribute('aria-pressed', String(choiceIndex === activePerkTreeIndex));
+      });
+      requestAnimationFrame(drawAllPerkBranches);
+    }
+    function chooseNextPerkTree(direction) {
+      const available = availablePerkTreeIndices();
+      const position = available.indexOf(activePerkTreeIndex);
+      choosePerkTree(available[(position + direction + available.length) % available.length]);
+    }
+    document.querySelectorAll('.tree-choice-button').forEach((choice) => choice.addEventListener('click', () => choosePerkTree(Number(choice.dataset.treeIndex))));
+    const timePeriodSlider = document.getElementById('time-period-slider');
+    const customPeriodEditor = document.getElementById('custom-period-editor');
+    const customPeriodName = document.getElementById('custom-period-name');
+    function updateTimePeriod(period) {
+      activeTimePeriod = period;
+      document.getElementById('time-period-current').textContent = period.id === 'custom' ? 'Currently set to: Custom — ' + period.label : 'Currently set to: ' + period.label;
+      timePeriodSlider.setAttribute('aria-valuetext', period.label);
+      const visibleTrees = availablePerkTreeIndices();
+      if (!visibleTrees.includes(activePerkTreeIndex)) activePerkTreeIndex = visibleTrees[0];
+      choosePerkTree(activePerkTreeIndex);
+    }
+    timePeriodSlider.addEventListener('input', () => {
+      customPeriodEditor.hidden = true;
+      updateTimePeriod(timePeriods[Number(timePeriodSlider.value)]);
+    });
+    document.getElementById('custom-period-button').addEventListener('click', () => {
+      customPeriodEditor.hidden = !customPeriodEditor.hidden;
+      if (!customPeriodEditor.hidden) { customPeriodName.value = activeTimePeriod.id === 'custom' ? activeTimePeriod.label : ''; customPeriodName.focus(); }
+    });
+    function applyCustomPeriod() {
+      const label = customPeriodName.value.trim();
+      if (!label) { customPeriodName.focus(); return; }
+      customPeriodEditor.hidden = true;
+      updateTimePeriod({ id: 'custom', label });
+    }
+    document.getElementById('apply-custom-period').addEventListener('click', applyCustomPeriod);
+    customPeriodName.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); applyCustomPeriod(); } });
+    document.addEventListener('keydown', (event) => {
+      if (document.getElementById('perks-screen').hidden) return;
+      if (event.target.matches('input, textarea, select, [contenteditable="true"]')) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); chooseNextPerkTree(-1); }
+      else if (event.key === 'ArrowRight') { event.preventDefault(); chooseNextPerkTree(1); }
+    });
+    choosePerkTree(0);
+
+    window.addEventListener('resize', drawAllPerkBranches);
+    function updatePerkTree() {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const perk of [...selectedPerks]) {
+          if (!perkRequirementsMet(perk)) {
+            selectedPerks.delete(perk);
+            changed = true;
+          }
+        }
+      }
+
+      const availablePoints = Number(reserveInput.value) || 0;
+      while (perkPointsSpent() > availablePoints && selectedPerks.size) {
+        selectedPerks.delete([...selectedPerks].at(-1));
+        changed = true;
+      }
+      if (changed) {
+        let pruned = true;
+        while (pruned) {
+          pruned = false;
+          for (const perk of [...selectedPerks]) {
+            if (!perkRequirementsMet(perk)) {
+              selectedPerks.delete(perk);
+              pruned = true;
+            }
+          }
+        }
+      }
+
+      const spent = perkPointsSpent();
+      const remaining = availablePoints - spent;
+      if (prerequisiteHintTarget && perkRequirementsMet(prerequisiteHintTarget)) prerequisiteHintTarget = null;
+      const missingPrerequisites = prerequisiteHintTarget ? collectMissingPrerequisites(prerequisiteHintTarget) : new Set();
+      document.querySelectorAll('.perk-node[data-perk]').forEach((button) => {
+        const perk = button.dataset.perk;
+        const definition = perkDefinitions[perk];
+        const selected = selectedPerks.has(perk);
+        const unlocked = perkRequirementsMet(perk);
+        button.setAttribute('aria-pressed', String(selected));
+        button.setAttribute('aria-disabled', String(!selected && (!unlocked || definition.cost > remaining)));
+        const available = !selected && unlocked && definition.cost <= remaining;
+        button.classList.toggle('is-pinned', selected);
+        button.classList.toggle('is-available', available);
+        button.classList.toggle('needs-prerequisite', missingPrerequisites.has(perk));
+      });
+      document.getElementById('perk-status').textContent = `Perk points: ${remaining} available · ${spent} spent · ${availablePoints} reserved`;
+      requestAnimationFrame(drawAllPerkBranches);
+    }
+
+    let perkAudioContext;
+    function getPerkAudioContext() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+      try {
+        perkAudioContext ||= new AudioContextClass();
+        if (perkAudioContext.state === 'suspended') perkAudioContext.resume().catch(() => {});
+        return perkAudioContext;
+      } catch { return null; }
+    }
+
+    function playPerkSound(kind) {
+      const context = getPerkAudioContext();
+      if (!context) return;
+      const isRustle = kind === 'rustle';
+      const duration = isRustle ? 0.22 : 0.095;
+      const now = context.currentTime;
+      const length = Math.max(1, Math.floor(context.sampleRate * duration));
+      const buffer = context.createBuffer(1, length, context.sampleRate);
+      const samples = buffer.getChannelData(0);
+      for (let i = 0; i < length; i++) {
+        const fade = 1 - i / length;
+        samples[i] = (Math.random() * 2 - 1) * fade * (isRustle ? 0.55 : 1);
+      }
+      const source = context.createBufferSource();
+      const filter = context.createBiquadFilter();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      filter.type = isRustle ? 'bandpass' : 'lowpass';
+      filter.frequency.value = isRustle ? 2100 : 1050;
+      filter.Q.value = isRustle ? 0.7 : 0.9;
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(isRustle ? 0.07 : 0.22, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+      source.connect(filter).connect(gain).connect(context.destination);
+      source.start(now);
+      if (!isRustle) {
+        const thump = context.createOscillator();
+        const thumpGain = context.createGain();
+        thump.type = 'triangle';
+        thump.frequency.setValueAtTime(190, now);
+        thump.frequency.exponentialRampToValueAtTime(65, now + duration);
+        thumpGain.gain.setValueAtTime(0.001, now);
+        thumpGain.gain.exponentialRampToValueAtTime(0.11, now + 0.006);
+        thumpGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        thump.connect(thumpGain).connect(context.destination);
+        thump.start(now);
+        thump.stop(now + duration);
+      }
+    }
+
+    window.addEventListener('pointerdown', () => getPerkAudioContext(), { once: true, passive: true });
+    const perkTooltip = document.getElementById('perk-hover-tooltip');
+    let perkTooltipButton = null;
+    function positionPerkTooltip(x, y) {
+      if (perkTooltip.hidden) return;
+      const rect = perkTooltip.getBoundingClientRect();
+      // Keep the pointer at the tooltip's lower-left corner when there is room.
+      let left = x;
+      let top = y - rect.height;
+      if (left + rect.width > window.innerWidth - 8) left = x - rect.width;
+      left = Math.max(8, Math.min(window.innerWidth - rect.width - 8, left));
+      if (top < 8) top = Math.min(window.innerHeight - rect.height - 8, y + 8);
+      perkTooltip.style.left = left + 'px';
+      perkTooltip.style.top = Math.max(8, top) + 'px';
+    }
+    function showPerkTooltip(button, event) {
+      perkTooltipButton = button;
+      perkTooltip.querySelector('strong').textContent = button.querySelector('.perk-name').textContent;
+      perkTooltip.querySelector('.tooltip-description').textContent = button.querySelector('.perk-description').textContent;
+      perkTooltip.querySelector('.tooltip-cost').textContent = button.querySelector('.perk-cost').textContent;
+      perkTooltip.hidden = false;
+      const rect = button.getBoundingClientRect();
+      positionPerkTooltip(event?.clientX ?? rect.left + rect.width / 2, event?.clientY ?? rect.top + rect.height / 2);
+    }
+    function hidePerkTooltip(button) {
+      if (button && document.activeElement === button) return;
+      if (!button || perkTooltipButton === button) { perkTooltip.hidden = true; perkTooltipButton = null; }
+    }
+    function bindPerkNode(button) {
+      button.setAttribute('aria-describedby', 'perk-hover-tooltip');
+      button.addEventListener('pointerenter', (event) => showPerkTooltip(button, event));
+      button.addEventListener('pointermove', (event) => positionPerkTooltip(event.clientX, event.clientY));
+      button.addEventListener('pointerleave', () => hidePerkTooltip(button));
+      button.addEventListener('focus', () => showPerkTooltip(button));
+      button.addEventListener('blur', () => hidePerkTooltip(button));
+      button.addEventListener('click', () => {
+        const perk = button.dataset.perk;
+        const definition = perkDefinitions[perk];
+        const remaining = (Number(reserveInput.value) || 0) - perkPointsSpent();
+        if (selectedPerks.has(perk)) {
+          selectedPerks.delete(perk);
+          prerequisiteHintTarget = null;
+          playPerkSound('snap');
+        } else if (perkRequirementsMet(perk) && definition.cost <= remaining) {
+          selectedPerks.add(perk);
+          prerequisiteHintTarget = null;
+          playPerkSound('snap');
+        } else {
+          prerequisiteHintTarget = perk;
+        }
+        updatePerkTree();
+        if (!perkTooltip.hidden) showPerkTooltip(button);
+      });
+    }
+    document.querySelectorAll('.perk-node[data-perk]').forEach(bindPerkNode);
+    const customPerkCost = document.getElementById('custom-perk-cost');
+    for (let cost = 5; cost <= 100; cost += 5) {
+      const option = document.createElement('option'); option.value = String(cost); option.textContent = `${cost} points`; customPerkCost.append(option);
+    }
+    function registerCustomPerk(perk) {
+      const id = `custom-${perk.id}`;
+      perk.id = String(perk.id);
+      perkDefinitions[id] = { cost: Number(perk.cost), requires: [] };
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'perk-node'; button.dataset.perk = id; button.setAttribute('aria-pressed', 'false');
+      const name = document.createElement('span'); name.className = 'perk-name'; name.textContent = perk.title;
+      const description = document.createElement('span'); description.className = 'perk-description'; description.textContent = perk.description;
+      const cost = document.createElement('span'); cost.className = 'perk-cost'; cost.textContent = `Cost: ${perk.cost} points`;
+      button.append(name, description, cost);
+      document.getElementById('custom-perk-list').append(button);
+      bindPerkNode(button);
+    }
+    function clearCustomPerks() {
+      customPerks.forEach((perk) => { delete perkDefinitions[`custom-${perk.id}`]; selectedPerks.delete(`custom-${perk.id}`); });
+      customPerks = [];
+      document.getElementById('custom-perk-list').replaceChildren();
+    }
+    document.getElementById('custom-perk-editor').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const title = document.getElementById('custom-perk-title').value.trim();
+      const description = document.getElementById('custom-perk-description').value.trim();
+      const cost = Number(customPerkCost.value);
+      if (!title || !description || !Number.isFinite(cost)) return;
+      const id = globalThis.crypto?.randomUUID?.() || `perk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const perk = { id, title, description, cost };
+      customPerks.push(perk); registerCustomPerk(perk);
+      event.currentTarget.reset(); customPerkCost.value = '5';
+      updatePerkTree();
+    });
     function addStatSelects(container, prefix, initial = {}) {
       return categoryKeys.map((key) => {
         const row = document.createElement('div');
@@ -258,6 +1200,7 @@
       row.append(error);
       input.setAttribute('aria-describedby', error.id);
       input.addEventListener('input', () => prefix === 'final' ? updateFinalPage() : updateSkills());
+      input.addEventListener('change', () => prefix === 'final' ? updateFinalPage() : updateSkills());
       return input;
     }
 
@@ -302,12 +1245,14 @@
 
     // Reserved points count toward the same budget, so edits must refresh skill caps and totals.
     reserveInput.addEventListener('input', updateSkills);
+    reserveInput.addEventListener('change', updateSkills);
 
     document.getElementById('character-form').addEventListener('submit', (event) => {
       event.preventDefault();
       // Starting a new character must not reuse the prior character's final form or save id.
       activeSaveId = null;
       finalReady = false;
+      selectedPerks = new Set();
       document.getElementById('character-screen').hidden = true;
       document.getElementById('stats-screen').hidden = false;
       const difficulty = new FormData(event.currentTarget).get('difficulty');
@@ -338,9 +1283,11 @@
       if (!event.currentTarget.reportValidity()) return;
       document.getElementById('skills-screen').hidden = true;
       document.getElementById('perks-screen').hidden = false;
+      updatePerkTree();
     });
 
     let finalReady = false;
+    let finalPerkPointSnapshot = 0;
     function buildFinalPage() {
       if (finalReady) return;
       const form = document.getElementById('final-form');
@@ -406,9 +1353,10 @@
       finalReserve.type = 'number';
       finalReserve.min = '0';
       finalReserve.step = '1';
-      finalReserve.value = reserveInput.value;
+      finalReserve.value = String(Math.max(0, (Number(reserveInput.value) || 0) - perkPointsSpent()));
       finalReserve.required = true;
       finalReserve.addEventListener('input', updateFinalPage);
+      finalReserve.addEventListener('change', updateFinalPage);
       reserveRow.append(reserveLabel, finalReserve);
       form.append(reserveRow);
 
@@ -429,6 +1377,7 @@
       });
       form.insertBefore(derived, form.querySelector('.category'));
       finalReady = true;
+      finalPerkPointSnapshot = perkPointsSpent();
       updateFinalPage();
     }
 
@@ -438,9 +1387,15 @@
 
     function updateFinalPage() {
       if (!finalReady) return;
+      const currentPerkCost = perkPointsSpent();
+      if (currentPerkCost !== finalPerkPointSnapshot) {
+        finalReserve.value = String(Math.max(0, (Number(finalReserve.value) || 0) + finalPerkPointSnapshot - currentPerkCost));
+        finalPerkPointSnapshot = currentPerkCost;
+      }
       const currentStats = Object.fromEntries(finalStatSelects.map((select) => [select.name, Number(select.value)]));
       updateUniqueOptions(document.getElementById('final-form'));
-      const budget = budgetFor(currentStats);
+      const fullBudget = budgetFor(currentStats);
+      const budget = Math.max(0, fullBudget - perkPointsSpent());
       finalSkillInputs.forEach((input) => { input.min = String(currentStats[input.dataset.category] || 0); });
       const totals = clampAllocation(finalSkillInputs, finalReserve, budget);
       finalSkillInputs.forEach((input) => {
@@ -453,7 +1408,11 @@
       categoryKeys.forEach((key) => {
         document.getElementById(`final-heading-${key}`).textContent = `${categories[key].label} (${categories[key].short} ${currentStats[key] || '—'})`;
       });
-      document.getElementById('final-total').textContent = `Bonus points used: ${totals.total} / ${budget} (skills plus reserve)`;
+      document.getElementById('final-total').textContent = `Points accounted for: ${totals.total + perkPointsSpent()} / ${fullBudget} (${perkPointsSpent()} spent on perks)`;
+      const meleePerks = perkNames(meleePerkIds);
+      const throwPerks = perkNames(throwPerkIds);
+      const firearmPerks = perkNames(firearmPerkIds);
+      document.getElementById('final-perk-list').textContent = `Melee perks: ${meleePerks.length ? meleePerks.join(', ') : 'None selected'} · Throw perks: ${throwPerks.length ? throwPerks.join(', ') : 'None selected'} · Firearm (Modern) perks: ${firearmPerks.length ? firearmPerks.join(', ') : 'None selected'}`;
       document.getElementById('final-reputation').textContent = String(currentStats.influence || 0);
       document.getElementById('final-base-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 2));
       document.getElementById('final-limb-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 4));
@@ -464,7 +1423,7 @@
       const invalidDetails = !['final-name', 'final-occupation', 'final-age'].every((id) => document.getElementById(id).checkValidity());
       const valid = !invalidStats && !invalidSkills && !invalidDetails && finalReserve.checkValidity() && totals.total === budget;
       document.getElementById('save-character-button').disabled = !valid;
-      document.getElementById('final-error').textContent = valid ? '' : invalidStats ? 'Choose a unique value for each major stat.' : invalidSkills ? 'Correct the highlighted skill values.' : invalidDetails ? 'Complete the character details.' : `Use exactly ${budget} bonus points across skills and reserve.`;
+      document.getElementById('final-error').textContent = valid ? '' : invalidStats ? 'Choose a unique value for each major stat.' : invalidSkills ? 'Correct the highlighted skill values.' : invalidDetails ? 'Complete the character details.' : `Use exactly ${budget} points across skills and remaining reserve after perk costs.`;
       document.getElementById('print-button').disabled = !valid;
     }
 
@@ -509,6 +1468,19 @@
       major.append(majorTitle);
       finalStatSelects.forEach((select) => addPrintRow(major, categories[select.name].label, select.value));
       summary.append(derived, major);
+      [["Melee perks", meleePerkIds], ["Throw perks", throwPerkIds], ["Firearm (Modern) perks", firearmPerkIds], ["Custom perks", customPerks.map((perk) => `custom-${perk.id}`)]].forEach(([titleText, perkIds]) => {
+        const chosen = perkIds.filter((perk) => selectedPerks.has(perk));
+        if (!chosen.length) return;
+        const perks = document.createElement('section');
+        const perksTitle = document.createElement('h2');
+        perksTitle.textContent = titleText;
+        perks.append(perksTitle);
+        chosen.forEach((perk) => {
+          const perkName = document.querySelector(`.perk-node[data-perk="${perk}"] .perk-name`)?.textContent;
+          if (perkName) addPrintRow(perks, perkName, `${perkDefinitions[perk].cost} points`);
+        });
+        summary.append(perks);
+      });
       sheet.append(summary);
       const grid = document.createElement('div');
       grid.className = 'print-skills-grid';
@@ -596,6 +1568,8 @@
         stats: Object.fromEntries(finalStatSelects.map((select) => [select.name, Number(select.value)])),
         skills: Object.fromEntries(finalSkillInputs.map((input) => [input.name, Number(input.value)])),
         reserve: Number(finalReserve.value) || 0,
+        perks: [...selectedPerks],
+        customPerks: customPerks.map((perk) => ({ ...perk })),
         savedAt: new Date().toISOString()
       };
     }
@@ -627,12 +1601,18 @@
       const difficulty = document.querySelector(`#character-form input[name="difficulty"][value="${character.difficulty}"]`);
       if (difficulty) difficulty.checked = true;
       categoryKeys.forEach((key) => { stats[key] = Number(character.stats[key]); });
+      clearCustomPerks();
+      customPerks = (character.customPerks || []).map((perk) => ({ ...perk }));
+      customPerks.forEach(registerCustomPerk);
+      selectedPerks = new Set((character.perks || []).filter((perk) => perkDefinitions[perk]));
+      const savedPerkCost = perkPointsSpent();
       initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
       updateUniqueOptions(statsFields);
       buildSkills();
       skillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
-      reserveInput.value = String(character.reserve || 0);
+      reserveInput.value = String((Number(character.reserve) || 0) + savedPerkCost);
       updateSkills();
+      updatePerkTree();
       if (finalReady) {
         document.getElementById('final-name').value = character.name;
         document.getElementById('final-occupation').value = character.occupation;
@@ -640,6 +1620,7 @@
         finalStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
         finalSkillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
         finalReserve.value = String(character.reserve || 0);
+        finalPerkPointSnapshot = perkPointsSpent();
         updateFinalPage();
       } else {
         buildFinalPage();
@@ -657,6 +1638,7 @@
       current.hidden = true;
       const target = document.getElementById(button.dataset.back);
       target.hidden = false;
+      if (target.id === 'perks-screen') updatePerkTree();
       target.scrollIntoView({ block: 'start' });
     }));
 
@@ -676,3 +1658,6 @@
   </script>
 </body>
 </html>
+
+
+
