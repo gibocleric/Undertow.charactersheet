@@ -163,7 +163,7 @@
     #print-sheet .print-perk-tree .perk-node { break-inside: avoid; page-break-inside: avoid; }
     #print-sheet .print-perk-tree .perk-level > .perk-node { width: min(40%, 2.5in); }
     #print-sheet .print-perk-tree .perk-name { position: static; z-index: auto; color: #111; font: 700 8pt/1.2 "Libre Baskerville", "Times New Roman", serif; text-shadow: none; }
-    #print-sheet .print-perk-tree .perk-description { position: static; z-index: auto; display: block; color: #222; font: 6.4pt/1.2 "Libre Baskerville", "Times New Roman", serif; text-shadow: none; }
+    #print-sheet .print-perk-tree .perk-description { position: static; z-index: auto; display: block !important; width: 100%; max-height: none !important; height: auto !important; overflow: visible !important; overflow-wrap: anywhere; white-space: normal !important; text-overflow: clip !important; -webkit-line-clamp: unset !important; line-clamp: unset; color: #222; font: 6.4pt/1.2 "Libre Baskerville", "Times New Roman", serif; text-shadow: none; }
     #print-sheet .print-perk-tree .perk-cost { position: static; display: block; margin: 1px 0 0; padding: 0; border: 0; background: none; color: #444; font: 6pt/1.2 "Libre Baskerville", "Times New Roman", serif; opacity: 1; transform: none; }
     #print-sheet .print-perk-tree .oak-leaf-art { display: none; }
     #print-sheet .print-perk-tree .perk-node.has-open-tooltip { z-index: 3 !important; }
