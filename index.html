@@ -141,11 +141,13 @@
       .print-stress-eyes { display: grid; grid-template-columns: repeat(6, .62in); gap: 10px; align-items: center; }
       .print-stress-eyes img { display: block; width: .62in; height: .32in; object-fit: contain; justify-self: center; }
       .print-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
-      .print-perk-section { break-inside: avoid; min-width: 0; }
-      .print-perk-section h2 { margin: 7px 0 3px; }
-      .print-perk-section ul { margin: 0; padding-left: 18px; }
-      .print-perk-section li { margin: 2px 0; break-inside: avoid; }
-      .print-perk-section li strong { margin-right: 3px; }
+      .print-perk-section { break-inside: auto; min-width: 0; }
+      .print-perk-section h2 { margin: 7px 0 3px; break-after: avoid; }
+      .print-perk-list { margin: 0; padding-left: 18px; }
+      .print-perk-list li { margin: 3px 0; padding-left: 2px; break-inside: avoid; }
+      .print-perk-list strong { display: inline; margin-right: 3px; }
+      .print-perk-description { display: inline; max-height: none; overflow: visible; overflow-wrap: anywhere; white-space: normal; text-overflow: clip; }
+      .print-stress-tracker { display: block; break-inside: avoid; page-break-inside: avoid; }
       .print-reserve { margin-top: 10px; }
     }
     #print-sheet .print-perks { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
@@ -1895,28 +1897,22 @@
         const perksTitle = document.createElement('h2');
         perksTitle.textContent = titleText;
         perks.append(perksTitle);
-        const tree = sourceTree.cloneNode(true);
-        tree.removeAttribute('id');
-        tree.classList.add('print-perk-tree');
-        tree.querySelectorAll('.perk-branch-art, #perk-hover-tooltip, .oak-leaf-art').forEach((element) => element.remove());
-        tree.querySelectorAll('.perk-node[data-perk]').forEach((node) => {
-          if (!selectedPerks.has(node.dataset.perk)) node.remove();
-          else {
-            node.removeAttribute('aria-disabled');
-            node.setAttribute('aria-pressed', 'true');
-            node.classList.remove('is-available', 'needs-prerequisite', 'has-open-tooltip');
-          }
+        const list = document.createElement('ul');
+        list.className = 'print-perk-list';
+        const sourceNodes = new Map([...sourceTree.querySelectorAll('.perk-node[data-perk]')].map((node) => [node.dataset.perk, node]));
+        chosen.forEach((perkId) => {
+          const sourceNode = sourceNodes.get(perkId);
+          if (!sourceNode) return;
+          const item = document.createElement('li');
+          const name = document.createElement('strong');
+          name.textContent = sourceNode.querySelector('.perk-name')?.textContent.trim() || perkId;
+          const description = document.createElement('span');
+          description.className = 'print-perk-description';
+          description.textContent = sourceNode.querySelector('.perk-description')?.textContent.trim() || '';
+          item.append(name, document.createTextNode(' — '), description);
+          list.append(item);
         });
-        if (titleText === 'Custom') {
-          const lane = document.createElement('div');
-          lane.className = 'perk-lane';
-          [...tree.querySelectorAll(':scope > .perk-node')].forEach((node) => lane.append(node));
-          tree.replaceChildren(lane);
-        }
-        tree.querySelectorAll('.perk-lane, .perk-level, .perk-fork, .perk-trifork, .perk-subfork').forEach((branch) => {
-          if (!branch.querySelector('.perk-node[data-perk]')) branch.remove();
-        });
-        perks.append(tree);
+        perks.append(list);
         perksGrid.append(perks);
       });
       pageTwo.append(perksGrid);
@@ -1926,41 +1922,6 @@
       pageTwo.append(reserve);
       sheet.append(pageTwo);
 
-      const previousHidden = sheet.hidden;
-      const previousStyle = sheet.getAttribute('style');
-      sheet.hidden = false;
-      sheet.style.cssText = 'display:block;position:absolute;left:-20000px;top:0;width:7.5in;visibility:hidden';
-      sheet.querySelectorAll('.print-perk-tree').forEach((tree) => {
-        const bounds = tree.getBoundingClientRect();
-        const nodes = new Map([...tree.querySelectorAll('.perk-node[data-perk]')].map((node) => [node.dataset.perk, node]));
-        if (!bounds.width || !bounds.height) return;
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add('perk-branch-art');
-        svg.setAttribute('aria-hidden', 'true');
-        svg.setAttribute('viewBox', `0 0 ${bounds.width} ${bounds.height}`);
-        nodes.forEach((child, childId) => {
-          const parents = perkDefinitions[childId]?.requires || [];
-          parents.forEach((parentId) => {
-            const parent = nodes.get(parentId);
-            if (!parent) return;
-            const parentRect = parent.getBoundingClientRect();
-            const childRect = child.getBoundingClientRect();
-            const x1 = parentRect.left + parentRect.width / 2 - bounds.left;
-            const y1 = parentRect.bottom - bounds.top;
-            const x2 = childRect.left + childRect.width / 2 - bounds.left;
-            const y2 = childRect.top - bounds.top;
-            const middleY = (y1 + y2) / 2;
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            line.setAttribute('class', 'map-route');
-            line.setAttribute('d', `M ${x1} ${y1} C ${x1} ${middleY}, ${x2} ${middleY}, ${x2} ${y2}`);
-            svg.append(line);
-          });
-        });
-        tree.insertBefore(svg, tree.firstChild);
-      });
-      sheet.hidden = previousHidden;
-      if (previousStyle === null) sheet.removeAttribute('style');
-      else sheet.setAttribute('style', previousStyle);
     }
 
     function readSavedCharacters() {
