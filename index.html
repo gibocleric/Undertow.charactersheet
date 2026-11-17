@@ -113,22 +113,61 @@
       body { display: block; padding: 0; background: white; }
       main { display: none; }
       #print-sheet { display: block !important; font: 9pt/1.35 "Libre Baskerville", "Times New Roman", serif; color: #111; }
-      .print-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-      .print-head h1 { font: 700 18pt "Libre Baskerville", "Times New Roman", serif; }
-      .print-brand { font: 10pt "Trade Winds", cursive; }
-      .print-meta { margin: 6px 0 12px; }
-      .print-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px; }
-      .print-summary section, .print-skills-grid section { margin: 0; break-inside: avoid; }
+      .print-page-one { break-after: page; page-break-after: always; }
+      .print-head { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 12px; text-align: right; }
+      .print-head h1 { margin: 2px 0 4px; font: 700 18pt "Libre Baskerville", "Times New Roman", serif; }
+      .print-brand { display: block; font: 10pt "Trade Winds", cursive; }
+      .print-meta { margin: 0; }
+      .print-derived-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; }
+      .print-derived-card { break-inside: avoid; min-width: 0; padding: 4px 0; }
+      .print-derived-name { display: block; font-size: 12pt; font-weight: 700; }
+      .print-derived-max { display: block; margin: 2px 0 5px; font-size: 8pt; }
+      .print-write-box { min-height: .58in; border: 1px solid #333; }
+      .print-stats-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 14px 0 0; }
+      .print-stat-card { display: flex; justify-content: space-between; align-items: baseline; gap: 5px; min-width: 0; padding: 3px 0; font-size: 8pt; }
+      .print-stat-card strong { overflow-wrap: anywhere; }
       #print-sheet h2 { font: 700 11pt "Libre Baskerville", "Times New Roman", serif; border-bottom: 1px solid #777; padding-bottom: 3px; margin: 10px 0 5px; }
-      .print-row { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-bottom: 1px solid #ddd; }
-      .print-skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; align-items: start; }
-      .print-skill-header, .print-skill-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .45fr) minmax(0, .8fr) minmax(0, .9fr); gap: 5px; font-size: 7pt; line-height: 1.2; }
-      .print-skill-header { font-weight: 700; border-bottom: 1px solid #999; padding-bottom: 3px; }
+      .print-first-page-skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; align-items: start; margin-top: 8px; break-inside: avoid; }
+      .print-first-page-skills-grid section { break-inside: avoid; min-width: 0; }
+      .print-skill-header, .print-skill-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, .5fr) minmax(0, .8fr) minmax(0, .9fr); gap: 4px; font-size: 6.3pt; line-height: 1.15; }
+      .print-skill-header { font-weight: 700; padding-bottom: 3px; }
       .print-skill-header span:not(:first-child), .print-skill-row span:not(:first-child) { text-align: right; }
-      .print-skill-row { padding: 3px 0; border-bottom: 1px solid #ddd; }
+      .print-skill-row { padding: 3px 0; border: 0; break-inside: avoid; }
       .print-skill-row span:first-child { overflow-wrap: anywhere; }
-      .print-reserve { margin-top: 14px; }
+      .print-skill-group h2 { margin: 4px 0; font: 700 8pt "Libre Baskerville", "Times New Roman", serif; }
+      .print-weapons-box { min-height: .9in; border: 1px solid #333; padding: 6px; margin: 10px 0; }
+      .print-weapons-box h2 { margin: 0; border: 0 !important; }
+      .print-stress-tracker { margin: 10px 0 14px; }
+      .print-stress-eyes { display: grid; grid-template-columns: repeat(6, .62in); gap: 10px; align-items: center; }
+      .print-stress-eyes img { display: block; width: .62in; height: .32in; object-fit: contain; justify-self: center; }
+      .print-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+      .print-perk-section { break-inside: avoid; min-width: 0; }
+      .print-perk-section h2 { margin: 7px 0 3px; }
+      .print-perk-section ul { margin: 0; padding-left: 18px; }
+      .print-perk-section li { margin: 2px 0; break-inside: avoid; }
+      .print-perk-section li strong { margin-right: 3px; }
+      .print-reserve { margin-top: 10px; }
     }
+    #print-sheet .print-perks { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    #print-sheet .print-perk-section { min-width: 0; break-inside: auto; page-break-inside: auto; }
+    #print-sheet .print-perk-section h2 { break-after: avoid; page-break-after: avoid; }
+    #print-sheet .print-perk-tree { display: grid; justify-items: center; gap: 10px; width: 100%; margin: 5px 0 12px; padding: 4px 0; position: relative; overflow: visible; }
+    #print-sheet .print-perk-tree, #print-sheet .print-perk-tree .perk-level, #print-sheet .print-perk-tree .perk-fork, #print-sheet .print-perk-tree .perk-trifork, #print-sheet .print-perk-tree .perk-subfork, #print-sheet .print-perk-tree .perk-lane { break-inside: auto; page-break-inside: auto; }
+    #print-sheet .print-perk-tree > .perk-branch-art { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    #print-sheet .print-perk-tree .perk-level { display: flex; justify-content: center; width: 100%; position: relative; z-index: 2; }
+    #print-sheet .print-perk-tree .perk-fork { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; width: 100%; position: relative; padding-top: 8px; }
+    #print-sheet .print-perk-tree .perk-trifork { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; position: relative; padding-top: 8px; }
+    #print-sheet .print-perk-tree .perk-subfork { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; position: relative; padding-top: 5px; }
+    #print-sheet .print-perk-tree .perk-lane { display: grid; align-content: start; justify-items: center; gap: 8px; position: relative; min-width: 0; }
+    #print-sheet .print-perk-tree .perk-node, #print-sheet .print-perk-tree .perk-node:hover, #print-sheet .print-perk-tree .perk-node:focus-visible { appearance: none; isolation: auto; overflow: visible; position: relative; z-index: 2; display: grid; justify-items: start; align-content: center; gap: 2px; width: min(100%, 2.25in); min-height: 0; height: auto; margin: 0; padding: 5px 6px; border: 1px solid #555; border-radius: 4px; background: #fff; color: #111; text-align: left; box-shadow: none; transform: none; animation: none; opacity: 1; }
+    #print-sheet .print-perk-tree .perk-node { break-inside: avoid; page-break-inside: avoid; }
+    #print-sheet .print-perk-tree .perk-level > .perk-node { width: min(40%, 2.5in); }
+    #print-sheet .print-perk-tree .perk-name { position: static; z-index: auto; color: #111; font: 700 8pt/1.2 "Libre Baskerville", "Times New Roman", serif; text-shadow: none; }
+    #print-sheet .print-perk-tree .perk-description { position: static; z-index: auto; display: block; color: #222; font: 6.4pt/1.2 "Libre Baskerville", "Times New Roman", serif; text-shadow: none; }
+    #print-sheet .print-perk-tree .perk-cost { position: static; display: block; margin: 1px 0 0; padding: 0; border: 0; background: none; color: #444; font: 6pt/1.2 "Libre Baskerville", "Times New Roman", serif; opacity: 1; transform: none; }
+    #print-sheet .print-perk-tree .oak-leaf-art { display: none; }
+    #print-sheet .print-perk-tree .perk-node.has-open-tooltip { z-index: 3 !important; }
+    #print-sheet .print-perk-tree .map-route { fill: none; stroke: #333; stroke-width: 1.2; opacity: 1; }
     /* Antique chart styling */
     main:has(#perks-screen:not([hidden])) {
       width: min(100%, 680px);
@@ -375,7 +414,7 @@
     #perks-screen .perk-node.is-available .perk-name { text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 3px; }
     #perks-screen .map-route.is-available { stroke: #a57937; stroke-width: 2.6; stroke-dasharray: 5 6; opacity: 1; }
     #perks-screen .map-route.is-selected { stroke: #8e421e; stroke-width: 3.1; stroke-dasharray: none; opacity: 1; }
-    #perk-hover-tooltip { position: fixed; z-index: 1300; width: min(320px, calc(100vw - 20px)); padding: 10px 12px; border: 1px solid #99774a; border-radius: 7px; background: linear-gradient(145deg,#fbf4e5,#ecdbb8); color: #332719; box-shadow: 0 8px 24px #37281355; pointer-events: none; line-height: 1.4; }
+    #perk-hover-tooltip { position: absolute; z-index: 2147483647; top: auto; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: min(320px, calc(100vw - 20px)); max-height: min(45vh, 280px); overflow-y: auto; padding: 10px 12px; border: 1px solid #99774a; border-radius: 7px; background: linear-gradient(145deg,#fbf4e5,#ecdbb8); color: #332719; box-shadow: 0 8px 24px #37281355; pointer-events: none; line-height: 1.4; text-align: left; }
     #perk-hover-tooltip[hidden] { display: none !important; }
     #perk-hover-tooltip strong { display: block; margin-bottom: 5px; color: #70451f; font: 700 .95rem Georgia, serif; }
     #perk-hover-tooltip .tooltip-description { display: block; font-size: .82rem; }
@@ -434,6 +473,7 @@
     #perks-screen .perk-node[aria-pressed="true"]::after { content: "Selected"; color: #75401f; }
     #perks-screen .perk-node.needs-prerequisite { border-color: #bd903e; background: #fff8e7; opacity: 1; }
     #perks-screen .perk-node.needs-prerequisite::after { content: "Path"; color: #94691f; }
+    #perks-screen .perk-node.has-open-tooltip { z-index: 2147483000 !important; }
     #perks-screen .perk-node:not([aria-disabled="true"]):hover, #perks-screen .perk-node:focus-visible { z-index: 4; transform: translateY(-2px); border-color: #85502c; box-shadow: 0 7px 16px #37281320; outline: none; }
     #perks-screen .perk-node:focus-visible { outline: 3px solid #b9935877; outline-offset: 2px; }
     #perks-screen .perk-node .perk-name { padding: 2px 0; color: #342b20; font-size: clamp(.78rem, 1.15vw, .94rem); font-weight: 700; line-height: 1.25; text-decoration: none; }
@@ -451,6 +491,9 @@
     #custom-perk-editor textarea { min-height: 78px; resize: vertical; }
     #custom-perk-list { display: grid; gap: 10px; }
     #custom-perk-list:empty { display: none; }
+    #archer-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
+    #archer-perk-tree .perk-fork > .perk-lane:last-child { order: 1; }
+    #firearm-perk-tree .perk-subfork > .perk-level { grid-column: 1 / -1; }
     @media (max-width: 560px) { #custom-perk-editor .custom-perk-fields { grid-template-columns: 1fr; } }
     @media (max-width: 560px) { #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible { min-height: 54px; padding: 10px 8px; grid-template-columns: 10px minmax(0, 1fr); } #perks-screen .perk-node::after { top: 5px; right: 5px; font-size: .5rem; } #perks-screen .perk-level > .perk-node { width: 90%; } #perks-screen .perk-node .perk-name { padding-top: 6px; font-size: .75rem; } }
   </style>
@@ -526,10 +569,16 @@
       </div>
       <p id="perk-status" class="perk-status" aria-live="polite"></p>
       <div class="cryptex-picker" role="group" aria-label="Skill tree selector">
-        <button class="tree-choice-button" type="button" data-tree-index="0" aria-pressed="true">Melee</button>
+        <button class="tree-choice-button" type="button" data-tree-index="0" aria-pressed="true">Bludgeon</button>
         <button class="tree-choice-button" type="button" data-tree-index="1" aria-pressed="false">Throw</button>
         <button class="tree-choice-button" type="button" data-tree-index="2" aria-label="Firearm (Modern) skill tree. Available only in the modern period." aria-pressed="false">Firearm (Modern)</button>
-        <button class="tree-choice-button" type="button" data-tree-index="3" aria-pressed="false">Custom</button>
+        <button class="tree-choice-button" type="button" data-tree-index="3" aria-pressed="false">Archer</button>
+        <button class="tree-choice-button" type="button" data-tree-index="4" aria-pressed="false">Craft</button>
+        <button class="tree-choice-button" type="button" data-tree-index="5" aria-pressed="false">Acrobatics</button>
+        <button class="tree-choice-button" type="button" data-tree-index="6" aria-pressed="false">Sword</button>
+        <button class="tree-choice-button" type="button" data-tree-index="7" aria-pressed="false">Cook</button>
+        <button class="tree-choice-button" type="button" data-tree-index="8" aria-label="Vehicle skill tree. Available only in the modern period." aria-pressed="false">Vehicle</button>
+        <button class="tree-choice-button" type="button" data-tree-index="9" aria-pressed="false">Custom</button>
       </div>
       <div id="custom-perk-panel" hidden>
         <form id="custom-perk-editor">
@@ -544,53 +593,31 @@
         <div id="custom-perk-list" class="perk-tree" aria-label="Custom perks"></div>
         <p class="intro">Custom perks are available in every time period. Click a perk below to select it and spend its point cost.</p>
       </div>
-      <p id="perk-hover-tooltip" role="tooltip" hidden><strong></strong><span class="tooltip-description"></span><span class="tooltip-cost"></span></p>
-      <div class="melee-tree-viewport"><div id="perk-tree" class="perk-tree" aria-label="Melee perk tree">
-
+      <span id="perk-hover-tooltip" role="tooltip" hidden><strong></strong><span class="tooltip-description"></span><span class="tooltip-cost"></span></span>
+      <div id="bludgeon-perk-tree" class="perk-tree" aria-label="Bludgeon perk tree">
         <div class="perk-level">
-          <button class="perk-node" type="button" data-perk="up-close" aria-pressed="false">
-            <span class="perk-name">Up close and personal</span><span class="perk-description">You have one melee weapon of your choice.</span><span class="perk-cost">Cost: 5 points</span>
+          <button class="perk-node" type="button" data-perk="bludgeon-up-close" aria-pressed="false">
+            <span class="perk-name">Up close and personal</span><span class="perk-description">You have a blunt melee weapon.</span><span class="perk-cost">Cost: 5 points</span>
           </button>
         </div>
-        <div class="perk-fork">
+        <div class="perk-trifork">
           <div class="perk-lane">
-            <button class="perk-node" type="button" data-perk="hulk-smash" aria-pressed="false">
-              <span class="perk-name">Hulk smash</span><span class="perk-description">You deal an extra 1d4 using improvised and blunt weapons as well as your fists.</span><span class="perk-cost">Cost: 5 points</span>
-            </button>
-            <div class="perk-subfork">
-              <div class="perk-lane">
-                <button class="perk-node" type="button" data-perk="blocker" aria-pressed="false">
-                  <span class="perk-name">Blocker</span><span class="perk-description">You have -10 to brawl rolls to block a melee attack.</span><span class="perk-cost">Cost: 5 points</span>
-                </button>
-                <button class="perk-node" type="button" data-perk="leon" aria-pressed="false">
-                  <span class="perk-name">Leon S. Kennedy</span><span class="perk-description">You now have -10 to brawl to block anything.</span><span class="perk-cost">Cost: 5 points</span>
-                </button>
-              </div>
-              <div class="perk-lane">
-                <button class="perk-node" type="button" data-perk="grappler" aria-pressed="false">
-                  <span class="perk-name">Grappler</span><span class="perk-description">When you make an attack with a melee weapon, you may roll a stress die to roll Strongarm to grapple the person you attacked or any other creature within 5 ft.</span><span class="perk-cost">Cost: 5 points</span>
-                </button>
-              </div>
-            </div>
+            <button class="perk-node" type="button" data-perk="spin-strike" aria-pressed="false"><span class="perk-name">Spin strike</span><span class="perk-description">Roll stress. On a success, you damage anyone in any square adjacent to yours.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="bludgeon-knockback" aria-pressed="false"><span class="perk-name">Knockback</span><span class="perk-description">When you hit someone with a melee attack, you can choose to knock them one square in any direction.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="crushing-strike" aria-pressed="false"><span class="perk-name">Crushing strike</span><span class="perk-description">On a hit, halve armor points before dealing damage.</span><span class="perk-cost">Cost: 5 points</span></button>
           </div>
           <div class="perk-lane">
-            <button class="perk-node" type="button" data-perk="staying-sharp" aria-pressed="false">
-              <span class="perk-name">Staying sharp</span><span class="perk-description">You gain 1d6 to one type of sharp melee weapon (Can be rechosen when you take the final perk in this tree to be blunt or sharp)</span><span class="perk-cost">Cost: 5 points</span>
-            </button>
-            <button class="perk-node" type="button" data-perk="footwork" aria-pressed="false">
-              <span class="perk-name">Footwork</span><span class="perk-description">You can move 1 extra square in combat while wielding a sharp weapon.</span><span class="perk-cost">Cost: 5 points</span>
-            </button>
-            <button class="perk-node" type="button" data-perk="riposte" aria-pressed="false">
-              <span class="perk-name">Riposte</span><span class="perk-description">Whenever an enemy fails a melee attack within 5 feet of you, you may make an attack against them if you are wielding a sharp melee weapon. If they attack you, you can roll dodge and attack them as well.</span><span class="perk-cost">Cost: 5 points</span>
-            </button>
+            <button class="perk-node" type="button" data-perk="improvise" aria-pressed="false"><span class="perk-name">Improvise</span><span class="perk-description">You can use things around you to your advantage. Attack with an improvised weapon to deal 1d4 damage.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="yes-and" aria-pressed="false"><span class="perk-name">Yes and</span><span class="perk-description">After you are hit with an attack, you can roll stress to hit with an improvised weapon.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="damage-increase" aria-pressed="false"><span class="perk-name">Damage increase</span><span class="perk-description">You now deal 1d6 with improvised weapons.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="no-but" aria-pressed="false"><span class="perk-name">No but</span><span class="perk-description">When you miss an attack with an improvised weapon, you can use your reaction to throw the weapon.</span><span class="perk-cost">Cost: 5 points</span></button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="concuss" aria-pressed="false"><span class="perk-name">Concuss</span><span class="perk-description">You can roll stress to stun your enemy with a blunt weapon, making them lose one of their pairs of reaction dice.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="sweep-the-leg" aria-pressed="false"><span class="perk-name">Sweep the leg</span><span class="perk-description">Roll stress. On a success, you can knock them prone. They can then only move one square per turn and have a penalty die to Throw and melee attacks.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="weaken" aria-pressed="false"><span class="perk-name">Weaken</span><span class="perk-description">Succeed on a stress roll to weaken an enemy. They deal half damage on their next turn.</span><span class="perk-cost">Cost: 5 points</span></button>
           </div>
         </div>
-        <div class="perk-level">
-          <button class="perk-node perk-final-leaf" type="button" data-perk="lethal-weapon" aria-pressed="false">
-            <span class="perk-name">Lethal weapon</span><span class="perk-description">All perks on this table apply to all types of melee weapons.</span><span class="perk-cost">Cost: 10 points</span>
-          </button>
-        </div>
-      </div>
       </div>
       <div id="throw-perk-tree" class="perk-tree" aria-label="Throw perk tree">
         <div class="perk-level">
@@ -644,9 +671,6 @@
                 <button class="perk-node" type="button" data-perk="highest-caliber" aria-pressed="false">
                   <span class="perk-name">Highest caliber</span><span class="perk-description">You have a sniper rifle, 15 bullets and a case for it.</span><span class="perk-cost">Cost: 5 points</span>
                 </button>
-                <button class="perk-node" type="button" data-perk="oswald" aria-pressed="false">
-                  <span class="perk-name">Oswald</span><span class="perk-description">You have a silencer for a sniper rifle with a -5 to head shots. You also need Booth.</span><span class="perk-cost">Cost: 10 points</span>
-                </button>
               </div>
               <div class="perk-lane">
                 <button class="perk-node" type="button" data-perk="forty-seven" aria-pressed="false">
@@ -654,6 +678,19 @@
                 </button>
                 <button class="perk-node" type="button" data-perk="duck-for-cover" aria-pressed="false">
                   <span class="perk-name">Duck for cover</span><span class="perk-description">You can fire a weapon and hide in the same turn in combat.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+                <button class="perk-node" type="button" data-perk="cover-mastery" aria-pressed="false">
+                  <span class="perk-name">Cover Mastery</span><span class="perk-description">While hidden, you can apply poison to a shot. It deals an extra 1d4 damage each round until combat ends.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+              <div class="perk-level">
+                <button class="perk-node" type="button" data-perk="oswald" aria-pressed="false">
+                  <span class="perk-name">Oswald</span><span class="perk-description">You have a silencer for a sniper rifle with a -5 to head shots.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
+              </div>
+              <div class="perk-level">
+                <button class="perk-node" type="button" data-perk="sniper-mastery" aria-pressed="false">
+                  <span class="perk-name">Sniper Mastery</span><span class="perk-description">Roll a stress die. If you make a sniper-rifle head shot, it deals an extra 1d12 damage.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
               </div>
             </div>
@@ -670,6 +707,9 @@
                 <button class="perk-node" type="button" data-perk="quick-aim" aria-pressed="false">
                   <span class="perk-name">Quick aim</span><span class="perk-description">On a firearm with multiple shots per round you can switch targets between shots.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
+                <button class="perk-node" type="button" data-perk="smg-mastery" aria-pressed="false">
+                  <span class="perk-name">SMG Mastery</span><span class="perk-description">If you miss one SMG shot, roll a stress die and roll each bullet separately to see if it hits.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
               </div>
               <div class="perk-lane">
                 <button class="perk-node" type="button" data-perk="higher-caliber" aria-pressed="false">
@@ -678,16 +718,220 @@
                 <button class="perk-node" type="button" data-perk="shotgun-specialist" aria-pressed="false">
                   <span class="perk-name">Shotgun specialist</span><span class="perk-description">If there is more than one enemy within five feet of another while using a shotgun, you may inflict the damage to all enemies within that radius.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
+                <button class="perk-node" type="button" data-perk="shotgun-mastery" aria-pressed="false">
+                  <span class="perk-name">Shotgun Mastery</span><span class="perk-description">Your shotgun deals +1d6 damage when used within melee range.</span><span class="perk-cost">Cost: 10 points</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <div id="archer-perk-tree" class="perk-tree" aria-label="Archer perk tree">
         <div class="perk-level">
-          <button class="perk-node perk-final-leaf" type="button" data-perk="locked-in" aria-pressed="false">
-            <span class="perk-name">Locked in</span>
-            <span class="perk-description">Its effect depends on the qualifying path: Shotgun Specialist: your shotgun deals +1d6 damage within melee range. Duck for Cover: while hidden, you can poison a shot; it deals an extra 1d4 damage each round until combat ends. Quick Aim: if you miss one shot with the SMG, you may roll a stress die to roll each bullet separately to see if they hit. Oswald: you may roll stress to make a sniper rifle head shot deal an extra 1d12.</span>
-            <span class="perk-cost">Cost: 10 points</span>
+          <button class="perk-node" type="button" data-perk="archer" aria-pressed="false">
+            <span class="perk-name">Archer</span><span class="perk-description">You have a bow and 20 arrows.</span><span class="perk-cost">Cost: 5 points</span>
           </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="quick-draw" aria-pressed="false">
+              <span class="perk-name">Quick draw</span><span class="perk-description">You can mark a line of tiles within 4 squares of you. If an enemy steps on or crosses that line, you can use a reaction die to shoot them with an extra 1d4 as a damage die.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="secondary-draw" aria-pressed="false">
+              <span class="perk-name">Secondary draw</span><span class="perk-description">Allows you to fire two arrows using just the bow's base damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="slavic-draw" aria-pressed="false">
+              <span class="perk-name">Slavic draw</span><span class="perk-description">Damage die: 1d6, range 5. Also doubles the amount of shots you would make next turn using any draw. This effect does not stack if using Slavic Draw more than once per turn.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="mediterranean-draw" aria-pressed="false">
+              <span class="perk-name">Mediterranean draw</span><span class="perk-description">Good stability and weight distribution. Damage die: 1d6, range 5.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="three-finger-draw" aria-pressed="false">
+              <span class="perk-name">Three finger draw</span><span class="perk-description">Good for range. Damage dice: 1d4, range 6.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="mongolian-draw" aria-pressed="false">
+              <span class="perk-name">Mongolian draw</span><span class="perk-description">Keeps your arrow steady while moving. Damage dice: 1d6, range 4. Add 1d6 to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="pinch-draw" aria-pressed="false">
+              <span class="perk-name">Pinch draw</span><span class="perk-description">Good for shooting things not meant to be shot by a bow and useful when you run out of arrows. Damage dice: variable, range 3.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="craft-perk-tree" class="perk-tree" aria-label="Craft perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="craftsman" aria-pressed="false">
+            <span class="perk-name">Craftsman</span><span class="perk-description">You have basic crafting tools which can be used to fix any number of objects.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="leatherworker" aria-pressed="false">
+              <span class="perk-name">Leatherworker</span><span class="perk-description">You can create leather storage containers and armor. Leather armor takes 6 hours to craft and 2 hours to mend, can be worn underneath regular clothing, and gives you +10 armor points. A leather storage container adds one row in either direction to your inventory and takes 2 hours to craft.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="rugged-armorer" aria-pressed="false">
+              <span class="perk-name">Rugged Armorer</span><span class="perk-description">You can create leather armor with metal reinforcing. It gives +20 armor points when worn and can be worn under some bulky clothing.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="metal-worker" aria-pressed="false">
+              <span class="perk-name">Metal Worker</span><span class="perk-description">You can create metal armor that gives +30 armor points.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="gunsmith" aria-pressed="false">
+              <span class="perk-name">Gunsmith</span><span class="perk-description">You can upgrade and maintain firearms and other ranged weapons. Add one of these mods to one weapon: Maintained (+1 damage), Sights (+1d4 range), or Magazine Capacity (+1d10 bullets). You may also add a similar-level mod as determined by the DM. All mods take 2 hours to install.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="advanced-gunsmith" aria-pressed="false">
+              <span class="perk-name">Advanced Gunsmith</span><span class="perk-description">You can apply one advanced mod and two earlier mods to a weapon. Advanced mods include: Secondary (a gadget such as a flashlight or laser dot sight, which gives -5 to shoot with that weapon), Slings (carry the weapon across your back without penalty), or Bipods (take a round to set up and aim with, then add -25 to a firearm roll). All mods take 2 hours to install.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="secondary-weapon-attachment" aria-pressed="false">
+              <span class="perk-name">Secondary Weapon Attachment</span><span class="perk-description">You can attach a secondary weapon to your gun: a grenade launcher, melee weapon attachment, non-lethal secondary, or under-barrel shotgun.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="on-the-fly" aria-pressed="false">
+              <span class="perk-name">On the Fly</span><span class="perk-description">You can swap out any of these things on your turn.</span><span class="perk-cost">Cost: 10 points</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="acrobatics-perk-tree" class="perk-tree" aria-label="Acrobatics perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="acrobat" aria-pressed="false">
+            <span class="perk-name">Acrobat</span><span class="perk-description">You can perform minor acrobatic feats.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="graceful-movement" aria-pressed="false">
+              <span class="perk-name">Graceful movement</span><span class="perk-description">You can roll an SD and add it to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="artful-dodge" aria-pressed="false">
+              <span class="perk-name">Artful dodge</span><span class="perk-description">You can roll Acrobatics to attempt to dodge an attack, and you can move when you do.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="tumbling-getaway" aria-pressed="false">
+              <span class="perk-name">Tumbling getaway</span><span class="perk-description">Roll Acrobatics. On a success, no one can take opportunity attacks against you.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="damaging-fall" aria-pressed="false">
+              <span class="perk-name">Damaging fall</span><span class="perk-description">If you are falling on a person, you can roll SD and they will take your fall damage along with your weapon damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="charging-attack" aria-pressed="false">
+              <span class="perk-name">Charging attack</span><span class="perk-description">If you move at least two squares before attacking someone, you deal an extra 1d6 damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="tumbler" aria-pressed="false">
+              <span class="perk-name">Tumbler</span><span class="perk-description">Roll SD. On a success, you take no fall damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="sword-perk-tree" class="perk-tree" aria-label="Sword perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="swordsman" aria-pressed="false">
+            <span class="perk-name">Swordsman</span><span class="perk-description">You own a sword.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-trifork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="furious-strike" aria-pressed="false">
+              <span class="perk-name">Furious strike</span><span class="perk-description">Roll stress. On a success, you deal twice your amount of damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="stopping-strike" aria-pressed="false">
+              <span class="perk-name">Stopping strike</span><span class="perk-description">If an enemy attempts to move from a square not adjacent to yours, you can use your reaction to roll an attack, deal damage, and stop them one square away.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="double-strike" aria-pressed="false">
+              <span class="perk-name">Double strike</span><span class="perk-description">After you miss a strike, you can roll stress to make another attack.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="distancing-strike" aria-pressed="false">
+              <span class="perk-name">Distancing strike</span><span class="perk-description">You can roll stress to make a strike which, if it hits, pushes the attacker one square back. They can't enter that space until the start of your next turn.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="defensive-stance" aria-pressed="false">
+              <span class="perk-name">Defensive stance</span><span class="perk-description">While wielding a sword, you gain -10 to Brawl rolls to block an incoming melee attack.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="parry" aria-pressed="false">
+              <span class="perk-name">Parry</span><span class="perk-description">When you block a melee attack with your sword, you have -5 to your next attack. This effect stacks.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="riposte" aria-pressed="false">
+              <span class="perk-name">Riposte</span><span class="perk-description">When you have blocked an attack, you can make one of the specialized strikes or add 1d6 to the damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="dirt-in-the-eyes" aria-pressed="false">
+              <span class="perk-name">Dirt in the eyes</span><span class="perk-description">You can throw something into the opponent's eyes to blind them, giving them +10 to hit with a melee weapon and +15 with a ranged weapon.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="offhand-knife" aria-pressed="false">
+              <span class="perk-name">Offhand knife</span><span class="perk-description">If you miss a sword attack, you can make an attack with this knife. Its damage die is 1d4.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="sword-grapple" aria-pressed="false">
+              <span class="perk-name">Grapple</span><span class="perk-description">While in a bind, you can roll Strongarm to try to grapple the other person.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+        <div class="perk-level">
+          <button class="perk-node perk-final-leaf" type="button" data-perk="reactive-grapple" aria-pressed="false">
+            <span class="perk-name">Reactive grapple</span><span class="perk-description">After taking Grapple and Riposte, you can use Riposte to grapple as a reaction rather than using one of the other options.</span><span class="perk-cost">Cost: 10 points</span>
+          </button>
+        </div>
+      </div>
+      <div id="cook-perk-tree" class="perk-tree" aria-label="Cook perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="chef" aria-pressed="false">
+            <span class="perk-name">Chef</span><span class="perk-description">You have chefs tools all dishes take 30 minutes to cook, you can cook 3 meals a day and be under 1 affect at a time</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="spicy-dish" aria-pressed="false">
+              <span class="perk-name">Spicy dish</span><span class="perk-description">Gain one stress die after eating this dish.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="energising-dish" aria-pressed="false">
+              <span class="perk-name">Energising dish</span><span class="perk-description">You gain one additional SD at the start of combat.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="soothing-tea" aria-pressed="false">
+              <span class="perk-name">Soothing tea</span><span class="perk-description">Remove 1 Stress point.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="hearty-dish" aria-pressed="false">
+              <span class="perk-name">Hearty dish</span><span class="perk-description">Gain 1d4+1 health.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="potluck" aria-pressed="false">
+              <span class="perk-name">Potluck</span><span class="perk-description">Add 1d6 to your reputation when given to an NPC at an appropriate time.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="skillful-dish" aria-pressed="false">
+              <span class="perk-name">Skillful dish</span><span class="perk-description">-5 to rolls for one particular stat chosen when it is cooked.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="vehicle-perk-tree" class="perk-tree" aria-label="Vehicle perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="drivers-license" aria-pressed="false">
+            <span class="perk-name">Drivers license</span><span class="perk-description">You own a car and can drive without need for rolling.</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="harley" aria-pressed="false">
+              <span class="perk-name">Harley</span><span class="perk-description">You own a motorcycle.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="hit-and-run" aria-pressed="false">
+              <span class="perk-name">Hit and run</span><span class="perk-description">You can wield melee weapons while on a bike.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="gun-it" aria-pressed="false">
+              <span class="perk-name">Gun it</span><span class="perk-description">You can wield ranged weapons on a vehicle.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="defensive-driving" aria-pressed="false">
+              <span class="perk-name">Defensive driving</span><span class="perk-description">+10 armor points while in a vehicle.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="offensive-driving" aria-pressed="false">
+              <span class="perk-name">Offensive driving</span><span class="perk-description">All vehicles deal 1d8 ram damage plus the number of squares you have traveled in the vehicle this round.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
         </div>
       </div>
       <button id="to-final-button" type="button">Continue to Final Changes</button>
@@ -740,15 +984,17 @@
       try { window.history.replaceState(null, '', window.location.pathname); } catch { /* file URLs may restrict history updates */ }
     }
     const perkDefinitions = {
-      'up-close': { cost: 5, requires: [] },
-      'hulk-smash': { cost: 5, requires: ['up-close'] },
-      blocker: { cost: 5, requires: ['hulk-smash'] },
-      leon: { cost: 5, requires: ['blocker'] },
-      grappler: { cost: 5, requires: ['hulk-smash'] },
-      'staying-sharp': { cost: 5, requires: ['up-close'] },
-      footwork: { cost: 5, requires: ['staying-sharp'] },
-      riposte: { cost: 5, requires: ['footwork'] },
-      'lethal-weapon': { cost: 10, requires: ['grappler', 'leon', 'riposte'] },
+      'bludgeon-up-close': { cost: 5, requires: [] },
+      'spin-strike': { cost: 5, requires: ['bludgeon-up-close'] },
+      'bludgeon-knockback': { cost: 5, requires: ['spin-strike'] },
+      'crushing-strike': { cost: 5, requires: ['bludgeon-knockback'] },
+      improvise: { cost: 5, requires: ['bludgeon-up-close'] },
+      'yes-and': { cost: 5, requires: ['improvise'] },
+      'damage-increase': { cost: 5, requires: ['yes-and'] },
+      'no-but': { cost: 5, requires: ['damage-increase'] },
+      concuss: { cost: 5, requires: ['bludgeon-up-close'] },
+      'sweep-the-leg': { cost: 5, requires: ['concuss'] },
+      weaken: { cost: 5, requires: ['sweep-the-leg'] },
       thrower: { cost: 5, requires: [] },
       'not-sharpest-tool': { cost: 5, requires: ['thrower'] },
       'reflexive-throw': { cost: 5, requires: ['not-sharpest-tool'] },
@@ -768,11 +1014,68 @@
       'quick-aim': { cost: 10, requires: ['spray-and-pray'] },
       'higher-caliber': { cost: 5, requires: ['quick-reload'] },
       'shotgun-specialist': { cost: 10, requires: ['higher-caliber'] },
-      'locked-in': { cost: 10, requires: [], requiresAny: [['shotgun-specialist'], ['duck-for-cover'], ['oswald'], ['quick-aim']] }
+      'shotgun-mastery': { cost: 10, requires: ['shotgun-specialist'] },
+      'cover-mastery': { cost: 10, requires: ['duck-for-cover'] },
+      'smg-mastery': { cost: 10, requires: ['quick-aim'] },
+      'sniper-mastery': { cost: 10, requires: ['oswald'] },
+      archer: { cost: 5, requires: [] },
+      'mediterranean-draw': { cost: 5, requires: ['archer'] },
+      'three-finger-draw': { cost: 5, requires: ['mediterranean-draw'] },
+      'mongolian-draw': { cost: 5, requires: ['three-finger-draw'] },
+      'pinch-draw': { cost: 5, requires: ['mongolian-draw'] },
+      'quick-draw': { cost: 5, requires: ['mediterranean-draw'] },
+      'secondary-draw': { cost: 5, requires: ['quick-draw'] },
+      'slavic-draw': { cost: 5, requires: ['secondary-draw'] },
+      craftsman: { cost: 5, requires: [] },
+      leatherworker: { cost: 5, requires: ['craftsman'] },
+      'rugged-armorer': { cost: 5, requires: ['leatherworker'] },
+      'metal-worker': { cost: 5, requires: ['rugged-armorer'] },
+      gunsmith: { cost: 5, requires: ['craftsman'] },
+      'advanced-gunsmith': { cost: 5, requires: ['gunsmith'] },
+      'secondary-weapon-attachment': { cost: 5, requires: ['advanced-gunsmith'] },
+      'on-the-fly': { cost: 10, requires: ['secondary-weapon-attachment'] },
+      acrobat: { cost: 5, requires: [] },
+      'graceful-movement': { cost: 5, requires: ['acrobat'] },
+      'artful-dodge': { cost: 5, requires: ['graceful-movement'] },
+      'tumbling-getaway': { cost: 5, requires: ['artful-dodge'] },
+      'damaging-fall': { cost: 5, requires: ['acrobat'] },
+      'charging-attack': { cost: 5, requires: ['damaging-fall'] },
+      tumbler: { cost: 5, requires: ['charging-attack'] },
+      swordsman: { cost: 5, requires: [] },
+      'furious-strike': { cost: 5, requires: ['swordsman'] },
+      'stopping-strike': { cost: 5, requires: ['furious-strike'] },
+      'double-strike': { cost: 5, requires: ['stopping-strike'] },
+      'distancing-strike': { cost: 5, requires: ['double-strike'] },
+      'defensive-stance': { cost: 5, requires: ['swordsman'] },
+      parry: { cost: 5, requires: ['defensive-stance'] },
+      riposte: { cost: 5, requires: ['parry'] },
+      'dirt-in-the-eyes': { cost: 5, requires: ['swordsman'] },
+      'offhand-knife': { cost: 5, requires: ['dirt-in-the-eyes'] },
+      'sword-grapple': { cost: 5, requires: ['offhand-knife'] },
+      'reactive-grapple': { cost: 10, requires: ['sword-grapple', 'riposte'] },
+      chef: { cost: 5, requires: [] },
+      'spicy-dish': { cost: 5, requires: ['chef'] },
+      'energising-dish': { cost: 5, requires: ['spicy-dish'] },
+      'soothing-tea': { cost: 5, requires: ['energising-dish'] },
+      'hearty-dish': { cost: 5, requires: ['chef'] },
+      potluck: { cost: 5, requires: ['hearty-dish'] },
+      'skillful-dish': { cost: 5, requires: ['potluck'] },
+      'drivers-license': { cost: 5, requires: [] },
+      harley: { cost: 5, requires: ['drivers-license'] },
+      'hit-and-run': { cost: 5, requires: ['harley'] },
+      'gun-it': { cost: 5, requires: ['hit-and-run'] },
+      'defensive-driving': { cost: 5, requires: ['drivers-license'] },
+      'offensive-driving': { cost: 5, requires: ['defensive-driving'] }
     };
-    const meleePerkIds = ['up-close', 'hulk-smash', 'blocker', 'leon', 'grappler', 'staying-sharp', 'footwork', 'riposte', 'lethal-weapon'];
+    const bludgeonPerkIds = ['bludgeon-up-close', 'spin-strike', 'bludgeon-knockback', 'crushing-strike', 'improvise', 'yes-and', 'damage-increase', 'no-but', 'concuss', 'sweep-the-leg', 'weaken'];
     const throwPerkIds = ['thrower', 'not-sharpest-tool', 'reflexive-throw', 'knockback', 'sharpest-tool', 'precise-throw', 'perseus'];
-    const firearmPerkIds = ['second-amendment', 'precise', 'sure-shot', 'highest-caliber', 'forty-seven', 'oswald', 'duck-for-cover', 'quick-reload', 'spray-and-pray', 'quick-aim', 'higher-caliber', 'shotgun-specialist', 'locked-in'];
+    const firearmPerkIds = ['second-amendment', 'precise', 'sure-shot', 'highest-caliber', 'forty-seven', 'oswald', 'duck-for-cover', 'quick-reload', 'spray-and-pray', 'quick-aim', 'higher-caliber', 'shotgun-specialist', 'shotgun-mastery', 'cover-mastery', 'smg-mastery', 'sniper-mastery'];
+    const archerPerkIds = ['archer', 'mediterranean-draw', 'three-finger-draw', 'mongolian-draw', 'pinch-draw', 'quick-draw', 'secondary-draw', 'slavic-draw'];
+    const craftPerkIds = ['craftsman', 'leatherworker', 'rugged-armorer', 'metal-worker', 'gunsmith', 'advanced-gunsmith', 'secondary-weapon-attachment', 'on-the-fly'];
+    const acrobaticsPerkIds = ['acrobat', 'graceful-movement', 'artful-dodge', 'tumbling-getaway', 'damaging-fall', 'charging-attack', 'tumbler'];
+    const swordPerkIds = ['swordsman', 'furious-strike', 'stopping-strike', 'double-strike', 'distancing-strike', 'defensive-stance', 'parry', 'riposte', 'dirt-in-the-eyes', 'offhand-knife', 'sword-grapple', 'reactive-grapple'];
+    const cookPerkIds = ['chef', 'spicy-dish', 'energising-dish', 'soothing-tea', 'hearty-dish', 'potluck', 'skillful-dish'];
+    const vehiclePerkIds = ['drivers-license', 'harley', 'hit-and-run', 'gun-it', 'defensive-driving', 'offensive-driving'];
     let customPerks = [];
     let selectedPerks = new Set();
     let prerequisiteHintTarget = null;
@@ -848,9 +1151,15 @@
       });
     }
     const perkTreeChoices = [
-      { label: 'Melee', panel: document.querySelector('.melee-tree-viewport'), periods: ['all'] },
+      { label: 'Bludgeon', panel: document.getElementById('bludgeon-perk-tree'), periods: ['all'] },
       { label: 'Throw', panel: document.getElementById('throw-perk-tree'), periods: ['all'] },
       { label: 'Firearm (Modern)', panel: document.getElementById('firearm-perk-tree'), periods: ['modern', 'custom'] },
+      { label: 'Archer', panel: document.getElementById('archer-perk-tree'), periods: ['fantasy', 'greco-roman', 'medieval', 'age-of-exploration', 'colonial-age', 'early-american', 'modern', 'custom'] },
+      { label: 'Craft', panel: document.getElementById('craft-perk-tree'), periods: ['all'] },
+      { label: 'Acrobatics', panel: document.getElementById('acrobatics-perk-tree'), periods: ['all'] },
+      { label: 'Sword', panel: document.getElementById('sword-perk-tree'), periods: ['fantasy', 'greco-roman', 'medieval', 'age-of-exploration', 'colonial-age', 'early-american', 'modern', 'custom'] },
+      { label: 'Cook', panel: document.getElementById('cook-perk-tree'), periods: ['all'] },
+      { label: 'Vehicle', panel: document.getElementById('vehicle-perk-tree'), periods: ['modern', 'sci-fi', 'custom'] },
       { label: 'Custom', panel: document.getElementById('custom-perk-panel'), periods: ['all'] }
     ];
     const timePeriods = [
@@ -1026,35 +1335,38 @@
     window.addEventListener('pointerdown', () => getPerkAudioContext(), { once: true, passive: true });
     const perkTooltip = document.getElementById('perk-hover-tooltip');
     let perkTooltipButton = null;
-    function positionPerkTooltip(x, y) {
+    function positionPerkTooltip(button) {
       if (perkTooltip.hidden) return;
+      if (perkTooltip.parentElement !== button) button.append(perkTooltip);
+      const perkRect = button.getBoundingClientRect();
+      const availableAbove = Math.max(0, perkRect.top - 16);
+      perkTooltip.style.maxHeight = Math.min(280, window.innerHeight * 0.45, availableAbove) + 'px';
       const rect = perkTooltip.getBoundingClientRect();
-      // Keep the pointer at the tooltip's lower-left corner when there is room.
-      let left = x;
-      let top = y - rect.height;
-      if (left + rect.width > window.innerWidth - 8) left = x - rect.width;
-      left = Math.max(8, Math.min(window.innerWidth - rect.width - 8, left));
-      if (top < 8) top = Math.min(window.innerHeight - rect.height - 8, y + 8);
-      perkTooltip.style.left = left + 'px';
-      perkTooltip.style.top = Math.max(8, top) + 'px';
+      const viewportLeft = Math.max(8, Math.min(window.innerWidth - rect.width - 8, perkRect.left + (perkRect.width - rect.width) / 2));
+      perkTooltip.style.left = (viewportLeft - perkRect.left) + 'px';
+      perkTooltip.style.transform = 'none';
     }
-    function showPerkTooltip(button, event) {
+    function showPerkTooltip(button) {
+      if (perkTooltipButton && perkTooltipButton !== button) perkTooltipButton.classList.remove('has-open-tooltip');
       perkTooltipButton = button;
+      button.classList.add('has-open-tooltip');
       perkTooltip.querySelector('strong').textContent = button.querySelector('.perk-name').textContent;
       perkTooltip.querySelector('.tooltip-description').textContent = button.querySelector('.perk-description').textContent;
       perkTooltip.querySelector('.tooltip-cost').textContent = button.querySelector('.perk-cost').textContent;
       perkTooltip.hidden = false;
-      const rect = button.getBoundingClientRect();
-      positionPerkTooltip(event?.clientX ?? rect.left + rect.width / 2, event?.clientY ?? rect.top + rect.height / 2);
+      positionPerkTooltip(button);
     }
     function hidePerkTooltip(button) {
       if (button && document.activeElement === button) return;
-      if (!button || perkTooltipButton === button) { perkTooltip.hidden = true; perkTooltipButton = null; }
+      if (!button || perkTooltipButton === button) {
+        perkTooltipButton?.classList.remove('has-open-tooltip');
+        perkTooltip.hidden = true;
+        perkTooltipButton = null;
+      }
     }
     function bindPerkNode(button) {
       button.setAttribute('aria-describedby', 'perk-hover-tooltip');
-      button.addEventListener('pointerenter', (event) => showPerkTooltip(button, event));
-      button.addEventListener('pointermove', (event) => positionPerkTooltip(event.clientX, event.clientY));
+      button.addEventListener('pointerenter', () => showPerkTooltip(button));
       button.addEventListener('pointerleave', () => hidePerkTooltip(button));
       button.addEventListener('focus', () => showPerkTooltip(button));
       button.addEventListener('blur', () => hidePerkTooltip(button));
@@ -1078,6 +1390,8 @@
       });
     }
     document.querySelectorAll('.perk-node[data-perk]').forEach(bindPerkNode);
+    window.addEventListener('scroll', () => { if (perkTooltipButton && !perkTooltip.hidden) positionPerkTooltip(perkTooltipButton); }, true);
+    window.addEventListener('resize', () => { if (perkTooltipButton && !perkTooltip.hidden) positionPerkTooltip(perkTooltipButton); });
     const customPerkCost = document.getElementById('custom-perk-cost');
     for (let cost = 5; cost <= 100; cost += 5) {
       const option = document.createElement('option'); option.value = String(cost); option.textContent = `${cost} points`; customPerkCost.append(option);
@@ -1409,10 +1723,16 @@
         document.getElementById(`final-heading-${key}`).textContent = `${categories[key].label} (${categories[key].short} ${currentStats[key] || '—'})`;
       });
       document.getElementById('final-total').textContent = `Points accounted for: ${totals.total + perkPointsSpent()} / ${fullBudget} (${perkPointsSpent()} spent on perks)`;
-      const meleePerks = perkNames(meleePerkIds);
+      const bludgeonPerks = perkNames(bludgeonPerkIds);
       const throwPerks = perkNames(throwPerkIds);
       const firearmPerks = perkNames(firearmPerkIds);
-      document.getElementById('final-perk-list').textContent = `Melee perks: ${meleePerks.length ? meleePerks.join(', ') : 'None selected'} · Throw perks: ${throwPerks.length ? throwPerks.join(', ') : 'None selected'} · Firearm (Modern) perks: ${firearmPerks.length ? firearmPerks.join(', ') : 'None selected'}`;
+      const archerPerks = perkNames(archerPerkIds);
+      const craftPerks = perkNames(craftPerkIds);
+      const acrobaticsPerks = perkNames(acrobaticsPerkIds);
+      const swordPerks = perkNames(swordPerkIds);
+      const cookPerks = perkNames(cookPerkIds);
+      const vehiclePerks = perkNames(vehiclePerkIds);
+      document.getElementById('final-perk-list').textContent = `Bludgeon perks: ${bludgeonPerks.length ? bludgeonPerks.join(', ') : 'None selected'} · Throw perks: ${throwPerks.length ? throwPerks.join(', ') : 'None selected'} · Firearm (Modern) perks: ${firearmPerks.length ? firearmPerks.join(', ') : 'None selected'} · Archer perks: ${archerPerks.length ? archerPerks.join(', ') : 'None selected'} · Craft perks: ${craftPerks.length ? craftPerks.join(', ') : 'None selected'} · Acrobatics perks: ${acrobaticsPerks.length ? acrobaticsPerks.join(', ') : 'None selected'} · Sword perks: ${swordPerks.length ? swordPerks.join(', ') : 'None selected'} · Cook perks: ${cookPerks.length ? cookPerks.join(', ') : 'None selected'} · Vehicle perks: ${vehiclePerks.length ? vehiclePerks.join(', ') : 'None selected'}`;
       document.getElementById('final-reputation').textContent = String(currentStats.influence || 0);
       document.getElementById('final-base-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 2));
       document.getElementById('final-limb-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 4));
@@ -1427,93 +1747,220 @@
       document.getElementById('print-button').disabled = !valid;
     }
 
-    function addPrintRow(parent, label, value) {
-      const row = document.createElement('div');
-      row.className = 'print-row';
-      const name = document.createElement('strong');
-      name.textContent = label;
-      const result = document.createElement('span');
-      result.textContent = value;
-      row.append(name, result);
-      parent.append(row);
-    }
-
     function preparePrintSheet() {
       const sheet = document.getElementById('print-sheet');
       sheet.replaceChildren();
+
+      const pageOne = document.createElement('section');
+      pageOne.className = 'print-page-one';
       const head = document.createElement('header');
       head.className = 'print-head';
+      const identity = document.createElement('div');
+      identity.className = 'print-identity';
       const title = document.createElement('h1');
       title.textContent = document.getElementById('final-name').value;
       const brand = document.createElement('span');
       brand.className = 'print-brand';
       brand.textContent = 'Undertow';
-      head.append(title, brand);
-      sheet.append(head);
+      identity.append(brand, title);
       const details = document.createElement('p');
       details.className = 'print-meta';
       const difficulty = new FormData(document.getElementById('character-form')).get('difficulty');
       details.textContent = `${document.getElementById('final-occupation').value} · Age ${document.getElementById('final-age').value} · ${difficulty} difficulty`;
-      sheet.append(details);
-      const summary = document.createElement('div');
-      summary.className = 'print-summary';
+      identity.append(details);
+      head.append(identity);
+      pageOne.append(head);
+
       const derived = document.createElement('section');
       const derivedTitle = document.createElement('h2');
       derivedTitle.textContent = 'Derived values';
       derived.append(derivedTitle);
-      [['Reputation (Inf)', 'final-reputation'], ['Base health ((Res + Str) / 2)', 'final-base-health'], ['Limb health ((Res + Str) / 4)', 'final-limb-health'], ['Stress die', 'final-stress-die'], ['Move die', 'final-move-die']].forEach(([label, id]) => addPrintRow(derived, label, document.getElementById(id).textContent));
-      const major = document.createElement('section');
+      const derivedGrid = document.createElement('div');
+      derivedGrid.className = 'print-derived-grid';
+      [['Reputation', 'final-reputation'], ['Base health', 'final-base-health'], ['Limb health', 'final-limb-health'], ['Stress die', 'final-stress-die'], ['Move die', 'final-move-die']].forEach(([label, id]) => {
+        const card = document.createElement('div');
+        card.className = 'print-derived-card';
+        const name = document.createElement('strong');
+        name.className = 'print-derived-name';
+        name.textContent = label;
+        const maximum = document.createElement('span');
+        maximum.className = 'print-derived-max';
+        maximum.textContent = `Max: ${document.getElementById(id).textContent}`;
+        const writeBox = document.createElement('div');
+        writeBox.className = 'print-write-box';
+        card.append(name, maximum, writeBox);
+        derivedGrid.append(card);
+      });
+      derived.append(derivedGrid);
+      pageOne.append(derived);
+
+      const majorStats = document.createElement('section');
       const majorTitle = document.createElement('h2');
       majorTitle.textContent = 'Major stats';
-      major.append(majorTitle);
-      finalStatSelects.forEach((select) => addPrintRow(major, categories[select.name].label, select.value));
-      summary.append(derived, major);
-      [["Melee perks", meleePerkIds], ["Throw perks", throwPerkIds], ["Firearm (Modern) perks", firearmPerkIds], ["Custom perks", customPerks.map((perk) => `custom-${perk.id}`)]].forEach(([titleText, perkIds]) => {
-        const chosen = perkIds.filter((perk) => selectedPerks.has(perk));
-        if (!chosen.length) return;
-        const perks = document.createElement('section');
-        const perksTitle = document.createElement('h2');
-        perksTitle.textContent = titleText;
-        perks.append(perksTitle);
-        chosen.forEach((perk) => {
-          const perkName = document.querySelector(`.perk-node[data-perk="${perk}"] .perk-name`)?.textContent;
-          if (perkName) addPrintRow(perks, perkName, `${perkDefinitions[perk].cost} points`);
-        });
-        summary.append(perks);
+      majorStats.append(majorTitle);
+      const statsRow = document.createElement('div');
+      statsRow.className = 'print-stats-row';
+      finalStatSelects.forEach((select) => {
+        const card = document.createElement('div');
+        card.className = 'print-stat-card';
+        const label = document.createElement('strong');
+        label.textContent = categories[select.name].label;
+        const value = document.createElement('span');
+        value.textContent = select.value;
+        card.append(label, value);
+        statsRow.append(card);
       });
-      sheet.append(summary);
-      const grid = document.createElement('div');
-      grid.className = 'print-skills-grid';
+      majorStats.append(statsRow);
+      pageOne.append(majorStats);
+
+      const appendSkillRow = (parent, input) => {
+        const row = document.createElement('div');
+        row.className = 'print-skill-row';
+        [input.name, input.value, String(Math.ceil(Number(input.value) / 2)), String(Math.ceil(Number(input.value) / 5))].forEach((text) => {
+          const cell = document.createElement('span'); cell.textContent = text; row.append(cell);
+        });
+        parent.append(row);
+      };
+      const skillsTitle = document.createElement('h2');
+      skillsTitle.textContent = 'Skills';
+      pageOne.append(skillsTitle);
+      const skillsGrid = document.createElement('div');
+      skillsGrid.className = 'print-first-page-skills-grid';
       categoryKeys.forEach((key) => {
         const group = document.createElement('section');
+        group.className = 'print-skill-group';
         const heading = document.createElement('h2');
-        heading.textContent = `${categories[key].label} (${categories[key].short} ${finalStatSelects.find((select) => select.name === key).value})`;
+        const statValue = finalStatSelects.find((select) => select.name === key)?.value || '';
+        heading.textContent = `${categories[key].label} (${categories[key].short} ${statValue})`;
         group.append(heading);
         const header = document.createElement('div');
         header.className = 'print-skill-header';
         ['Skill', 'Value', 'Hard success', 'Extreme success'].forEach((text) => {
-          const cell = document.createElement('span');
-          cell.textContent = text;
-          header.append(cell);
+          const cell = document.createElement('span'); cell.textContent = text; header.append(cell);
         });
         group.append(header);
-        finalSkillInputs.filter((input) => input.dataset.category === key).forEach((input) => {
-          const row = document.createElement('div');
-          row.className = 'print-skill-row';
-          [input.name, input.value, String(Math.ceil(Number(input.value) / 2)), String(Math.ceil(Number(input.value) / 5))].forEach((text) => {
-            const cell = document.createElement('span');
-            cell.textContent = text;
-            row.append(cell);
-          });
-          group.append(row);
-        });
-        grid.append(group);
+        finalSkillInputs.filter((input) => input.dataset.category === key).forEach((input) => appendSkillRow(group, input));
+        skillsGrid.append(group);
       });
-      sheet.append(grid);
+      pageOne.append(skillsGrid);
+      sheet.append(pageOne);
+
+      const pageTwo = document.createElement('section');
+      pageTwo.className = 'print-page-two';
+      const pageTwoTitle = document.createElement('h2');
+      pageTwoTitle.textContent = 'Weapons & Perks';
+      pageTwo.append(pageTwoTitle);
+
+      const weapons = document.createElement('section');
+      weapons.className = 'print-weapons-box';
+      const weaponsTitle = document.createElement('h2');
+      weaponsTitle.textContent = 'Weapons';
+      weapons.append(weaponsTitle);
+      pageTwo.append(weapons);
+
+      const stress = document.createElement('section');
+      stress.className = 'print-stress-tracker';
+      const stressTitle = document.createElement('h2');
+      stressTitle.textContent = 'Stress tracker';
+      const eyes = document.createElement('div');
+      eyes.className = 'print-stress-eyes';
+      for (let index = 0; index < 6; index += 1) {
+        const eye = document.createElement('img');
+        eye.src = './assets/stress-eye.svg';
+        eye.alt = `Stress marker ${index + 1}`;
+        eyes.append(eye);
+      }
+      stress.append(stressTitle, eyes);
+      pageTwo.append(stress);
+
+      const perksGrid = document.createElement('div');
+      perksGrid.className = 'print-perks';
+      const printTreeSources = [
+        ["Bludgeon", bludgeonPerkIds, document.getElementById('bludgeon-perk-tree')],
+        ["Throw", throwPerkIds, document.getElementById('throw-perk-tree')],
+        ["Firearm (Modern)", firearmPerkIds, document.getElementById('firearm-perk-tree')],
+        ["Archer", archerPerkIds, document.getElementById('archer-perk-tree')],
+        ["Craft", craftPerkIds, document.getElementById('craft-perk-tree')],
+        ["Acrobatics", acrobaticsPerkIds, document.getElementById('acrobatics-perk-tree')],
+        ["Sword", swordPerkIds, document.getElementById('sword-perk-tree')],
+        ["Cook", cookPerkIds, document.getElementById('cook-perk-tree')],
+        ["Vehicle", vehiclePerkIds, document.getElementById('vehicle-perk-tree')],
+        ["Custom", customPerks.map((perk) => `custom-${perk.id}`), document.getElementById('custom-perk-list')]
+      ];
+      printTreeSources.forEach(([titleText, perkIds, sourceTree]) => {
+        const chosen = perkIds.filter((perk) => selectedPerks.has(perk));
+        if (!chosen.length) return;
+        const perks = document.createElement('section');
+        perks.className = 'print-perk-section';
+        const perksTitle = document.createElement('h2');
+        perksTitle.textContent = titleText;
+        perks.append(perksTitle);
+        const tree = sourceTree.cloneNode(true);
+        tree.removeAttribute('id');
+        tree.classList.add('print-perk-tree');
+        tree.querySelectorAll('.perk-branch-art, #perk-hover-tooltip, .oak-leaf-art').forEach((element) => element.remove());
+        tree.querySelectorAll('.perk-node[data-perk]').forEach((node) => {
+          if (!selectedPerks.has(node.dataset.perk)) node.remove();
+          else {
+            node.removeAttribute('aria-disabled');
+            node.setAttribute('aria-pressed', 'true');
+            node.classList.remove('is-available', 'needs-prerequisite', 'has-open-tooltip');
+          }
+        });
+        if (titleText === 'Custom') {
+          const lane = document.createElement('div');
+          lane.className = 'perk-lane';
+          [...tree.querySelectorAll(':scope > .perk-node')].forEach((node) => lane.append(node));
+          tree.replaceChildren(lane);
+        }
+        tree.querySelectorAll('.perk-lane, .perk-level, .perk-fork, .perk-trifork, .perk-subfork').forEach((branch) => {
+          if (!branch.querySelector('.perk-node[data-perk]')) branch.remove();
+        });
+        perks.append(tree);
+        perksGrid.append(perks);
+      });
+      pageTwo.append(perksGrid);
       const reserve = document.createElement('p');
       reserve.className = 'print-reserve';
       reserve.textContent = `Points reserved for perks: ${finalReserve.value || 0}`;
-      sheet.append(reserve);
+      pageTwo.append(reserve);
+      sheet.append(pageTwo);
+
+      const previousHidden = sheet.hidden;
+      const previousStyle = sheet.getAttribute('style');
+      sheet.hidden = false;
+      sheet.style.cssText = 'display:block;position:absolute;left:-20000px;top:0;width:7.5in;visibility:hidden';
+      sheet.querySelectorAll('.print-perk-tree').forEach((tree) => {
+        const bounds = tree.getBoundingClientRect();
+        const nodes = new Map([...tree.querySelectorAll('.perk-node[data-perk]')].map((node) => [node.dataset.perk, node]));
+        if (!bounds.width || !bounds.height) return;
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.classList.add('perk-branch-art');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('viewBox', `0 0 ${bounds.width} ${bounds.height}`);
+        nodes.forEach((child, childId) => {
+          const parents = perkDefinitions[childId]?.requires || [];
+          parents.forEach((parentId) => {
+            const parent = nodes.get(parentId);
+            if (!parent) return;
+            const parentRect = parent.getBoundingClientRect();
+            const childRect = child.getBoundingClientRect();
+            const x1 = parentRect.left + parentRect.width / 2 - bounds.left;
+            const y1 = parentRect.bottom - bounds.top;
+            const x2 = childRect.left + childRect.width / 2 - bounds.left;
+            const y2 = childRect.top - bounds.top;
+            const middleY = (y1 + y2) / 2;
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('class', 'map-route');
+            line.setAttribute('d', `M ${x1} ${y1} C ${x1} ${middleY}, ${x2} ${middleY}, ${x2} ${y2}`);
+            svg.append(line);
+          });
+        });
+        tree.insertBefore(svg, tree.firstChild);
+      });
+      sheet.hidden = previousHidden;
+      if (previousStyle === null) sheet.removeAttribute('style');
+      else sheet.setAttribute('style', previousStyle);
     }
 
     function readSavedCharacters() {
