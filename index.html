@@ -56,6 +56,14 @@
     .saved-card p { margin: 0; }
     .saved-actions { display: flex; gap: 8px; }
     .saved-actions button { padding: 8px 10px; }
+    .inventory-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+    .inventory-card { min-width: 0; padding: 12px; border: 1px solid #c9c5ba; border-radius: 10px; background: #fffdf8; }
+    .inventory-card h2 { margin: 0 0 4px; font-size: 1rem; }
+    .inventory-source { margin: 0 0 6px; color: #754c24; font-size: .78rem; font-weight: 700; }
+    .inventory-description { margin: 0; color: #4d4b48; line-height: 1.45; }
+    .inventory-select { width: 100%; margin-top: 9px; }
+    .inventory-weapon-stats { margin: 7px 0 0; font-size: .88rem; font-weight: 700; }
+    .inventory-empty { padding: 14px; border: 1px dashed #aaa08e; border-radius: 10px; color: #666; }
     .perk-title { margin-top: 34px; padding-top: 18px; border-top: 1px solid #ddd6c8; }
     .perk-tree { display: grid; justify-items: center; gap: 24px; margin: 22px 0 34px; padding: 8px 0 18px; position: relative; }
     .perk-tree > .perk-branch-art { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
@@ -107,6 +115,7 @@
       main { padding: 22px 18px; }
       .stat-row, .skill-row { grid-template-columns: minmax(0, 1fr) 100px; }
       .final-skill-header, .final-skill-row { grid-template-columns: minmax(82px, 1.2fr) repeat(3, minmax(0, .7fr)); gap: 4px; font-size: .78rem; }
+      .inventory-list { grid-template-columns: 1fr; }
     }
     @media print {
       @page { margin: 0.5in; }
@@ -135,23 +144,68 @@
       .print-skill-row { padding: 3px 0; border: 0; break-inside: avoid; }
       .print-skill-row span:first-child { overflow-wrap: anywhere; }
       .print-skill-group h2 { margin: 4px 0; font: 700 8pt "Libre Baskerville", "Times New Roman", serif; }
-      .print-weapons-box { min-height: .9in; border: 1px solid #333; padding: 6px; margin: 10px 0; }
-      .print-weapons-box h2 { margin: 0; border: 0 !important; }
-      .print-stress-tracker { margin: 10px 0 14px; }
-      .print-stress-eyes { display: grid; grid-template-columns: repeat(6, .62in); gap: 10px; align-items: center; }
-      .print-stress-eyes img { display: block; width: .62in; height: .32in; object-fit: contain; justify-self: center; }
+      .print-weapons-box { min-height: .9in; border: 1px solid #333; padding: 6px; margin: 10px 0; break-inside: auto !important; page-break-inside: auto !important; }
+      .print-weapons-box h2 { margin: 0; border: 0 !important; break-after: avoid; page-break-after: avoid; }
+      .print-weapons-box h3 { margin: 5px 0 2px; font: 700 8pt "Libre Baskerville", "Times New Roman", serif; break-after: avoid; page-break-after: avoid; }
+      .print-weapons-list { margin: 3px 0 5px; padding-left: 17px; font-size: 7pt; line-height: 1.25; break-inside: auto !important; page-break-inside: auto !important; }
+      .print-weapon-attachment-group { break-inside: auto !important; page-break-inside: auto !important; }
+      .print-weapons-list li { margin: 2px 0; break-inside: avoid; }
+      .print-stress-tracker { display: block; visibility: visible; width: max-content; max-width: 100%; margin: 0; padding: 4px 6px; border: 1px solid #555; break-inside: avoid; page-break-inside: avoid; }
+      .print-tracker-group { display: grid; grid-template-columns: minmax(0, 4.1in) minmax(1.45in, 1fr); align-items: start; gap: 8px; break-inside: avoid; page-break-inside: avoid; }
+      .print-stress-tracker h2 { display: block; visibility: visible; margin: 0 0 3px; border: 0 !important; }
+      .print-stress-eyes { display: grid; grid-template-columns: repeat(6, .55in); gap: 10px; align-items: center; }
+      .print-stress-eyes svg { display: block; visibility: visible; width: .55in; height: .28in; justify-self: center; }
+      .print-base-health-tracker { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: stretch; gap: 6px; padding: 5px 6px; border: 1px solid #555; break-inside: avoid; page-break-inside: avoid; }
+      .print-base-health-tracker strong { display: grid; align-content: center; font-size: 9pt; }
+      .print-health-tracker { grid-column: 1 / -1; margin: 10px 0 16px; break-inside: avoid; page-break-inside: avoid; }
+      .print-health-tracker > h2 { margin: 0 0 7px; }
+      .print-health-layout { display: grid; grid-template-columns: 1.55in minmax(0, 1fr); align-items: start; gap: 10px; }
+      .print-health-figure { display: block; width: 100%; height: 4.25in; object-fit: contain; object-position: center top; }
+      .print-health-details { display: grid; align-content: start; gap: 6px; min-width: 0; }
+      .print-injury-table-wrap { min-width: 0; }
+      .print-injury-table-wrap h3 { margin: 0 0 5px; font: 700 9pt "Libre Baskerville", "Times New Roman", serif; }
+      .print-injury-table { width: 100%; border-collapse: collapse; table-layout: fixed; font: 7pt/1.25 "Libre Baskerville", "Times New Roman", serif; }
+      .print-injury-table th, .print-injury-table td { padding: 4px 5px; border: 1px solid #555; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+      .print-injury-table th { background: #eee; font-weight: 700; }
+      .print-injury-table th:first-child { width: 18%; }
+      .print-injury-table th:nth-child(2) { width: 19%; }
+      .print-health-parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+      .print-health-part-card { min-width: 0; padding: 4px; border: 1px solid #555; break-inside: avoid; }
+      .print-health-part-name { display: block; font-size: 7pt; font-weight: 700; }
+      .print-health-part-max { display: block; margin: 2px 0 4px; font-size: 6pt; }
+      .print-health-current-label { display: block; font-size: 5.7pt; }
+      .print-health-current-box { height: .32in; border: 1px solid #555; }
+      .print-health-top-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px; break-inside: avoid; }
+      .print-tracker-values-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 0 8px; break-inside: avoid; }
+      .print-tracker-value { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1fr); align-items: stretch; gap: 6px; padding: 4px; border: 1px solid #555; break-inside: avoid; }
+      .print-tracker-value-label { display: grid; align-content: center; font-size: 8pt; font-weight: 700; }
+      .print-tracker-value-detail { display: grid; grid-template-rows: auto 1fr; gap: 3px; font-size: 6pt; }
+      .print-tracker-value-box { min-height: .3in; border: 1px solid #555; }
+      .print-whole-health { display: grid; grid-template-columns: 1.2in minmax(0, 1fr); align-items: stretch; gap: 6px; margin: 0; break-inside: avoid; }
+      .print-whole-health-label { display: grid; align-content: center; padding: 5px 7px; border: 1px solid #555; }
+      .print-whole-health-label strong { font-size: 8pt; }
+      .print-whole-health-label span { font-size: 7pt; }
+      .print-whole-health-box { min-height: .36in; border: 2px solid #333; }
+      .print-armor-points { display: grid; grid-template-columns: .78in minmax(0, 1fr); align-items: stretch; gap: 6px; padding: 4px; border: 1px solid #555; break-inside: avoid; }
+      .print-armor-points strong { display: grid; align-content: center; font-size: 8pt; }
+      .print-armor-points-box { min-height: .36in; border: 1px solid #555; }
       .print-perks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
-      .print-perk-section { break-inside: auto; min-width: 0; }
-      .print-perk-section h2 { margin: 7px 0 3px; break-after: avoid; }
+      .print-perk-section { break-inside: avoid; page-break-inside: avoid; min-width: 0; }
+      .print-perk-heading-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; break-after: avoid; }
+      .print-perk-heading-row h2 { flex: 0 0 auto; margin: 7px 0 3px; }
+      .print-perk-passive-summary { min-width: 0; margin: 5px 0 3px; font-size: 6.5pt; line-height: 1.2; text-align: right; }
+      .print-perk-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; align-items: start; }
+      .print-perk-column { min-width: 0; }
+      .print-perk-column h3 { margin: 4px 0 2px; font: 700 8pt "Libre Baskerville", "Times New Roman", serif; break-after: avoid; }
       .print-perk-list { margin: 0; padding-left: 18px; }
       .print-perk-list li { margin: 3px 0; padding-left: 2px; break-inside: avoid; }
       .print-perk-list strong { display: inline; margin-right: 3px; }
       .print-perk-description { display: inline; max-height: none; overflow: visible; overflow-wrap: anywhere; white-space: normal; text-overflow: clip; }
-      .print-stress-tracker { display: block; break-inside: avoid; page-break-inside: avoid; }
+      .print-stress-tracker { display: block !important; visibility: visible !important; break-inside: avoid; page-break-inside: avoid; }
       .print-reserve { margin-top: 10px; }
     }
     #print-sheet .print-perks { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
-    #print-sheet .print-perk-section { min-width: 0; break-inside: auto; page-break-inside: auto; }
+    #print-sheet .print-perk-section { min-width: 0; break-inside: avoid; page-break-inside: avoid; }
     #print-sheet .print-perk-section h2 { break-after: avoid; page-break-after: avoid; }
     #print-sheet .print-perk-tree { display: grid; justify-items: center; gap: 10px; width: 100%; margin: 5px 0 12px; padding: 4px 0; position: relative; overflow: visible; }
     #print-sheet .print-perk-tree, #print-sheet .print-perk-tree .perk-level, #print-sheet .print-perk-tree .perk-fork, #print-sheet .print-perk-tree .perk-trifork, #print-sheet .print-perk-tree .perk-subfork, #print-sheet .print-perk-tree .perk-lane { break-inside: auto; page-break-inside: auto; }
@@ -416,13 +470,13 @@
     #perks-screen .perk-node.is-available .perk-name { text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 3px; }
     #perks-screen .map-route.is-available { stroke: #a57937; stroke-width: 2.6; stroke-dasharray: 5 6; opacity: 1; }
     #perks-screen .map-route.is-selected { stroke: #8e421e; stroke-width: 3.1; stroke-dasharray: none; opacity: 1; }
-    #perk-hover-tooltip { position: absolute; z-index: 2147483647; top: auto; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: min(320px, calc(100vw - 20px)); max-height: min(45vh, 280px); overflow-y: auto; padding: 10px 12px; border: 1px solid #99774a; border-radius: 7px; background: linear-gradient(145deg,#fbf4e5,#ecdbb8); color: #332719; box-shadow: 0 8px 24px #37281355; pointer-events: none; line-height: 1.4; text-align: left; }
+    #perk-hover-tooltip { position: fixed; z-index: 2147483647; top: 0; bottom: auto; left: 0; transform: none; width: min(320px, calc(100vw - 20px)); max-height: min(45vh, 280px); overflow-y: auto; padding: 10px 12px; border: 1px solid #99774a; border-radius: 7px; background: linear-gradient(145deg,#fbf4e5,#ecdbb8); color: #332719; box-shadow: 0 8px 24px #37281355; pointer-events: none; line-height: 1.4; text-align: left; }
     #perk-hover-tooltip[hidden] { display: none !important; }
     #perk-hover-tooltip strong { display: block; margin-bottom: 5px; color: #70451f; font: 700 .95rem Georgia, serif; }
     #perk-hover-tooltip .tooltip-description { display: block; font-size: .82rem; }
     #perk-hover-tooltip .tooltip-cost { display: block; margin-top: 6px; color: #754c24; font-size: .78rem; font-weight: 700; }
     #perk-detail-overlay { display: none !important; }
-    #perks-screen #to-final-button { width: 100%; margin-top: 4px; padding: 6px 5px; font-size: clamp(.55rem, .9vw, .7rem); }
+    #perks-screen #to-inventory-button { width: 100%; margin-top: 4px; padding: 6px 5px; font-size: clamp(.55rem, .9vw, .7rem); }
     #perk-detail-overlay { position: fixed !important; inset: 0 !important; width: 100vw; height: 100vh; z-index: 1200; }
     @media (max-width: 650px) { .wheel-paper-content { left: 50%; top: 13%; transform: translateX(-50%); width: min(92vw, 56%); height: 74%; max-height: 84vh; padding: 6px 8px 9px; } }
     @media (max-width: 560px) { #perks-screen .perk-fork, #perks-screen .perk-subfork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; } #perks-screen .perk-trifork { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; } #perks-screen .perk-node { min-height: 24px; } }
@@ -588,6 +642,14 @@
           <div class="custom-perk-fields">
             <label for="custom-perk-title">Title<input id="custom-perk-title" type="text" maxlength="60" required placeholder="Perk title"></label>
             <label for="custom-perk-cost">Point cost<select id="custom-perk-cost" required></select></label>
+            <label for="custom-perk-category">Category<select id="custom-perk-category" required>
+              <option value="" selected disabled>Choose a category</option>
+              <option value="stress">Uses Stress dice</option>
+              <option value="reaction">Used on a reaction</option>
+              <option value="action">Used on an action</option>
+              <option value="move">Move perk</option>
+              <option value="passive">Passive benefit</option>
+            </select></label>
           </div>
           <label for="custom-perk-description">Description<textarea id="custom-perk-description" maxlength="500" required placeholder="What does this perk do?"></textarea></label>
           <button type="submit">Add perk</button>
@@ -630,10 +692,10 @@
         <div class="perk-fork">
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="not-sharpest-tool" aria-pressed="false">
-              <span class="perk-name">Not the sharpest tool</span><span class="perk-description">-10 to throw to use blunt objects.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Not the sharpest tool</span><span class="perk-description">When you hit with a thrown blunt weapon, you can roll stress to stun the enemy.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="reflexive-throw" aria-pressed="false">
-              <span class="perk-name">Reflexive throw</span><span class="perk-description">You can roll Throw instead of Brawl to counter attack by rolling a stress die.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Reflexive throw</span><span class="perk-description">You can roll Throw instead of Brawl to counterattack.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="knockback" aria-pressed="false">
               <span class="perk-name">Knockback</span><span class="perk-description">On a successful throw you can roll a stress die to knock your target prone.</span><span class="perk-cost">Cost: 5 points</span>
@@ -641,7 +703,7 @@
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="sharpest-tool" aria-pressed="false">
-              <span class="perk-name">Sharpest tool</span><span class="perk-description">-10 to throwing sharp objects.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Sharpest tool</span><span class="perk-description">If you are wielding a sharp offhand weapon, you can roll stress. On a success, you regain your action dice to throw the weapon in your offhand.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="precise-throw" aria-pressed="false">
               <span class="perk-name">Precise throw</span><span class="perk-description">You have -10 to targeting shots with sharp objects.</span><span class="perk-cost">Cost: 5 points</span>
@@ -743,21 +805,21 @@
               <span class="perk-name">Secondary draw</span><span class="perk-description">Allows you to fire two arrows using just the bow's base damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="slavic-draw" aria-pressed="false">
-              <span class="perk-name">Slavic draw</span><span class="perk-description">Damage die: 1d6, range 5. Also doubles the amount of shots you would make next turn using any draw. This effect does not stack if using Slavic Draw more than once per turn.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Slavic draw</span><span class="perk-description">Damage die: 1d6, range 5. Add this draw's damage die to the bow's damage. Also doubles the amount of shots you would make next turn using any draw. This effect does not stack if using Slavic Draw more than once per turn.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="mediterranean-draw" aria-pressed="false">
-              <span class="perk-name">Mediterranean draw</span><span class="perk-description">Good stability and weight distribution. Damage die: 1d6, range 5.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Mediterranean draw</span><span class="perk-description">Good stability and weight distribution. Damage die: 1d6, range 5. Add this draw's damage die to the bow's damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="three-finger-draw" aria-pressed="false">
-              <span class="perk-name">Three finger draw</span><span class="perk-description">Good for range. Damage dice: 1d4, range 6.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Three finger draw</span><span class="perk-description">Good for range. Damage dice: 1d4, range 6. Add this draw's damage die to the bow's damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="mongolian-draw" aria-pressed="false">
-              <span class="perk-name">Mongolian draw</span><span class="perk-description">Keeps your arrow steady while moving. Damage dice: 1d6, range 4. Add 1d6 to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Mongolian draw</span><span class="perk-description">Keeps your arrow steady while moving. Damage dice: 1d6, range 4. Add this draw's damage die to the bow's damage. Add 1d6 to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="pinch-draw" aria-pressed="false">
-              <span class="perk-name">Pinch draw</span><span class="perk-description">Good for shooting things not meant to be shot by a bow and useful when you run out of arrows. Damage dice: variable, range 3.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Pinch draw</span><span class="perk-description">Good for shooting things not meant to be shot by a bow and useful when you run out of arrows. Damage dice: variable, range 3. Add this draw's damage die to the bow's damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
           </div>
         </div>
@@ -788,7 +850,7 @@
               <span class="perk-name">Advanced Gunsmith</span><span class="perk-description">You can apply one advanced mod and two earlier mods to a weapon. Advanced mods include: Secondary (a gadget such as a flashlight or laser dot sight, which gives -5 to shoot with that weapon), Slings (carry the weapon across your back without penalty), or Bipods (take a round to set up and aim with, then add -25 to a firearm roll). All mods take 2 hours to install.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="secondary-weapon-attachment" aria-pressed="false">
-              <span class="perk-name">Secondary Weapon Attachment</span><span class="perk-description">You can attach a secondary weapon to your gun: a grenade launcher, melee weapon attachment, non-lethal secondary, or under-barrel shotgun.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Secondary Weapon Attachment</span><span class="perk-description">You can attach a secondary weapon to your gun: a grenade launcher, melee weapon attachment, non-lethal secondary, or under-barrel shotgun. You gain any benefits of these secondaries, and you can roll two stress dice to attack with it.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="on-the-fly" aria-pressed="false">
               <span class="perk-name">On the Fly</span><span class="perk-description">You can swap out any of these things on your turn.</span><span class="perk-cost">Cost: 10 points</span>
@@ -835,9 +897,6 @@
         </div>
         <div class="perk-trifork">
           <div class="perk-lane">
-            <button class="perk-node" type="button" data-perk="furious-strike" aria-pressed="false">
-              <span class="perk-name">Furious strike</span><span class="perk-description">Roll stress. On a success, you deal twice your amount of damage.</span><span class="perk-cost">Cost: 5 points</span>
-            </button>
             <button class="perk-node" type="button" data-perk="stopping-strike" aria-pressed="false">
               <span class="perk-name">Stopping strike</span><span class="perk-description">If an enemy attempts to move from a square not adjacent to yours, you can use your reaction to roll an attack, deal damage, and stop them one square away.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
@@ -850,7 +909,7 @@
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="defensive-stance" aria-pressed="false">
-              <span class="perk-name">Defensive stance</span><span class="perk-description">While wielding a sword, you gain -10 to Brawl rolls to block an incoming melee attack.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Defensive stance</span><span class="perk-description">While wielding a sword, you have +10 armor points. When the armor points from the sword are removed, you do not need to repair the sword.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="parry" aria-pressed="false">
               <span class="perk-name">Parry</span><span class="perk-description">When you block a melee attack with your sword, you have -5 to your next attack. This effect stacks.</span><span class="perk-cost">Cost: 5 points</span>
@@ -936,12 +995,20 @@
           </div>
         </div>
       </div>
-      <button id="to-final-button" type="button">Continue to Final Changes</button>
+      <button id="to-inventory-button" type="button">Continue to Inventory</button>
       </div>
     </section>
 
-    <section id="final-screen" hidden>
+    <section id="inventory-screen" hidden>
       <button class="back-button" type="button" data-back="perks-screen" aria-label="Back to perks">←</button>
+      <h1>Inventory</h1>
+      <p class="intro">Items granted by your selected perks appear here.</p>
+      <div id="perk-inventory-list" class="inventory-list" aria-live="polite"></div>
+      <button id="inventory-continue-button" type="button">Continue to Final Changes</button>
+    </section>
+
+    <section id="final-screen" hidden>
+      <button class="back-button" type="button" data-back="inventory-screen" aria-label="Back to inventory">←</button>
       <h1>Final Changes</h1>
       <p class="intro">Review or change your character. Skill values must stay between their category value and 80, and skill increases, perk costs, and remaining reserve must use the full point budget.</p>
       <form id="final-form"></form>
@@ -1044,8 +1111,7 @@
       'charging-attack': { cost: 5, requires: ['damaging-fall'] },
       tumbler: { cost: 5, requires: ['charging-attack'] },
       swordsman: { cost: 5, requires: [] },
-      'furious-strike': { cost: 5, requires: ['swordsman'] },
-      'stopping-strike': { cost: 5, requires: ['furious-strike'] },
+      'stopping-strike': { cost: 5, requires: ['swordsman'] },
       'double-strike': { cost: 5, requires: ['stopping-strike'] },
       'distancing-strike': { cost: 5, requires: ['double-strike'] },
       'defensive-stance': { cost: 5, requires: ['swordsman'] },
@@ -1075,11 +1141,61 @@
     const archerPerkIds = ['archer', 'mediterranean-draw', 'three-finger-draw', 'mongolian-draw', 'pinch-draw', 'quick-draw', 'secondary-draw', 'slavic-draw'];
     const craftPerkIds = ['craftsman', 'leatherworker', 'rugged-armorer', 'metal-worker', 'gunsmith', 'advanced-gunsmith', 'secondary-weapon-attachment', 'on-the-fly'];
     const acrobaticsPerkIds = ['acrobat', 'graceful-movement', 'artful-dodge', 'tumbling-getaway', 'damaging-fall', 'charging-attack', 'tumbler'];
-    const swordPerkIds = ['swordsman', 'furious-strike', 'stopping-strike', 'double-strike', 'distancing-strike', 'defensive-stance', 'parry', 'riposte', 'dirt-in-the-eyes', 'offhand-knife', 'sword-grapple', 'reactive-grapple'];
+    const swordPerkIds = ['swordsman', 'stopping-strike', 'double-strike', 'distancing-strike', 'defensive-stance', 'parry', 'riposte', 'dirt-in-the-eyes', 'offhand-knife', 'sword-grapple', 'reactive-grapple'];
     const cookPerkIds = ['chef', 'spicy-dish', 'energising-dish', 'soothing-tea', 'hearty-dish', 'potluck', 'skillful-dish'];
     const vehiclePerkIds = ['drivers-license', 'harley', 'hit-and-run', 'gun-it', 'defensive-driving', 'offensive-driving'];
+    const meleeWeaponOptions = [
+      { name: 'Club', damageDice: '2d4', range: 'Melee', tags: 'Blunt, Stealthy', description: 'A basic blunt melee weapon.' },
+      { name: 'Baton', damageDice: '1d4+1', range: 'Melee', tags: 'Stealthy, Concealable, Bindable', description: 'A smaller melee weapon which can be concealed.' },
+      { name: 'Sword', damageDice: '1d6', range: 'Melee', tags: 'Bindable, Stealthy', description: 'A reliable sword.' },
+      { name: 'Offhand knife', damageDice: '1d4', range: 'Melee', tags: 'Concealable, Bindable, Offhand, Stealthy', description: 'A reliable knife able to be used in the offhand with another weapon.' }
+    ];
+    const perkInventoryGrants = {
+      'bludgeon-up-close': [{ name: 'Blunt Melee weapon', choicePrompt: 'Choose a Blunt Melee weapon', description: 'Choose one weapon from the Blunt Melee category.', weapon: true, choices: [
+        ...meleeWeaponOptions.slice(0, 2)
+      ] }],
+      thrower: [1, 2, 3].map((number) => ({ name: `Thrown weapon ${number}`, choicePrompt: 'Choose a thrown weapon', description: 'Choose one of your three thrown weapons.', weapon: true, choices: [
+        { name: 'Discus', damageDice: '1d4', range: '4', tags: 'Blunt, Thrown', description: 'Made by the ancient Greeks, it makes a better test of strength than a weapon.' },
+        { name: 'Throwing knife', damageDice: '1d6', range: '5', tags: 'Sharp', description: 'A small dagger made to stick when thrown at an enemy.' },
+        { name: 'Shotput', damageDice: '1d8', range: '3', tags: '', requirement: 'Requires a hard success to throw.', description: 'An unwieldy heavy ball; the only way this makes a good weapon is if it was shot from a cannon.' }
+      ] })),
+      'second-amendment': [
+        { name: 'Handgun', weapon: true, damageDice: '1d6', range: '4', tags: 'Concealable', description: 'A reliable pistol.' },
+        { name: 'Handgun ammunition (15 bullets)', ammunition: true, description: 'Handgun ammunition.' }
+      ],
+      'highest-caliber': [
+        { name: 'Sniper rifle', weapon: true, damageDice: '1d12', range: '10', special: 'Takes one round to aim and another to fire.', description: 'A long range weapon made to deal massive amounts of damage from far away.' },
+        { name: 'Sniper rifle ammunition (15 bullets)', ammunition: true, description: 'Sniper rifle ammunition.' }
+      ],
+      'forty-seven': [{ name: 'Pistol silencer', attachment: true, special: 'While in Inventory, it adds the Stealthy tag to any handguns.', description: 'A modification for a pistol which makes it practically silent.' }],
+      oswald: [{ name: 'Sniper rifle silencer', attachment: true, special: 'Adds the Silent tag to the sniper rifle.', description: 'The silencer makes the sniper silent and almost stealthy, and the shooter almost undetectable from sound.' }],
+      'spray-and-pray': [
+        { name: 'SMG', weapon: true, damageDice: '1d4-1 (minimum 1)', range: '3', description: 'A fast firing weapon which shoots three bullets per round.' },
+        { name: 'SMG ammunition (45 bullets)', ammunition: true, description: 'SMG ammunition.' }
+      ],
+      'higher-caliber': [
+        { name: 'Shotgun', weapon: true, damageDice: '2d4', range: '2', tags: 'Breach weapon', description: 'A powerful shotgun which does a lot of damage.' },
+        { name: 'Shotgun ammunition (15 shells)', ammunition: true, description: 'Shotgun Shells.' }
+      ],
+      'secondary-weapon-attachment': [{ name: 'Secondary weapon attachment', attachment: true, choicePrompt: 'Choose an attached secondary weapon', description: 'Choose one secondary weapon attachment.', weapon: true, choices: [
+        { name: 'Grenade launcher', damageDice: '1d10', range: '5', special: 'Takes one round to load, even with Quick Reload.', description: 'An underbarrel weapon which can launch grenades.' },
+        { name: 'Non-lethal secondary: Net gun', damageDice: 'No damage', range: '2 squares', special: 'On a successful hit, grapple the target with a net.', description: 'A net gun which allows you to tangle your enemies.' },
+        { name: 'Under-barrel Shotgun', damageDice: '2d4', range: '2', tags: 'Breach weapon', special: 'Must be reloaded every other turn and cannot be affected by Quick Reload.', description: 'A powerful shotgun which does a lot of damage.' },
+        ...meleeWeaponOptions.map((weapon) => ({ ...weapon, name: `Melee attachment: ${weapon.name}` }))
+      ] }],
+      archer: [
+        { name: 'Bow', weapon: true, damageDice: '1d4 + draw damage', range: 'Variable by draw', description: 'A regular bow which can be used in a variety of ways.' },
+        { name: 'Arrows (20)', ammunition: true, description: 'Arrows.' }
+      ],
+      craftsman: [{ name: 'Basic crafting tools', description: 'Tools which can be used to repair or create armor and places to carry things.' }],
+      swordsman: [{ name: 'Sword', weapon: true, damageDice: '1d6', range: 'Melee', tags: 'Bindable, Stealthy', description: 'A reliable sword.' }],
+      'offhand-knife': [{ name: 'Offhand knife', weapon: true, damageDice: '1d4', range: 'Melee', tags: 'Concealable, Bindable, Offhand, Stealthy', description: 'A reliable knife able to be used in the offhand with another weapon.' }],
+      'drivers-license': [{ name: 'Car', description: 'A regular reliable commuter car, might not be flashy but it will get you there.' }],
+      harley: [{ name: 'Motorcycle', description: 'A nice motorcycle which allows you more options than a car.' }]
+    };
     let customPerks = [];
     let selectedPerks = new Set();
+    let inventoryChoices = {};
     let prerequisiteHintTarget = null;
 
     function perkPointsSpent() {
@@ -1088,6 +1204,80 @@
 
     function perkNames(ids) {
       return ids.filter((perk) => selectedPerks.has(perk)).map((perk) => document.querySelector(`.perk-node[data-perk="${perk}"] .perk-name`)?.textContent).filter(Boolean);
+    }
+
+    function renderPerkInventory() {
+      const list = document.getElementById('perk-inventory-list');
+      list.replaceChildren();
+      const acquiredItems = [];
+      Object.entries(perkInventoryGrants).forEach(([perkId, items]) => {
+        if (!selectedPerks.has(perkId)) return;
+        const sourceName = document.querySelector(`.perk-node[data-perk="${perkId}"] .perk-name`)?.textContent.trim() || 'Perk';
+        items.forEach((item) => acquiredItems.push({ ...item, sourceName }));
+      });
+      if (!acquiredItems.length) {
+        const empty = document.createElement('p');
+        empty.className = 'inventory-empty';
+        empty.textContent = 'No inventory items have been granted by your selected perks yet.';
+        list.append(empty);
+        return;
+      }
+      acquiredItems.forEach((item) => {
+        const card = document.createElement('article');
+        card.className = 'inventory-card';
+        const name = document.createElement('h2');
+        name.textContent = item.name;
+        const source = document.createElement('p');
+        source.className = 'inventory-source';
+        source.textContent = `From ${item.sourceName}`;
+        const description = document.createElement('p');
+        description.className = 'inventory-description';
+        description.textContent = item.description;
+        card.append(name, source);
+        if (item.choices) {
+          const select = document.createElement('select');
+          select.className = 'inventory-select';
+          select.setAttribute('aria-label', `Choose ${item.name}`);
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = item.choicePrompt || `Choose ${item.name}`;
+          select.append(placeholder);
+          item.choices.forEach((choice) => {
+            const option = document.createElement('option');
+            option.value = choice.name;
+            option.textContent = choice.name;
+            select.append(option);
+          });
+          const stats = document.createElement('p');
+          stats.className = 'inventory-weapon-stats';
+          const tags = document.createElement('p');
+          tags.className = 'inventory-weapon-stats';
+          const updateWeaponChoice = () => {
+            inventoryChoices[item.name] = select.value;
+            const choice = item.choices.find((entry) => entry.name === select.value);
+            description.textContent = choice?.description || 'Choose one weapon from the Blunt Melee category.';
+            stats.textContent = choice ? `Damage: ${choice.damageDice} · Range: ${choice.range}${choice.tags ? ` · Tags: ${choice.tags}` : ''}` : '';
+            tags.textContent = [choice?.requirement, choice?.special].filter(Boolean).join(' ');
+          };
+          select.addEventListener('change', updateWeaponChoice);
+          card.append(select, stats, tags);
+          select.value = inventoryChoices[item.name] || '';
+          updateWeaponChoice();
+        } else if (item.weapon && (item.damageDice || item.range)) {
+          const stats = document.createElement('p');
+          stats.className = 'inventory-weapon-stats';
+          stats.textContent = `Damage: ${item.damageDice || '—'} · Range: ${item.range || '—'}${item.tags ? ` · Tags: ${item.tags}` : ''}`;
+          card.append(stats);
+        }
+        if (item.special) {
+          const special = document.createElement('p');
+          special.className = 'inventory-description';
+          special.textContent = item.special;
+          card.append(special);
+        }
+        card.append(description);
+        list.append(card);
+      });
     }
 
     function perkRequirementsMet(perk) {
@@ -1339,13 +1529,17 @@
     let perkTooltipButton = null;
     function positionPerkTooltip(button) {
       if (perkTooltip.hidden) return;
-      if (perkTooltip.parentElement !== button) button.append(perkTooltip);
-      const perkRect = button.getBoundingClientRect();
-      const availableAbove = Math.max(0, perkRect.top - 16);
+      if (perkTooltip.parentElement !== document.body) document.body.append(perkTooltip);
+      const selector = document.querySelector('.cryptex-picker');
+      if (!selector) return;
+      const selectorRect = selector.getBoundingClientRect();
+      const availableAbove = Math.max(0, selectorRect.top - 12);
       perkTooltip.style.maxHeight = Math.min(280, window.innerHeight * 0.45, availableAbove) + 'px';
       const rect = perkTooltip.getBoundingClientRect();
-      const viewportLeft = Math.max(8, Math.min(window.innerWidth - rect.width - 8, perkRect.left + (perkRect.width - rect.width) / 2));
-      perkTooltip.style.left = (viewportLeft - perkRect.left) + 'px';
+      const viewportLeft = Math.max(8, Math.min(window.innerWidth - rect.width - 8, selectorRect.left + (selectorRect.width - rect.width) / 2));
+      perkTooltip.style.left = viewportLeft + 'px';
+      perkTooltip.style.top = Math.max(8, selectorRect.top - rect.height - 10) + 'px';
+      perkTooltip.style.bottom = 'auto';
       perkTooltip.style.transform = 'none';
     }
     function showPerkTooltip(button) {
@@ -1390,6 +1584,51 @@
         updatePerkTree();
         if (!perkTooltip.hidden) showPerkTooltip(button);
       });
+      button.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        const perk = button.dataset.perk;
+        const definition = perkDefinitions[perk];
+        if (!definition || selectedPerks.has(perk) || perkRequirementsMet(perk)) return;
+        const pending = new Set(collectMissingPrerequisites(perk));
+        const planned = new Set(selectedPerks);
+        const ordered = [];
+        const requirementsMetForSet = (perkId, selection) => {
+          const perkDefinition = perkDefinitions[perkId];
+          if (!perkDefinition) return false;
+          const requiredMet = (perkDefinition.requires || []).every((requiredId) => selection.has(requiredId));
+          const alternativesMet = !perkDefinition.requiresAny || perkDefinition.requiresAny.some((group) => group.every((requiredId) => selection.has(requiredId)));
+          return requiredMet && alternativesMet;
+        };
+        while (pending.size) {
+          let madeProgress = false;
+          for (const prerequisite of [...pending]) {
+            if (!requirementsMetForSet(prerequisite, planned)) continue;
+            pending.delete(prerequisite);
+            planned.add(prerequisite);
+            ordered.push(prerequisite);
+            madeProgress = true;
+          }
+          if (!madeProgress) break;
+        }
+        if (pending.size || !requirementsMetForSet(perk, planned)) {
+          prerequisiteHintTarget = perk;
+          updatePerkTree();
+          return;
+        }
+        const pointsNeeded = definition.cost + ordered.reduce((total, prerequisite) => total + (perkDefinitions[prerequisite]?.cost || 0), 0);
+        const pointsRemaining = (Number(reserveInput.value) || 0) - perkPointsSpent();
+        if (pointsNeeded > pointsRemaining) {
+          prerequisiteHintTarget = perk;
+          updatePerkTree();
+          return;
+        }
+        ordered.forEach((prerequisite) => selectedPerks.add(prerequisite));
+        selectedPerks.add(perk);
+        prerequisiteHintTarget = null;
+        playPerkSound('snap');
+        updatePerkTree();
+        if (!perkTooltip.hidden) showPerkTooltip(button);
+      });
     }
     document.querySelectorAll('.perk-node[data-perk]').forEach(bindPerkNode);
     window.addEventListener('scroll', () => { if (perkTooltipButton && !perkTooltip.hidden) positionPerkTooltip(perkTooltipButton); }, true);
@@ -1421,9 +1660,10 @@
       const title = document.getElementById('custom-perk-title').value.trim();
       const description = document.getElementById('custom-perk-description').value.trim();
       const cost = Number(customPerkCost.value);
+      const category = document.getElementById('custom-perk-category').value;
       if (!title || !description || !Number.isFinite(cost)) return;
       const id = globalThis.crypto?.randomUUID?.() || `perk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      const perk = { id, title, description, cost };
+      const perk = { id, title, description, cost, category };
       customPerks.push(perk); registerCustomPerk(perk);
       event.currentTarget.reset(); customPerkCost.value = '5';
       updatePerkTree();
@@ -1773,48 +2013,6 @@
       head.append(identity);
       pageOne.append(head);
 
-      const derived = document.createElement('section');
-      const derivedTitle = document.createElement('h2');
-      derivedTitle.textContent = 'Derived values';
-      derived.append(derivedTitle);
-      const derivedGrid = document.createElement('div');
-      derivedGrid.className = 'print-derived-grid';
-      [['Reputation', 'final-reputation'], ['Base health', 'final-base-health'], ['Limb health', 'final-limb-health'], ['Stress die', 'final-stress-die'], ['Move die', 'final-move-die']].forEach(([label, id]) => {
-        const card = document.createElement('div');
-        card.className = 'print-derived-card';
-        const name = document.createElement('strong');
-        name.className = 'print-derived-name';
-        name.textContent = label;
-        const maximum = document.createElement('span');
-        maximum.className = 'print-derived-max';
-        maximum.textContent = `Max: ${document.getElementById(id).textContent}`;
-        const writeBox = document.createElement('div');
-        writeBox.className = 'print-write-box';
-        card.append(name, maximum, writeBox);
-        derivedGrid.append(card);
-      });
-      derived.append(derivedGrid);
-      pageOne.append(derived);
-
-      const majorStats = document.createElement('section');
-      const majorTitle = document.createElement('h2');
-      majorTitle.textContent = 'Major stats';
-      majorStats.append(majorTitle);
-      const statsRow = document.createElement('div');
-      statsRow.className = 'print-stats-row';
-      finalStatSelects.forEach((select) => {
-        const card = document.createElement('div');
-        card.className = 'print-stat-card';
-        const label = document.createElement('strong');
-        label.textContent = categories[select.name].label;
-        const value = document.createElement('span');
-        value.textContent = select.value;
-        card.append(label, value);
-        statsRow.append(card);
-      });
-      majorStats.append(statsRow);
-      pageOne.append(majorStats);
-
       const appendSkillRow = (parent, input) => {
         const row = document.createElement('div');
         row.className = 'print-skill-row';
@@ -1849,17 +2047,69 @@
 
       const pageTwo = document.createElement('section');
       pageTwo.className = 'print-page-two';
-      const pageTwoTitle = document.createElement('h2');
-      pageTwoTitle.textContent = 'Weapons & Perks';
-      pageTwo.append(pageTwoTitle);
 
       const weapons = document.createElement('section');
       weapons.className = 'print-weapons-box';
       const weaponsTitle = document.createElement('h2');
       weaponsTitle.textContent = 'Weapons';
       weapons.append(weaponsTitle);
-      pageTwo.append(weapons);
+      const weaponList = document.createElement('ul');
+      weaponList.className = 'print-weapons-list';
+      const attachmentGroups = new Map();
+      let weaponEntries = 0;
+      const makeWeaponLine = (item, choice, sourceName) => {
+        const details = choice || item;
+        const parts = [`${details.name || item.name} (${sourceName})`];
+        if (details.damageDice || details.range) {
+          parts.push(`Damage: ${details.damageDice || '—'}; range: ${details.range || '—'}`);
+        }
+        if (details.tags) parts.push(`Tags: ${details.tags}`);
+        if (details.description) parts.push(details.description);
+        if (details.special) parts.push(details.special);
+        if (details.requirement) parts.push(details.requirement);
+        return parts.join(' — ');
+      };
+      Object.entries(perkInventoryGrants).forEach(([perkId, items]) => {
+        if (!selectedPerks.has(perkId)) return;
+        const sourceName = document.querySelector(`.perk-node[data-perk="${perkId}"] .perk-name`)?.textContent.trim() || 'Perk';
+        items.forEach((item) => {
+          if (!(item.weapon || item.attachment || item.ammunition)) return;
+          const choice = item.choices?.find((entry) => entry.name === inventoryChoices[item.name]);
+          const line = makeWeaponLine(item, choice, sourceName);
+          const li = document.createElement('li');
+          li.textContent = item.choices && !choice
+            ? `${item.name} (${sourceName}): no option selected`
+            : line;
+          if (item.attachment) {
+            if (!attachmentGroups.has(sourceName)) attachmentGroups.set(sourceName, []);
+            attachmentGroups.get(sourceName).push(li);
+          } else {
+            weaponList.append(li);
+          }
+          weaponEntries += 1;
+        });
+      });
+      if (weaponEntries === 0) {
+        const empty = document.createElement('li');
+        empty.textContent = 'No weapons or weapon attachments granted by selected perks.';
+        weaponList.append(empty);
+      }
+      weapons.append(weaponList);
+      attachmentGroups.forEach((entries, sourceName) => {
+        const group = document.createElement('section');
+        group.className = 'print-weapon-attachment-group';
+        const heading = document.createElement('h3');
+        heading.textContent = sourceName;
+        const list = document.createElement('ul');
+        list.className = 'print-weapons-list';
+        entries.forEach((entry) => list.append(entry));
+        group.append(heading, list);
+        weapons.append(group);
+      });
+      pageOne.append(weapons);
 
+      const trackerGroup = document.createElement('section');
+      trackerGroup.className = 'print-tracker-group';
       const stress = document.createElement('section');
       stress.className = 'print-stress-tracker';
       const stressTitle = document.createElement('h2');
@@ -1867,13 +2117,137 @@
       const eyes = document.createElement('div');
       eyes.className = 'print-stress-eyes';
       for (let index = 0; index < 6; index += 1) {
-        const eye = document.createElement('img');
-        eye.src = './assets/stress-eye.svg';
-        eye.alt = `Stress marker ${index + 1}`;
+        const eye = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        eye.setAttribute('viewBox', '0 0 100 50');
+        eye.setAttribute('role', 'img');
+        eye.setAttribute('aria-label', `Stress marker ${index + 1}`);
+        const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        outline.setAttribute('d', 'M5 25C18 7 34 2 50 2s32 5 45 23C82 43 66 48 50 48S18 43 5 25Z');
+        outline.setAttribute('fill', 'none');
+        outline.setAttribute('stroke', '#000');
+        outline.setAttribute('stroke-width', '3.2');
+        outline.setAttribute('stroke-linecap', 'round');
+        outline.setAttribute('stroke-linejoin', 'round');
+        const iris = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        iris.setAttribute('cx', '50'); iris.setAttribute('cy', '25'); iris.setAttribute('r', '16.8');
+        iris.setAttribute('fill', 'none'); iris.setAttribute('stroke', '#000'); iris.setAttribute('stroke-width', '2.8');
+        const pupil = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pupil.setAttribute('cx', '50'); pupil.setAttribute('cy', '25'); pupil.setAttribute('r', '5');
+        pupil.setAttribute('fill', 'none'); pupil.setAttribute('stroke', '#000'); pupil.setAttribute('stroke-width', '2.5');
+        eye.append(outline, iris, pupil);
         eyes.append(eye);
       }
       stress.append(stressTitle, eyes);
-      pageTwo.append(stress);
+      trackerGroup.append(stress);
+      const baseHealthTracker = document.createElement('section');
+      baseHealthTracker.className = 'print-base-health-tracker';
+      const baseHealthLabel = document.createElement('strong');
+      baseHealthLabel.textContent = 'Base health';
+      const baseHealthDetail = document.createElement('div');
+      baseHealthDetail.className = 'print-tracker-value-detail';
+      const baseHealthMaximum = document.createElement('span');
+      baseHealthMaximum.textContent = `Max: ${document.getElementById('final-base-health').textContent}`;
+      const baseHealthBox = document.createElement('div');
+      baseHealthBox.className = 'print-tracker-value-box';
+      baseHealthBox.setAttribute('aria-label', 'Current base health');
+      baseHealthDetail.append(baseHealthMaximum, baseHealthBox);
+      baseHealthTracker.append(baseHealthLabel, baseHealthDetail);
+      trackerGroup.append(baseHealthTracker);
+
+      const health = document.createElement('section');
+      health.className = 'print-health-tracker';
+      const healthTitle = document.createElement('h2');
+      healthTitle.textContent = 'Health tracker';
+      const healthLayout = document.createElement('div');
+      healthLayout.className = 'print-health-layout';
+      const figure = document.createElement('img');
+      figure.className = 'print-health-figure';
+      figure.src = './assets/health-tracker-man.png';
+      figure.alt = 'Front-facing body outline for marking injuries';
+      const injuryWrap = document.createElement('section');
+      injuryWrap.className = 'print-injury-table-wrap';
+      const injuryTitle = document.createElement('h3');
+      injuryTitle.textContent = 'Injury table';
+      const injuryTable = document.createElement('table');
+      injuryTable.className = 'print-injury-table';
+      const tableHead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      ['Location', 'To hit', 'Effect'].forEach((label) => {
+        const cell = document.createElement('th'); cell.scope = 'col'; cell.textContent = label; headerRow.append(cell);
+      });
+      tableHead.append(headerRow);
+      const tableBody = document.createElement('tbody');
+      [
+        ['Feet', '+30', '+10 to move checks'],
+        ['Legs', '+20', '+10 to move checks. If hit 3 times, you are knocked prone on every attack.'],
+        ['Arms', '+20', '+10 to Throw or Brawl, chosen by the person who hits. Effect stacks.'],
+        ['Hands', '+40', '+30 to Firearm'],
+        ['Head', '+30', 'The target is stunned.'],
+        ['Ears', '+40', 'You are deafened. You have +10 to Dodge and +20 to Notice.'],
+        ['Eyes', '+50', 'You are blinded. You have +50 to Notice and +20 to Dodge.']
+      ].forEach(([location, modifier, effect]) => {
+        const row = document.createElement('tr');
+        [location, modifier, effect].forEach((value) => { const cell = document.createElement('td'); cell.textContent = value; row.append(cell); });
+        tableBody.append(row);
+      });
+      injuryTable.append(tableHead, tableBody);
+      injuryWrap.append(injuryTitle, injuryTable);
+      const healthParts = document.createElement('div');
+      healthParts.className = 'print-health-parts';
+      const limbMaximum = document.getElementById('final-limb-health').textContent;
+      ['Feet', 'Legs', 'Arms', 'Hands', 'Head', 'Ears', 'Eyes'].forEach((part) => {
+        const card = document.createElement('div');
+        card.className = 'print-health-part-card';
+        const name = document.createElement('strong');
+        name.className = 'print-health-part-name';
+        name.textContent = part;
+        const maximum = document.createElement('span');
+        maximum.className = 'print-health-part-max';
+        maximum.textContent = `Max: ${limbMaximum}`;
+        const currentLabel = document.createElement('span');
+        currentLabel.className = 'print-health-current-label';
+        currentLabel.textContent = 'Current';
+        const currentBox = document.createElement('div');
+        currentBox.className = 'print-health-current-box';
+        currentBox.setAttribute('aria-label', `Current ${part} health`);
+        card.append(name, maximum, currentLabel, currentBox);
+        healthParts.append(card);
+      });
+      const healthDetails = document.createElement('div');
+      healthDetails.className = 'print-health-details';
+      healthDetails.append(injuryWrap, healthParts);
+      healthLayout.append(figure, healthDetails);
+      const armorPoints = document.createElement('div');
+      armorPoints.className = 'print-armor-points';
+      const armorPointsLabel = document.createElement('strong');
+      armorPointsLabel.textContent = 'Armor points';
+      const armorPointsBox = document.createElement('div');
+      armorPointsBox.className = 'print-armor-points-box';
+      armorPointsBox.setAttribute('aria-label', 'Current armor points');
+      armorPoints.append(armorPointsLabel, armorPointsBox);
+      const trackerValuesRow = document.createElement('div');
+      trackerValuesRow.className = 'print-tracker-values-row';
+      [['Reputation', 'final-reputation'], ['Move die', 'final-move-die']].forEach(([labelText, id]) => {
+        const tracker = document.createElement('div');
+        tracker.className = 'print-tracker-value';
+        const label = document.createElement('strong');
+        label.className = 'print-tracker-value-label';
+        label.textContent = labelText;
+        const detail = document.createElement('div');
+        detail.className = 'print-tracker-value-detail';
+        const maximum = document.createElement('span');
+        maximum.textContent = `Value: ${document.getElementById(id).textContent}`;
+        const box = document.createElement('div');
+        box.className = 'print-tracker-value-box';
+        box.setAttribute('aria-label', `${labelText} tracker`);
+        detail.append(maximum, box);
+        tracker.append(label, detail);
+        trackerValuesRow.append(tracker);
+      });
+      trackerValuesRow.append(armorPoints);
+      health.append(healthTitle, trackerValuesRow, healthLayout);
+      trackerGroup.append(health);
+      pageTwo.append(trackerGroup);
 
       const perksGrid = document.createElement('div');
       perksGrid.className = 'print-perks';
@@ -1889,30 +2263,87 @@
         ["Vehicle", vehiclePerkIds, document.getElementById('vehicle-perk-tree')],
         ["Custom", customPerks.map((perk) => `custom-${perk.id}`), document.getElementById('custom-perk-list')]
       ];
+      const equipmentOnlyPerkIds = new Set([
+        'bludgeon-up-close', 'thrower', 'second-amendment', 'highest-caliber',
+        'forty-seven', 'spray-and-pray', 'higher-caliber', 'archer', 'swordsman', 'harley'
+      ]);
       printTreeSources.forEach(([titleText, perkIds, sourceTree]) => {
-        const chosen = perkIds.filter((perk) => selectedPerks.has(perk));
+        const chosen = perkIds.filter((perk) => selectedPerks.has(perk) && !equipmentOnlyPerkIds.has(perk));
         if (!chosen.length) return;
         const perks = document.createElement('section');
         perks.className = 'print-perk-section';
+        const headingRow = document.createElement('div');
+        headingRow.className = 'print-perk-heading-row';
         const perksTitle = document.createElement('h2');
         perksTitle.textContent = titleText;
-        perks.append(perksTitle);
-        const list = document.createElement('ul');
-        list.className = 'print-perk-list';
+        headingRow.append(perksTitle);
+        const passiveSummary = document.createElement('p');
+        passiveSummary.className = 'print-perk-passive-summary';
+        headingRow.append(passiveSummary);
+        perks.append(headingRow);
+        const columns = document.createElement('div');
+        columns.className = 'print-perk-columns';
+        const perkBuckets = [
+          { key: 'stress', title: 'Stress dice', test: (text) => /\bstress\b|\bSD\b/i.test(text), entries: [] },
+          { key: 'reaction', title: 'Reactions', test: (text) => /\breaction\b|counter.attack|counter attack|opportunity attack/i.test(text), entries: [] },
+          { key: 'action', title: 'Actions', test: (text) => /\b(?:you can|you may|roll|make an attack|attack with|strike|throw|shoot|fire|block)\b/i.test(text), entries: [] },
+          { key: 'move', title: 'Move perks', test: (text) => /\b(?:move|movement|squares?|dodge|prone|fall|tumbling|getaway|footwork)\b/i.test(text), entries: [] }
+        ];
+        const passiveBenefits = [];
         const sourceNodes = new Map([...sourceTree.querySelectorAll('.perk-node[data-perk]')].map((node) => [node.dataset.perk, node]));
         chosen.forEach((perkId) => {
           const sourceNode = sourceNodes.get(perkId);
           if (!sourceNode) return;
-          const item = document.createElement('li');
-          const name = document.createElement('strong');
-          name.textContent = sourceNode.querySelector('.perk-name')?.textContent.trim() || perkId;
-          const description = document.createElement('span');
-          description.className = 'print-perk-description';
-          description.textContent = sourceNode.querySelector('.perk-description')?.textContent.trim() || '';
-          item.append(name, document.createTextNode(' — '), description);
-          list.append(item);
+          const perkName = sourceNode.querySelector('.perk-name')?.textContent.trim() || perkId;
+          const descriptionText = sourceNode.querySelector('.perk-description')?.textContent.trim() || '';
+          const equipmentGrants = perkInventoryGrants[perkId];
+          let benefitText = descriptionText;
+          if (equipmentGrants?.length) {
+            const grantedItems = equipmentGrants.map((grant) => {
+              if (!grant.choices) return grant.name;
+              const selectedChoice = grant.choices.find((choice) => choice.name === inventoryChoices[grant.name]);
+              return selectedChoice?.name || `${grant.name} (choice pending)`;
+            });
+            benefitText = `Granted: ${grantedItems.join('; ')}`;
+          }
+          const customPerk = titleText === 'Custom' ? customPerks.find((perk) => `custom-${perk.id}` === perkId) : null;
+          const matchingBucket = customPerk
+            ? perkBuckets.find((bucket) => bucket.key === customPerk.category)
+            : perkBuckets.find((bucket) => bucket.test(descriptionText));
+          if (!matchingBucket) {
+            passiveBenefits.push(`${perkName}: ${benefitText}`);
+            return;
+          }
+          matchingBucket.entries.push({ perkName, benefitText });
         });
-        perks.append(list);
+        if (passiveBenefits.length) {
+          const passiveLabel = document.createElement('strong');
+          passiveLabel.textContent = 'Passive benefits: ';
+          passiveSummary.append(passiveLabel, document.createTextNode(passiveBenefits.join('; ')));
+        }
+        perkBuckets.forEach((bucket) => {
+          if (!bucket.entries.length) return;
+          const column = document.createElement('section');
+          column.className = 'print-perk-column';
+          const heading = document.createElement('h3');
+          heading.textContent = bucket.title;
+          const list = document.createElement('ul');
+          list.className = 'print-perk-list';
+          bucket.entries.forEach(({ perkName, benefitText }) => {
+            const item = document.createElement('li');
+            const name = document.createElement('strong');
+            name.textContent = perkName;
+            const description = document.createElement('span');
+            description.className = 'print-perk-description';
+            description.textContent = benefitText;
+            item.append(name, document.createTextNode(' — '), description);
+            list.append(item);
+          });
+          column.append(heading, list);
+          columns.append(column);
+        });
+        if (!passiveBenefits.length && !columns.children.length) return;
+        perks.append(columns);
         perksGrid.append(perks);
       });
       pageTwo.append(perksGrid);
@@ -1977,6 +2408,7 @@
         skills: Object.fromEntries(finalSkillInputs.map((input) => [input.name, Number(input.value)])),
         reserve: Number(finalReserve.value) || 0,
         perks: [...selectedPerks],
+        inventoryChoices: { ...inventoryChoices },
         customPerks: customPerks.map((perk) => ({ ...perk })),
         savedAt: new Date().toISOString()
       };
@@ -2013,6 +2445,7 @@
       customPerks = (character.customPerks || []).map((perk) => ({ ...perk }));
       customPerks.forEach(registerCustomPerk);
       selectedPerks = new Set((character.perks || []).filter((perk) => perkDefinitions[perk]));
+      inventoryChoices = { ...(character.inventoryChoices || {}) };
       const savedPerkCost = perkPointsSpent();
       initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
       updateUniqueOptions(statsFields);
@@ -2047,11 +2480,19 @@
       const target = document.getElementById(button.dataset.back);
       target.hidden = false;
       if (target.id === 'perks-screen') updatePerkTree();
+      if (target.id === 'inventory-screen') renderPerkInventory();
       target.scrollIntoView({ block: 'start' });
     }));
 
-    document.getElementById('to-final-button').addEventListener('click', () => {
+    document.getElementById('to-inventory-button').addEventListener('click', () => {
       document.getElementById('perks-screen').hidden = true;
+      document.getElementById('inventory-screen').hidden = false;
+      renderPerkInventory();
+      document.getElementById('inventory-screen').scrollIntoView({ block: 'start' });
+    });
+
+    document.getElementById('inventory-continue-button').addEventListener('click', () => {
+      document.getElementById('inventory-screen').hidden = true;
       document.getElementById('final-screen').hidden = false;
       buildFinalPage();
       document.getElementById('final-screen').scrollIntoView({ block: 'start' });
