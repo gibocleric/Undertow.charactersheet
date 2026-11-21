@@ -56,6 +56,8 @@
     .saved-card p { margin: 0; }
     .saved-actions { display: flex; gap: 8px; }
     .saved-actions button { padding: 8px 10px; }
+    #account-panel { margin: 18px 0; padding: 16px; border: 1px solid #ddd2bf; border-radius: 12px; background: #faf7f0; }
+    #account-panel h2 { margin-top: 0; }
     .inventory-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
     .inventory-card { min-width: 0; padding: 12px; border: 1px solid #c9c5ba; border-radius: 10px; background: #fffdf8; }
     .inventory-card h2 { margin: 0 0 4px; font-size: 1rem; }
@@ -118,10 +120,12 @@
       .inventory-list { grid-template-columns: 1fr; }
     }
     @media print {
-      @page { margin: 0.5in; }
+      @page { margin: 0; }
       body { display: block; padding: 0; background: white; }
       main { display: none; }
-      #print-sheet { display: block !important; font: 9pt/1.35 "Libre Baskerville", "Times New Roman", serif; color: #111; }
+      #print-sheet { display: block !important; position: relative; font: 9pt/1.35 "Libre Baskerville", "Times New Roman", serif; color: #111; }
+      .print-page-frame { display: block !important; position: fixed; z-index: 0; top: .25in; left: .25in; width: calc(100% - .5in); height: calc(100% - .5in); object-fit: fill; pointer-events: none; }
+      #print-sheet > section:not(.print-page-frame) { position: relative; z-index: 1; min-width: 0; overflow: visible; margin: 0; padding: .75in; background: #fff; background-clip: content-box; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
       .print-page-one { break-after: page; page-break-after: always; }
       .print-head { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 12px; text-align: right; }
       .print-head h1 { margin: 2px 0 4px; font: 700 18pt "Libre Baskerville", "Times New Roman", serif; }
@@ -151,7 +155,7 @@
       .print-weapon-attachment-group { break-inside: auto !important; page-break-inside: auto !important; }
       .print-weapons-list li { margin: 2px 0; break-inside: avoid; }
       .print-stress-tracker { display: block; visibility: visible; width: max-content; max-width: 100%; margin: 0; padding: 4px 6px; border: 1px solid #555; break-inside: avoid; page-break-inside: avoid; }
-      .print-tracker-group { display: grid; grid-template-columns: minmax(0, 4.1in) minmax(1.45in, 1fr); align-items: start; gap: 8px; break-inside: avoid; page-break-inside: avoid; }
+      .print-tracker-group { display: grid; grid-template-columns: minmax(0, 4.05in) minmax(1.35in, 1fr); align-items: start; gap: 5px; break-inside: avoid; page-break-inside: avoid; }
       .print-stress-tracker h2 { display: block; visibility: visible; margin: 0 0 3px; border: 0 !important; }
       .print-stress-eyes { display: grid; grid-template-columns: repeat(6, .55in); gap: 10px; align-items: center; }
       .print-stress-eyes svg { display: block; visibility: visible; width: .55in; height: .28in; justify-self: center; }
@@ -194,7 +198,7 @@
       .print-perk-heading-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; break-after: avoid; }
       .print-perk-heading-row h2 { flex: 0 0 auto; margin: 7px 0 3px; }
       .print-perk-passive-summary { min-width: 0; margin: 5px 0 3px; font-size: 6.5pt; line-height: 1.2; text-align: right; }
-      .print-perk-columns { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; align-items: start; }
+      .print-perk-columns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: start; }
       .print-perk-column { min-width: 0; }
       .print-perk-column h3 { margin: 4px 0 2px; font: 700 8pt "Libre Baskerville", "Times New Roman", serif; break-after: avoid; }
       .print-perk-list { margin: 0; padding-left: 18px; }
@@ -547,6 +551,21 @@
     #custom-perk-editor textarea { min-height: 78px; resize: vertical; }
     #custom-perk-list { display: grid; gap: 10px; }
     #custom-perk-list:empty { display: none; }
+    #community-admin { margin: 18px 0; padding: 16px; border: 1px solid #b9a07d; border-radius: 12px; background: #f7f1e6; color: #332b22; }
+    #community-admin h2, #community-admin h3 { margin: 8px 0; }
+    .community-admin-form, .community-admin-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0; }
+    #community-admin label { display: grid; gap: 5px; margin: 8px 0; font-weight: 700; }
+    #community-admin input, #community-admin textarea, #community-admin select { box-sizing: border-box; width: 100%; padding: 9px; border: 1px solid #b9a07d; border-radius: 7px; background: #fffdf8; color: #332b22; font: inherit; }
+    #community-admin fieldset { border: 1px solid #cdbb9e; border-radius: 8px; }
+    #community-periods { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+    #community-periods label { display: flex; align-items: center; gap: 6px; margin: 2px; font-weight: 400; }
+    #community-periods input { width: auto; }
+    .community-admin-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .community-perk-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid #d9cbb6; }
+    .community-perk-row span { overflow-wrap: anywhere; }
+    #community-admin-status { min-height: 1.4em; }
+    #community-admin .danger { color: #8d261e; }
+    @media (max-width: 560px) { .community-admin-form, .community-admin-fields { grid-template-columns: 1fr; } }
     #archer-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
     #archer-perk-tree .perk-fork > .perk-lane:last-child { order: 1; }
     #firearm-perk-tree .perk-subfork > .perk-level { grid-column: 1 / -1; }
@@ -572,9 +591,16 @@
         </div></fieldset>
         <button type="submit">Continue</button>
       </form>
+      <section id="account-panel" aria-labelledby="account-heading">
+        <h2 id="account-heading">Character files</h2>
+        <p class="intro">Characters are saved in this browser. Export a character file to back it up or share it, then import that file on another device.</p>
+        <button id="import-character-button" type="button">Import character file</button>
+        <input id="character-import-file" type="file" accept=".json,application/json" hidden>
+        <p id="file-transfer-status" class="intro" role="status" aria-live="polite"></p>
+      </section>
       <section class="category saved-library" aria-labelledby="saved-heading">
         <h2 id="saved-heading">Saved Characters</h2>
-        <p class="intro">Saved on this browser and device.</p>
+        <p class="intro" id="saved-library-note">Saved on this browser and device.</p>
         <div id="saved-character-list" class="saved-list"></div>
       </section>
     </section>
@@ -634,7 +660,8 @@
         <button class="tree-choice-button" type="button" data-tree-index="6" aria-pressed="false">Sword</button>
         <button class="tree-choice-button" type="button" data-tree-index="7" aria-pressed="false">Cook</button>
         <button class="tree-choice-button" type="button" data-tree-index="8" aria-label="Vehicle skill tree. Available only in the modern period." aria-pressed="false">Vehicle</button>
-        <button class="tree-choice-button" type="button" data-tree-index="9" aria-pressed="false">Custom</button>
+        <button class="tree-choice-button" type="button" data-tree-index="9" aria-pressed="false">Doctor</button>
+        <button class="tree-choice-button" type="button" data-tree-index="10" aria-pressed="false">Custom</button>
       </div>
       <div id="custom-perk-panel" hidden>
         <form id="custom-perk-editor">
@@ -656,6 +683,44 @@
         </form>
         <div id="custom-perk-list" class="perk-tree" aria-label="Custom perks"></div>
         <p class="intro">Custom perks are available in every time period. Click a perk below to select it and spend its point cost.</p>
+        <section id="community-admin" hidden aria-label="Shared skill tree publisher">
+          <h2>Shared skill trees</h2>
+          <p class="intro">Sign in with your local admin account to add, edit, or remove trees for everyone using this app.</p>
+          <form id="community-login" class="community-admin-form">
+            <label>Admin account<input id="community-account" autocomplete="username" required></label>
+            <label>Password<input id="community-password" type="password" autocomplete="current-password" required></label>
+            <button type="submit">Sign in</button>
+          </form>
+          <div id="community-editor" hidden>
+            <label>Choose a shared tree<select id="community-tree-select"><option value="">Create a new tree</option></select></label>
+            <div class="community-admin-fields">
+              <label>Tree title<input id="community-title" maxlength="80"></label>
+              <fieldset><legend>Available time periods</legend><div id="community-periods"></div></fieldset>
+            </div>
+            <div class="community-admin-actions">
+              <button id="community-new-tree" type="button">New tree</button>
+              <button id="community-save-tree" type="button">Save tree details</button>
+              <button id="community-delete-tree" type="button" class="danger">Delete tree</button>
+            </div>
+            <hr>
+            <h3 id="community-perk-form-title">Add a perk</h3>
+            <div class="community-admin-fields">
+              <label>Perk name<input id="community-perk-name" maxlength="80"></label>
+              <label>Point cost<input id="community-perk-cost" type="number" min="0" max="500" step="5" value="5"></label>
+              <label>Category<select id="community-perk-category"><option value="passive">Passive benefit</option><option value="stress">Uses Stress dice</option><option value="reaction">Used on a reaction</option><option value="action">Used on an action</option><option value="move">Move perk</option><option value="other">Other</option></select></label>
+            </div>
+            <label>Perk description<textarea id="community-perk-description" maxlength="1200" rows="3"></textarea></label>
+            <label>Prerequisites<select id="community-perk-requires" multiple size="4" aria-label="Perk prerequisites"></select></label>
+            <button id="community-save-perk" type="button">Add perk</button>
+            <button id="community-cancel-perk-edit" type="button" hidden>Cancel perk edit</button>
+            <div id="community-perk-list"></div>
+            <div class="community-admin-actions">
+              <button id="community-undo" type="button" disabled>↶ Undo last change</button>
+              <button id="community-publish" type="button" class="primary">Publish changes for everyone</button>
+            </div>
+            <p id="community-admin-status" aria-live="polite"></p>
+          </div>
+        </section>
       </div>
       <span id="perk-hover-tooltip" role="tooltip" hidden><strong></strong><span class="tooltip-description"></span><span class="tooltip-cost"></span></span>
       <div id="bludgeon-perk-tree" class="perk-tree" aria-label="Bludgeon perk tree">
@@ -995,6 +1060,44 @@
           </div>
         </div>
       </div>
+      <div id="doctor-perk-tree" class="perk-tree" aria-label="Doctor perk tree">
+        <div class="perk-level">
+          <button class="perk-node" type="button" data-perk="first-aid" aria-pressed="false">
+            <span class="perk-name">First Aid</span><span class="perk-description">You have a medical kit can be used to heal people 10 times with half an hour to do so 1d6</span><span class="perk-cost">Cost: 5 points</span>
+          </button>
+        </div>
+        <div class="perk-fork">
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="combat-medic" aria-pressed="false">
+              <span class="perk-name">Combat Medic</span><span class="perk-description">Using your action dice you can roll anatomy to heal someone 1d6 health back using a charge of your medical kit.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <div class="perk-fork">
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="injury-medic" aria-pressed="false">
+                  <span class="perk-name">Injury medic</span><span class="perk-description">You can heal limb health for 1d8 using a charge of your medical kit.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+              </div>
+              <div class="perk-lane">
+                <button class="perk-node" type="button" data-perk="life-saver" aria-pressed="false">
+                  <span class="perk-name">Life saver</span><span class="perk-description">When an ally is reduced to 0 hp within three squares of you, you can roll stress to expend a charge of your healers kit, run over and stabilize them.</span><span class="perk-cost">Cost: 5 points</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="perk-lane">
+            <button class="perk-node" type="button" data-perk="hippocratic-oath" aria-pressed="false">
+              <span class="perk-name">Hippocritic Oath</span><span class="perk-description">You have a few poisons.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="added-potency" aria-pressed="false">
+              <span class="perk-name">Added potency</span><span class="perk-description">When using these poisons, deal an extra 1d4 on the first round, not every remaining round.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+            <button class="perk-node" type="button" data-perk="dose-makes-poison" aria-pressed="false">
+              <span class="perk-name">The dose makes the poison</span><span class="perk-description">You can expend a use from your medical kit to deal 1d6 poison damage.</span><span class="perk-cost">Cost: 5 points</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <p class="intro">Any unused points will be used to purchase equipment.</p>
       <button id="to-inventory-button" type="button">Continue to Inventory</button>
       </div>
     </section>
@@ -1040,6 +1143,25 @@
     const reserveInput = document.getElementById('reserve-points');
     const savedCharactersKey = 'undertow-saved-characters-v1';
     let activeSaveId = null;
+
+    // Keep locally cached character files from the earlier account-based draft available offline.
+    try {
+      const localCharacters = JSON.parse(localStorage.getItem(savedCharactersKey) || '[]');
+      const migrated = Array.isArray(localCharacters) ? localCharacters : [];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (!key || !key.startsWith(`${savedCharactersKey}-`)) continue;
+        try {
+          const accountCharacters = JSON.parse(localStorage.getItem(key) || '[]');
+          if (Array.isArray(accountCharacters)) {
+            accountCharacters.forEach((character) => {
+              if (character && !migrated.some((entry) => entry.id === character.id)) migrated.push(character);
+            });
+          }
+        } catch { /* Skip an unreadable old local character list. */ }
+      }
+      localStorage.setItem(savedCharactersKey, JSON.stringify(migrated));
+    } catch { /* Continue if browser storage is unavailable. */ }
 
     // Recover details if an earlier script error let the browser submit the form as a GET.
     const recoveredDetails = new URLSearchParams(window.location.search);
@@ -1133,7 +1255,14 @@
       'hit-and-run': { cost: 5, requires: ['harley'] },
       'gun-it': { cost: 5, requires: ['hit-and-run'] },
       'defensive-driving': { cost: 5, requires: ['drivers-license'] },
-      'offensive-driving': { cost: 5, requires: ['defensive-driving'] }
+      'offensive-driving': { cost: 5, requires: ['defensive-driving'] },
+      'first-aid': { cost: 5, requires: [] },
+      'combat-medic': { cost: 5, requires: ['first-aid'] },
+      'injury-medic': { cost: 5, requires: ['combat-medic'] },
+      'life-saver': { cost: 5, requires: ['combat-medic'] },
+      'hippocratic-oath': { cost: 5, requires: ['first-aid'] },
+      'added-potency': { cost: 5, requires: ['hippocratic-oath'] },
+      'dose-makes-poison': { cost: 5, requires: ['added-potency'] }
     };
     const bludgeonPerkIds = ['bludgeon-up-close', 'spin-strike', 'bludgeon-knockback', 'crushing-strike', 'improvise', 'yes-and', 'damage-increase', 'no-but', 'concuss', 'sweep-the-leg', 'weaken'];
     const throwPerkIds = ['thrower', 'not-sharpest-tool', 'reflexive-throw', 'knockback', 'sharpest-tool', 'precise-throw', 'perseus'];
@@ -1144,6 +1273,7 @@
     const swordPerkIds = ['swordsman', 'stopping-strike', 'double-strike', 'distancing-strike', 'defensive-stance', 'parry', 'riposte', 'dirt-in-the-eyes', 'offhand-knife', 'sword-grapple', 'reactive-grapple'];
     const cookPerkIds = ['chef', 'spicy-dish', 'energising-dish', 'soothing-tea', 'hearty-dish', 'potluck', 'skillful-dish'];
     const vehiclePerkIds = ['drivers-license', 'harley', 'hit-and-run', 'gun-it', 'defensive-driving', 'offensive-driving'];
+    const doctorPerkIds = ['first-aid', 'combat-medic', 'injury-medic', 'life-saver', 'hippocratic-oath', 'added-potency', 'dose-makes-poison'];
     const meleeWeaponOptions = [
       { name: 'Club', damageDice: '2d4', range: 'Melee', tags: 'Blunt, Stealthy', description: 'A basic blunt melee weapon.' },
       { name: 'Baton', damageDice: '1d4+1', range: 'Melee', tags: 'Stealthy, Concealable, Bindable', description: 'A smaller melee weapon which can be concealed.' },
@@ -1151,6 +1281,15 @@
       { name: 'Offhand knife', damageDice: '1d4', range: 'Melee', tags: 'Concealable, Bindable, Offhand, Stealthy', description: 'A reliable knife able to be used in the offhand with another weapon.' }
     ];
     const perkInventoryGrants = {
+      'first-aid': [{ name: 'Medical kit', tags: 'Utility', description: 'A medical kit with 10 uses. Spend half an hour to heal someone for 1d6 health.' }],
+      'hippocratic-oath': [{ name: "Poisoner's kit", choicePrompt: 'Choose a poison', description: 'Choose one poison granted by Hippocratic oath.', special: 'When using poisons, the target rolls Endurance to resist the effects of the poison that round.', choices: [
+        { name: 'Arsenic', doses: 3, description: 'This one can deal 1d6 per round in combat and can be snuck into a drink or food to assassinate someone.' },
+        { name: 'Hemlock', doses: 2, description: 'Deals 1d4 per round and paralyzes the enemy for one round.' },
+        { name: 'Belladonna', doses: 3, description: 'When used, if no other damage is apparent, it appears to be an accident. Deals 1d6 per round.' },
+        { name: 'Ergot', doses: 2, description: 'Deals 1d4 and the enemy hallucinates for one round.' },
+        { name: 'Chloroform', doses: 5, description: 'If you stay grappled to someone for 3 rounds, you can put them to sleep with this poison.' },
+        { name: 'Cyanide', doses: 1, description: 'Deals 1d12 damage.' }
+      ] }],
       'bludgeon-up-close': [{ name: 'Blunt Melee weapon', choicePrompt: 'Choose a Blunt Melee weapon', description: 'Choose one weapon from the Blunt Melee category.', weapon: true, choices: [
         ...meleeWeaponOptions.slice(0, 2)
       ] }],
@@ -1256,18 +1395,27 @@
             inventoryChoices[item.name] = select.value;
             const choice = item.choices.find((entry) => entry.name === select.value);
             description.textContent = choice?.description || 'Choose one weapon from the Blunt Melee category.';
-            stats.textContent = choice ? `Damage: ${choice.damageDice} · Range: ${choice.range}${choice.tags ? ` · Tags: ${choice.tags}` : ''}` : '';
+            stats.textContent = choice
+              ? choice.weapon || choice.damageDice || choice.range
+                ? `Damage: ${choice.damageDice || '—'} · Range: ${choice.range || '—'}${choice.tags ? ` · Tags: ${choice.tags}` : ''}`
+                : [choice.doses ? `Doses: ${choice.doses}` : '', choice.tags ? `Tags: ${choice.tags}` : ''].filter(Boolean).join(' · ')
+              : '';
             tags.textContent = [choice?.requirement, choice?.special].filter(Boolean).join(' ');
           };
           select.addEventListener('change', updateWeaponChoice);
           card.append(select, stats, tags);
-          select.value = inventoryChoices[item.name] || '';
+          select.value = inventoryChoices[item.name] || (item.name === "Poisoner's kit" ? inventoryChoices.Poison : '') || '';
           updateWeaponChoice();
         } else if (item.weapon && (item.damageDice || item.range)) {
           const stats = document.createElement('p');
           stats.className = 'inventory-weapon-stats';
           stats.textContent = `Damage: ${item.damageDice || '—'} · Range: ${item.range || '—'}${item.tags ? ` · Tags: ${item.tags}` : ''}`;
           card.append(stats);
+        } else if (item.tags) {
+          const tags = document.createElement('p');
+          tags.className = 'inventory-weapon-stats';
+          tags.textContent = `Tags: ${item.tags}`;
+          card.append(tags);
         }
         if (item.special) {
           const special = document.createElement('p');
@@ -1352,6 +1500,7 @@
       { label: 'Sword', panel: document.getElementById('sword-perk-tree'), periods: ['fantasy', 'greco-roman', 'medieval', 'age-of-exploration', 'colonial-age', 'early-american', 'modern', 'custom'] },
       { label: 'Cook', panel: document.getElementById('cook-perk-tree'), periods: ['all'] },
       { label: 'Vehicle', panel: document.getElementById('vehicle-perk-tree'), periods: ['modern', 'sci-fi', 'custom'] },
+      { label: 'Doctor', panel: document.getElementById('doctor-perk-tree'), periods: ['all'] },
       { label: 'Custom', panel: document.getElementById('custom-perk-panel'), periods: ['all'] }
     ];
     const timePeriods = [
@@ -1974,7 +2123,12 @@
       const swordPerks = perkNames(swordPerkIds);
       const cookPerks = perkNames(cookPerkIds);
       const vehiclePerks = perkNames(vehiclePerkIds);
-      document.getElementById('final-perk-list').textContent = `Bludgeon perks: ${bludgeonPerks.length ? bludgeonPerks.join(', ') : 'None selected'} · Throw perks: ${throwPerks.length ? throwPerks.join(', ') : 'None selected'} · Firearm (Modern) perks: ${firearmPerks.length ? firearmPerks.join(', ') : 'None selected'} · Archer perks: ${archerPerks.length ? archerPerks.join(', ') : 'None selected'} · Craft perks: ${craftPerks.length ? craftPerks.join(', ') : 'None selected'} · Acrobatics perks: ${acrobaticsPerks.length ? acrobaticsPerks.join(', ') : 'None selected'} · Sword perks: ${swordPerks.length ? swordPerks.join(', ') : 'None selected'} · Cook perks: ${cookPerks.length ? cookPerks.join(', ') : 'None selected'} · Vehicle perks: ${vehiclePerks.length ? vehiclePerks.join(', ') : 'None selected'}`;
+      const doctorPerks = perkNames(doctorPerkIds);
+      const communityPerkSummary = communityCatalog.trees.map(tree => {
+        const names = perkNames(tree.perks.map(perk => communityPerkDomId(tree, perk)));
+        return names.length ? `${tree.title} perks: ${names.join(', ')}` : '';
+      }).filter(Boolean);
+      document.getElementById('final-perk-list').textContent = [`Bludgeon perks: ${bludgeonPerks.length ? bludgeonPerks.join(', ') : 'None selected'}`, `Throw perks: ${throwPerks.length ? throwPerks.join(', ') : 'None selected'}`, `Firearm (Modern) perks: ${firearmPerks.length ? firearmPerks.join(', ') : 'None selected'}`, `Archer perks: ${archerPerks.length ? archerPerks.join(', ') : 'None selected'}`, `Craft perks: ${craftPerks.length ? craftPerks.join(', ') : 'None selected'}`, `Acrobatics perks: ${acrobaticsPerks.length ? acrobaticsPerks.join(', ') : 'None selected'}`, `Sword perks: ${swordPerks.length ? swordPerks.join(', ') : 'None selected'}`, `Cook perks: ${cookPerks.length ? cookPerks.join(', ') : 'None selected'}`, `Vehicle perks: ${vehiclePerks.length ? vehiclePerks.join(', ') : 'None selected'}`, `Doctor perks: ${doctorPerks.length ? doctorPerks.join(', ') : 'None selected'}`, ...communityPerkSummary].join(' · ');
       document.getElementById('final-reputation').textContent = String(currentStats.influence || 0);
       document.getElementById('final-base-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 2));
       document.getElementById('final-limb-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 4));
@@ -1992,6 +2146,11 @@
     function preparePrintSheet() {
       const sheet = document.getElementById('print-sheet');
       sheet.replaceChildren();
+      const pageFrame = document.createElement('img');
+      pageFrame.className = 'print-page-frame';
+      pageFrame.src = './assets/print-top-left-frame.png';
+      pageFrame.alt = '';
+      sheet.append(pageFrame);
 
       const pageOne = document.createElement('section');
       pageOne.className = 'print-page-one';
@@ -2008,7 +2167,8 @@
       const details = document.createElement('p');
       details.className = 'print-meta';
       const difficulty = new FormData(document.getElementById('character-form')).get('difficulty');
-      details.textContent = `${document.getElementById('final-occupation').value} · Age ${document.getElementById('final-age').value} · ${difficulty} difficulty`;
+      const periodLabel = activeTimePeriod.id === 'custom' ? `Custom: ${activeTimePeriod.label}` : activeTimePeriod.label;
+      details.textContent = `${document.getElementById('final-occupation').value} · Age ${document.getElementById('final-age').value} · ${difficulty} difficulty · ${periodLabel}`;
       identity.append(details);
       head.append(identity);
       pageOne.append(head);
@@ -2261,11 +2421,13 @@
         ["Sword", swordPerkIds, document.getElementById('sword-perk-tree')],
         ["Cook", cookPerkIds, document.getElementById('cook-perk-tree')],
         ["Vehicle", vehiclePerkIds, document.getElementById('vehicle-perk-tree')],
+        ["Doctor", doctorPerkIds, document.getElementById('doctor-perk-tree')],
         ["Custom", customPerks.map((perk) => `custom-${perk.id}`), document.getElementById('custom-perk-list')]
       ];
+      communityCatalog.trees.forEach(tree => printTreeSources.push([tree.title, tree.perks.map(perk => communityPerkDomId(tree, perk)), document.getElementById(`community-tree-${tree.id}`)]));
       const equipmentOnlyPerkIds = new Set([
         'bludgeon-up-close', 'thrower', 'second-amendment', 'highest-caliber',
-        'forty-seven', 'spray-and-pray', 'higher-caliber', 'archer', 'swordsman', 'harley'
+        'forty-seven', 'spray-and-pray', 'higher-caliber', 'archer', 'swordsman', 'harley', 'hippocratic-oath'
       ]);
       printTreeSources.forEach(([titleText, perkIds, sourceTree]) => {
         const chosen = perkIds.filter((perk) => selectedPerks.has(perk) && !equipmentOnlyPerkIds.has(perk));
@@ -2287,8 +2449,11 @@
           { key: 'stress', title: 'Stress dice', test: (text) => /\bstress\b|\bSD\b/i.test(text), entries: [] },
           { key: 'reaction', title: 'Reactions', test: (text) => /\breaction\b|counter.attack|counter attack|opportunity attack/i.test(text), entries: [] },
           { key: 'action', title: 'Actions', test: (text) => /\b(?:you can|you may|roll|make an attack|attack with|strike|throw|shoot|fire|block)\b/i.test(text), entries: [] },
-          { key: 'move', title: 'Move perks', test: (text) => /\b(?:move|movement|squares?|dodge|prone|fall|tumbling|getaway|footwork)\b/i.test(text), entries: [] }
+          { key: 'move', title: 'Move perks', test: (text) => /\b(?:move|movement|squares?|dodge|prone|fall|tumbling|getaway|footwork)\b/i.test(text), entries: [] },
+          { key: 'other', title: 'Other perks', test: () => false, entries: [] }
         ];
+        const otherBucket = perkBuckets.find((bucket) => bucket.key === 'other');
+        const explicitDurationPattern = /\b(?:a\s+half\s+(?:an?\s+)?|half\s+(?:an?\s+)?|quarter\s+(?:an?\s+)?|(?:\d+(?:\s*\/\s*\d+)?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|a|an)\s*-?\s*)(?:hours?|hrs?|minutes?|mins?|seconds?|secs?|days?|weeks?)\b/i;
         const passiveBenefits = [];
         const sourceNodes = new Map([...sourceTree.querySelectorAll('.perk-node[data-perk]')].map((node) => [node.dataset.perk, node]));
         chosen.forEach((perkId) => {
@@ -2296,26 +2461,24 @@
           if (!sourceNode) return;
           const perkName = sourceNode.querySelector('.perk-name')?.textContent.trim() || perkId;
           const descriptionText = sourceNode.querySelector('.perk-description')?.textContent.trim() || '';
-          const equipmentGrants = perkInventoryGrants[perkId];
-          let benefitText = descriptionText;
-          if (equipmentGrants?.length) {
-            const grantedItems = equipmentGrants.map((grant) => {
-              if (!grant.choices) return grant.name;
-              const selectedChoice = grant.choices.find((choice) => choice.name === inventoryChoices[grant.name]);
-              return selectedChoice?.name || `${grant.name} (choice pending)`;
-            });
-            benefitText = `Granted: ${grantedItems.join('; ')}`;
-          }
+          const benefitText = descriptionText;
           const customPerk = titleText === 'Custom' ? customPerks.find((perk) => `custom-${perk.id}` === perkId) : null;
-          const matchingBucket = customPerk
-            ? perkBuckets.find((bucket) => bucket.key === customPerk.category)
-            : perkBuckets.find((bucket) => bucket.test(descriptionText));
+          const communityPerk = communityCatalog.trees.flatMap(tree => tree.perks.map(perk => ({ ...perk, fullId: communityPerkDomId(tree, perk) }))).find(perk => perk.fullId === perkId);
+          const matchingBucket = explicitDurationPattern.test(descriptionText)
+            ? otherBucket
+            : customPerk
+              ? perkBuckets.find((bucket) => bucket.key === customPerk.category)
+              : communityPerk
+                ? perkBuckets.find((bucket) => bucket.key === communityPerk.category)
+                : perkBuckets.find((bucket) => bucket.test(descriptionText));
           if (!matchingBucket) {
             passiveBenefits.push(`${perkName}: ${benefitText}`);
             return;
           }
           matchingBucket.entries.push({ perkName, benefitText });
         });
+        const populatedBucketCount = perkBuckets.filter((bucket) => bucket.entries.length).length;
+        if (populatedBucketCount) columns.style.gridTemplateColumns = `repeat(${populatedBucketCount}, minmax(0, 1fr))`;
         if (passiveBenefits.length) {
           const passiveLabel = document.createElement('strong');
           passiveLabel.textContent = 'Passive benefits: ';
@@ -2359,6 +2522,56 @@
       try { return JSON.parse(localStorage.getItem(savedCharactersKey) || '[]'); }
       catch { return []; }
     }
+    function writeSavedCharacters(characters) { localStorage.setItem(savedCharactersKey, JSON.stringify(characters)); }
+    function setFileTransferStatus(message, isError = false) {
+      const status = document.getElementById('file-transfer-status');
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+    function exportCharacter(character) {
+      const fileData = { format: 'undertow-character', version: 1, exportedAt: new Date().toISOString(), character };
+      const blob = new Blob([JSON.stringify(fileData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${(character.name || 'character').trim().replace(/[^a-z0-9-_]+/gi, '-').replace(/^-+|-+$/g, '') || 'character'}.undertow.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setFileTransferStatus(`Exported ${character.name || 'character'}. Share the downloaded .json file to transfer it.`);
+    }
+    function validateImportedCharacter(data) {
+      const character = data?.format === 'undertow-character' ? data.character : data;
+      if (!character || typeof character !== 'object' || Array.isArray(character)) throw new Error('That file does not contain a character.');
+      if (typeof character.name !== 'string' || typeof character.occupation !== 'string' || !Number.isFinite(Number(character.age))) {
+        throw new Error('The file is missing the character name, occupation, or age.');
+      }
+      if (!character.stats || typeof character.stats !== 'object' || !character.skills || typeof character.skills !== 'object') {
+        throw new Error('The file is missing the character stats or skills.');
+      }
+      const id = globalThis.crypto?.randomUUID?.() || `character-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      return { ...character, id };
+    }
+    document.getElementById('character-import-file').addEventListener('change', async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const imported = validateImportedCharacter(JSON.parse(await file.text()));
+        const saved = readSavedCharacters();
+        saved.push(imported);
+        writeSavedCharacters(saved);
+        renderSavedCharacters();
+        setFileTransferStatus(`Imported ${imported.name}. It is now saved in this browser.`);
+      } catch (error) {
+        setFileTransferStatus(error.message || 'Could not import that character file.', true);
+      } finally {
+        event.target.value = '';
+      }
+    });
+    document.getElementById('import-character-button').addEventListener('click', () => {
+      document.getElementById('character-import-file').click();
+    });
 
     function renderSavedCharacters() {
       const list = document.getElementById('saved-character-list');
@@ -2381,16 +2594,20 @@
         loadButton.type = 'button';
         loadButton.textContent = 'Load';
         loadButton.addEventListener('click', () => loadSavedCharacter(character));
+        const exportButton = document.createElement('button');
+        exportButton.type = 'button';
+        exportButton.textContent = 'Export file';
+        exportButton.addEventListener('click', () => exportCharacter(character));
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', () => {
           const remaining = readSavedCharacters().filter((entry) => entry.id !== character.id);
-          localStorage.setItem(savedCharactersKey, JSON.stringify(remaining));
+          writeSavedCharacters(remaining);
           if (activeSaveId === character.id) activeSaveId = null;
           renderSavedCharacters();
         });
-        actions.append(loadButton, deleteButton);
+        actions.append(loadButton, exportButton, deleteButton);
         card.append(summary, actions);
         list.append(card);
       });
@@ -2404,6 +2621,7 @@
         occupation: document.getElementById('final-occupation').value.trim(),
         age: Number(document.getElementById('final-age').value),
         difficulty,
+        timePeriod: { id: activeTimePeriod.id, label: activeTimePeriod.label },
         stats: Object.fromEntries(finalStatSelects.map((select) => [select.name, Number(select.value)])),
         skills: Object.fromEntries(finalSkillInputs.map((input) => [input.name, Number(input.value)])),
         reserve: Number(finalReserve.value) || 0,
@@ -2424,17 +2642,27 @@
       if (index >= 0) saved[index] = character;
       else saved.push(character);
       try {
-        localStorage.setItem(savedCharactersKey, JSON.stringify(saved));
+        writeSavedCharacters(saved);
         activeSaveId = id;
         document.getElementById('save-status').textContent = 'Character saved in this browser.';
         renderSavedCharacters();
-      } catch {
+      } catch (error) {
         document.getElementById('save-status').textContent = 'Could not save. This browser may be out of storage space.';
       }
     }
 
-    function loadSavedCharacter(character) {
+    async function loadSavedCharacter(character) {
+      await communityReady;
       activeSaveId = character.id;
+      const storedPeriod = character.timePeriod;
+      if (storedPeriod?.id === 'custom') {
+        customPeriodName.value = storedPeriod.label || 'Custom';
+        updateTimePeriod({ id: 'custom', label: storedPeriod.label || 'Custom' });
+      } else {
+        const storedPreset = timePeriods.find((period) => period.id === storedPeriod?.id) || timePeriods[0];
+        timePeriodSlider.value = String(timePeriods.indexOf(storedPreset));
+        updateTimePeriod(storedPreset);
+      }
       document.getElementById('name').value = character.name;
       document.getElementById('occupation').value = character.occupation;
       document.getElementById('age').value = character.age;
@@ -2504,6 +2732,230 @@
       preparePrintSheet();
       Promise.all([document.fonts.load('10pt "Trade Winds"'), document.fonts.load('10pt "Libre Baskerville"')]).finally(() => window.print());
     });
+
+    // Shared community trees are served from a JSON file on GitHub Pages and can
+    // only be edited through the loopback-only local admin server.
+    const communityPeriods = [
+      ['all', 'All periods'], ['fantasy', 'Fantasy'], ['greco-roman', 'Greco-Roman'], ['medieval', 'Medieval'],
+      ['age-of-exploration', 'Age of Exploration'], ['colonial-age', 'Colonial age'], ['early-american', 'Early American'],
+      ['modern', 'Modern'], ['sci-fi', 'Sci-fi'], ['custom', 'Custom']
+    ];
+    let communityCatalog = { version: 1, trees: [] };
+    let communityReady = Promise.resolve();
+    let communityAdminAvailable = false;
+    let communityAuthToken = '';
+    let communityDraftDirty = false;
+    let communityUndoStack = [];
+    let communityEditingPerkId = '';
+    let communityCurrentTreeId = '';
+
+    function communitySafeId(text) { return String(text).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || `tree-${Date.now()}`; }
+    function communityPerkDomId(tree, perk) { return `community-${tree.id}-${perk.id}`; }
+    function communityCleanCatalog(data = communityCatalog) { return { version: 1, trees: (data.trees || []).map(tree => ({ id: tree.id, title: tree.title, periods: [...(tree.periods || ['all'])], perks: (tree.perks || []).map(perk => ({ id: perk.id, name: perk.name, description: perk.description, cost: perk.cost, category: perk.category || 'passive', requires: [...(perk.requires || [])] })) })) }; }
+    function communitySnapshot() { communityUndoStack.push(JSON.stringify(communityCleanCatalog())); if (communityUndoStack.length > 30) communityUndoStack.shift(); document.getElementById('community-undo').disabled = false; }
+    function communitySetDirty() { communityDraftDirty = true; document.getElementById('community-admin-status').textContent = 'Unpublished changes. Publish them to share these trees with everyone.'; }
+    function communityPeriodLabel(id) { return communityPeriods.find(([key]) => key === id)?.[1] || id; }
+    function communityRenderTree(tree) {
+      if (!tree._panel) {
+        tree._panel = document.createElement('div'); tree._panel.className = 'perk-tree community-perk-tree'; tree._panel.id = `community-tree-${tree.id}`; tree._panel.setAttribute('aria-label', `${tree.title} perk tree`);
+        tree._button = document.createElement('button'); tree._button.type = 'button'; tree._button.className = 'tree-choice-button community-tree-choice'; tree._button.dataset.treeIndex = String(perkTreeChoices.length); tree._button.textContent = tree.title;
+        document.querySelector('.cryptex-picker').append(tree._button);
+        perkTreeChoices.push({ label: tree.title, panel: tree._panel, periods: tree.periods?.includes('all') ? ['all'] : (tree.periods || []), community: true });
+        document.getElementById('perks-screen').insertBefore(tree._panel, document.getElementById('custom-perk-panel').nextSibling);
+        tree._button.addEventListener('click', () => choosePerkTree(Number(tree._button.dataset.treeIndex)));
+      }
+      tree._button.textContent = tree.title;
+      const choice = perkTreeChoices[Number(tree._button.dataset.treeIndex)];
+      if (choice) { choice.label = tree.title; choice.periods = tree.periods?.includes('all') ? ['all'] : (tree.periods || []); }
+      tree._panel.replaceChildren();
+      const byId = new Map((tree.perks || []).map(perk => [perk.id, perk]));
+      const depthMemo = new Map();
+      const depthOf = (perk, seen = new Set()) => {
+        if (depthMemo.has(perk.id)) return depthMemo.get(perk.id);
+        if (seen.has(perk.id)) return 0;
+        const next = new Set(seen); next.add(perk.id);
+        const result = perk.requires?.length ? 1 + Math.max(...perk.requires.map(id => byId.has(id) ? depthOf(byId.get(id), next) : -1)) : 0;
+        depthMemo.set(perk.id, result); return result;
+      };
+      const levels = new Map();
+      (tree.perks || []).forEach(perk => { const depth = depthOf(perk); if (!levels.has(depth)) levels.set(depth, []); levels.get(depth).push(perk); });
+      [...levels.keys()].sort((a,b) => a-b).forEach((depth, levelIndex) => {
+        const group = levels.get(depth);
+        const row = document.createElement('div'); row.className = levelIndex === 0 ? 'perk-level' : 'perk-fork community-perk-level';
+        const lanes = levelIndex === 0 ? [row] : [document.createElement('div'), document.createElement('div')];
+        if (levelIndex > 0) lanes.forEach(lane => { lane.className = 'perk-lane'; row.append(lane); });
+        group.forEach((perk, index) => {
+          const id = communityPerkDomId(tree, perk);
+          perkDefinitions[id] = { cost: Number(perk.cost), requires: (perk.requires || []).map(req => communityPerkDomId(tree, byId.get(req) || { id: req })) };
+          const node = document.createElement('button'); node.type = 'button'; node.className = 'perk-node'; node.dataset.perk = id; node.setAttribute('aria-pressed', String(selectedPerks.has(id)));
+          const name = document.createElement('span'); name.className = 'perk-name'; name.textContent = perk.name;
+          const desc = document.createElement('span'); desc.className = 'perk-description'; desc.textContent = perk.description;
+          const cost = document.createElement('span'); cost.className = 'perk-cost'; cost.textContent = `Cost: ${perk.cost} points`;
+          node.append(name, desc, cost); (lanes.length === 1 ? lanes[0] : lanes[index % 2]).append(node); bindPerkNode(node);
+        });
+        tree._panel.append(row);
+      });
+    }
+    function communityRenderAllTrees() {
+      perkTreeChoices.splice(11);
+      document.querySelectorAll('.community-tree-choice, .community-perk-tree').forEach(element => element.remove());
+      activePerkTreeIndex = Math.min(activePerkTreeIndex, 10);
+      const validPerkIds = new Set(communityCatalog.trees.flatMap(tree => tree.perks.map(perk => communityPerkDomId(tree, perk))));
+      Object.keys(perkDefinitions).filter(id => id.startsWith('community-')).forEach(id => { delete perkDefinitions[id]; if (!validPerkIds.has(id)) selectedPerks.delete(id); });
+      communityCatalog.trees.forEach(communityRenderTree);
+      choosePerkTree(activePerkTreeIndex);
+      updatePerkTree();
+    }
+    function communityLoadCatalog(data) {
+      communityCatalog = communityCleanCatalog({ trees: Array.isArray(data?.trees) ? data.trees : [] });
+      communityCatalog.trees.forEach(tree => { tree.periods = Array.isArray(tree.periods) && tree.periods.length ? tree.periods : ['all']; tree.perks = Array.isArray(tree.perks) ? tree.perks : []; });
+      communityRenderAllTrees();
+      communityRenderAdminTreeSelect();
+    }
+    function communityRenderAdminTreeSelect() {
+      const select = document.getElementById('community-tree-select'); if (!select) return;
+      const keep = communityCurrentTreeId;
+      select.replaceChildren(new Option('Create a new tree', ''));
+      communityCatalog.trees.forEach(tree => select.add(new Option(tree.title, tree.id)));
+      select.value = communityCatalog.trees.some(tree => tree.id === keep) ? keep : '';
+      communityLoadEditorTree(select.value);
+    }
+    function communitySetPeriodChecks(periods = ['all']) {
+      const root = document.getElementById('community-periods'); root.replaceChildren();
+      communityPeriods.forEach(([id, label]) => {
+        const wrapper = document.createElement('label'); const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.value = id; checkbox.checked = periods.includes('all') ? id === 'all' : periods.includes(id); checkbox.addEventListener('change', () => {
+          if (id === 'all' && checkbox.checked) root.querySelectorAll('input:not([value="all"])').forEach(item => item.checked = false);
+          else if (id !== 'all' && checkbox.checked) root.querySelector('input[value="all"]').checked = false;
+        }); wrapper.append(checkbox, document.createTextNode(label)); root.append(wrapper);
+      });
+    }
+    function communitySelectedPeriods() { const selected = [...document.querySelectorAll('#community-periods input:checked')].map(input => input.value); return selected.includes('all') || !selected.length ? ['all'] : selected; }
+    function communityLoadEditorTree(id) {
+      communityCurrentTreeId = id || '';
+      const tree = communityCatalog.trees.find(item => item.id === id);
+      document.getElementById('community-title').value = tree?.title || '';
+      communitySetPeriodChecks(tree?.periods || ['all']);
+      document.getElementById('community-delete-tree').disabled = !tree;
+      document.getElementById('community-save-tree').textContent = tree ? 'Save tree details' : 'Add this tree';
+      communityRenderAdminPerks(tree);
+    }
+    function communityRenderAdminPerks(tree) {
+      const list = document.getElementById('community-perk-list'); list.replaceChildren();
+      const prereq = document.getElementById('community-perk-requires'); prereq.replaceChildren();
+      (tree?.perks || []).forEach(perk => {
+        prereq.add(new Option(perk.name, perk.id));
+        const row = document.createElement('div'); row.className = 'community-perk-row';
+        const text = document.createElement('span'); text.textContent = `${perk.name} · ${perk.cost} points`;
+        const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.addEventListener('click', () => communityEditPerk(perk.id));
+        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove'; remove.addEventListener('click', () => communityRemovePerk(perk.id));
+        row.append(text, edit, remove); list.append(row);
+      });
+    }
+    function communityEditPerk(id) {
+      const tree = communityCatalog.trees.find(item => item.id === communityCurrentTreeId); const perk = tree?.perks.find(item => item.id === id); if (!perk) return;
+      communityEditingPerkId = id;
+      document.getElementById('community-perk-name').value = perk.name;
+      document.getElementById('community-perk-cost').value = String(perk.cost);
+      document.getElementById('community-perk-description').value = perk.description;
+      document.getElementById('community-perk-category').value = perk.category || 'passive';
+      [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = (perk.requires || []).includes(option.value));
+      document.getElementById('community-perk-form-title').textContent = 'Edit perk';
+      document.getElementById('community-save-perk').textContent = 'Save perk changes';
+      document.getElementById('community-cancel-perk-edit').hidden = false;
+    }
+    function communityClearPerkForm() {
+      communityEditingPerkId = '';
+      document.getElementById('community-perk-name').value = '';
+      document.getElementById('community-perk-cost').value = '5';
+      document.getElementById('community-perk-description').value = '';
+      document.getElementById('community-perk-category').value = 'passive';
+      [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = false);
+      document.getElementById('community-perk-form-title').textContent = 'Add a perk';
+      document.getElementById('community-save-perk').textContent = 'Add perk';
+      document.getElementById('community-cancel-perk-edit').hidden = true;
+    }
+    function communityRemovePerk(id) {
+      const tree = communityCatalog.trees.find(item => item.id === communityCurrentTreeId); const perk = tree?.perks.find(item => item.id === id); if (!perk) return;
+      if (!window.confirm(`Remove “${perk.name}” from “${tree.title}”? Any perks that require it will also lose that prerequisite.`)) return;
+      communitySnapshot(); tree.perks = tree.perks.filter(item => item.id !== id); tree.perks.forEach(item => { item.requires = (item.requires || []).filter(req => req !== id); });
+      communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communitySetDirty();
+    }
+    document.getElementById('community-tree-select').addEventListener('change', event => communityLoadEditorTree(event.target.value));
+    document.getElementById('community-new-tree').addEventListener('click', () => { communityCurrentTreeId = ''; document.getElementById('community-tree-select').value = ''; communityLoadEditorTree(''); communityClearPerkForm(); });
+    document.getElementById('community-save-tree').addEventListener('click', () => {
+      const title = document.getElementById('community-title').value.trim(); if (!title) return alert('Enter a title for the tree.');
+      const existing = communityCatalog.trees.find(tree => tree.id === communityCurrentTreeId);
+      const promptText = existing ? `Save changes to the “${title}” skill tree?` : `Add the “${title}” skill tree to the shared catalog?`;
+      if (!window.confirm(promptText)) return;
+      communitySnapshot();
+      if (existing) { existing.title = title; existing.periods = communitySelectedPeriods(); }
+      else { const id = communitySafeId(title); if (communityCatalog.trees.some(tree => tree.id === id)) return alert('A tree with a similar title already exists.'); const tree = { id, title, periods: communitySelectedPeriods(), perks: [] }; communityCatalog.trees.push(tree); communityCurrentTreeId = id; }
+      communityLoadCatalog(communityCatalog); document.getElementById('community-tree-select').value = communityCurrentTreeId; communityLoadEditorTree(communityCurrentTreeId); communitySetDirty();
+    });
+    document.getElementById('community-delete-tree').addEventListener('click', () => {
+      const tree = communityCatalog.trees.find(item => item.id === communityCurrentTreeId); if (!tree) return;
+      if (!window.confirm(`Permanently remove “${tree.title}” from the shared catalog when you publish?`)) return;
+      communitySnapshot(); communityCatalog.trees = communityCatalog.trees.filter(item => item.id !== tree.id); communityCurrentTreeId = ''; communityLoadCatalog(communityCatalog); communitySetDirty();
+    });
+    document.getElementById('community-save-perk').addEventListener('click', () => {
+      const tree = communityCatalog.trees.find(item => item.id === communityCurrentTreeId); if (!tree) return alert('Create or select a tree first.');
+      const name = document.getElementById('community-perk-name').value.trim(); const description = document.getElementById('community-perk-description').value.trim(); const cost = Number(document.getElementById('community-perk-cost').value);
+      if (!name || !description || !Number.isInteger(cost) || cost < 0 || cost > 500) return alert('Enter a perk name, description, and valid point cost.');
+      const isEdit = Boolean(communityEditingPerkId); if (!window.confirm(isEdit ? `Save changes to “${name}”?` : `Add “${name}” to “${tree.title}”?`)) return;
+      communitySnapshot();
+      const perk = { id: communityEditingPerkId || communitySafeId(name), name, description, cost, category: document.getElementById('community-perk-category').value, requires: [...document.getElementById('community-perk-requires').selectedOptions].map(option => option.value).filter(id => id !== communityEditingPerkId) };
+      if (!isEdit && tree.perks.some(item => item.id === perk.id)) perk.id += `-${Date.now().toString(36)}`;
+      if (isEdit) tree.perks = tree.perks.map(item => item.id === communityEditingPerkId ? perk : item); else tree.perks.push(perk);
+      communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communityClearPerkForm(); communitySetDirty();
+    });
+    document.getElementById('community-cancel-perk-edit').addEventListener('click', communityClearPerkForm);
+    document.getElementById('community-undo').addEventListener('click', () => {
+      const previous = communityUndoStack.pop(); if (!previous) return;
+      communityCatalog = JSON.parse(previous); document.getElementById('community-undo').disabled = !communityUndoStack.length;
+      communityLoadCatalog(communityCatalog); communityDraftDirty = true; document.getElementById('community-admin-status').textContent = 'Last edit undone. Publish to make the restored version public.';
+    });
+    document.getElementById('community-login').addEventListener('submit', async event => {
+      event.preventDefault(); const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
+      try {
+        const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
+        const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
+        communityAuthToken = result.token; document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; status.textContent = 'Signed in to the local editor.';
+      } catch (error) { status.textContent = error.message; }
+    });
+    document.getElementById('community-publish').addEventListener('click', async () => {
+      if (!communityAuthToken) return alert('Sign in to the local admin editor first.');
+      if (!window.confirm('Publish these skill tree changes for everyone using the app?')) return;
+      const status = document.getElementById('community-admin-status'); status.textContent = 'Saving and publishing…';
+      try {
+        const response = await fetch('/api/publish-trees', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Token': communityAuthToken }, body: JSON.stringify({ version: 1, trees: communityCatalog.trees }) });
+        const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Publishing failed.');
+        status.textContent = result.message; if (result.published) { communityDraftDirty = false; communityUndoStack = []; document.getElementById('community-undo').disabled = true; }
+      } catch (error) { status.textContent = error.message; }
+    });
+    window.addEventListener('beforeunload', event => { if (communityDraftDirty) { event.preventDefault(); event.returnValue = ''; } });
+    document.addEventListener('click', event => {
+      if (!communityDraftDirty) return;
+      const button = event.target.closest('button');
+      if (!button || button.closest('#community-admin') || button.classList.contains('tree-choice-button') || button.classList.contains('perk-node')) return;
+      const page = button.closest('main > section');
+      if (page?.id !== 'perks-screen') return;
+      if (!window.confirm('You have unpublished shared tree changes. Leave this page and discard the unpublished edits?')) {
+        event.preventDefault(); event.stopImmediatePropagation();
+      } else communityDraftDirty = false;
+    }, true);
+
+    communityReady = (async function loadCommunityTrees() {
+      try {
+        let response = await fetch('/api/community-trees', { cache: 'no-store' });
+        let data;
+        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; }
+        else throw new Error('Local admin API unavailable');
+        communityLoadCatalog(data);
+      } catch {
+        try { const response = await fetch('./community-trees.json', { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
+      }
+      if (communityAdminAvailable) document.getElementById('community-admin').hidden = false;
+    })();
   </script>
 </body>
 </html>
