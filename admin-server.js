@@ -9,6 +9,7 @@ const { spawnSync, spawn } = require('node:child_process');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4173);
+const BUNDLE_MARKER = 'Undertow admin bundle: tree-visualizer-v2';
 const DATA_FILE = path.join(ROOT, 'community-trees.json');
 const CONFIG_FILE = path.join(ROOT, '.admin-access.json');
 const sessions = new Set();
@@ -100,6 +101,8 @@ function staticFile(req, res) {
 
 async function main() {
   await ensureAdminConfig();
+  const indexPath = path.join(ROOT, 'index.html');
+  const matchingAppBundle = fs.existsSync(indexPath) && fs.readFileSync(indexPath, 'utf8').includes(BUNDLE_MARKER);
   const server = http.createServer(async (req, res) => {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     try {
@@ -140,6 +143,7 @@ async function main() {
     const address = `http://127.0.0.1:${PORT}`;
     console.log(`Undertow local editor: ${address}`);
     console.log('This editor only accepts connections from this computer. Press Ctrl+C to stop it.');
+    if (!matchingAppBundle) console.warn('This folder has an older or mismatched index.html. Replace index.html and admin-server.js with the files from the latest package, then restart this launcher.');
     if (!isGitRepo()) console.log('No GitHub repository clone detected beside admin-server.js; edits can be saved locally but not published yet.');
     if (process.platform === 'win32') {
       const opener = spawn('cmd', ['/c', 'start', '', address], { detached: true, stdio: 'ignore', windowsHide: true });
