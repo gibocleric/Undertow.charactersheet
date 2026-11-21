@@ -564,6 +564,15 @@
     .community-perk-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid #d9cbb6; }
     .community-perk-row span { overflow-wrap: anywhere; }
     #community-admin-status { min-height: 1.4em; }
+    #community-prereq-visualizer { position: relative; min-height: 100px; overflow: auto; padding: 14px; border: 1px solid #cdbb9e; border-radius: 10px; background: #fffcf5; }
+    .community-tree-preview { position: relative; display: grid; gap: 18px; min-width: 340px; padding: 12px 8px; }
+    .community-tree-preview-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .community-tree-preview-level { position: relative; z-index: 1; display: flex; justify-content: center; align-items: flex-start; flex-wrap: wrap; gap: 10px; min-height: 48px; }
+    .community-tree-preview-node { max-width: 175px; padding: 7px 12px; border: 1px solid #a58b69; border-radius: 18px; background: #f7f0e3; color: #332b22; font: inherit; font-size: .85rem; cursor: pointer; }
+    .community-tree-preview-node.is-prerequisite { border: 2px solid #714a24; background: #ead7b7; text-decoration: underline; }
+    .community-tree-preview-node.is-new-perk { border-style: dashed; cursor: default; }
+    .community-tree-preview-node:disabled { opacity: 1; }
+    .community-tree-preview-line { fill: none; stroke: #88704e; stroke-width: 2; }
     #community-admin .danger { color: #8d261e; }
     @media (max-width: 560px) { .community-admin-form, .community-admin-fields { grid-template-columns: 1fr; } }
     #archer-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
@@ -712,6 +721,8 @@
             </div>
             <label>Perk description<textarea id="community-perk-description" maxlength="1200" rows="3"></textarea></label>
             <label>Prerequisites<select id="community-perk-requires" multiple size="4" aria-label="Perk prerequisites"></select></label>
+            <p class="intro">Choose where this perk comes from by clicking one or more perk names in this tree. Leave them unselected for a starting perk.</p>
+            <div id="community-prereq-visualizer" aria-label="Skill tree prerequisite visualizer"></div>
             <button id="community-save-perk" type="button">Add perk</button>
             <button id="community-cancel-perk-edit" type="button" hidden>Cancel perk edit</button>
             <div id="community-perk-list"></div>
@@ -2851,6 +2862,62 @@
         const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove'; remove.addEventListener('click', () => communityRemovePerk(perk.id));
         row.append(text, edit, remove); list.append(row);
       });
+      communityRenderPrereqVisualizer(tree);
+    }
+    function communityRenderPrereqVisualizer(tree) {
+      const host = document.getElementById('community-prereq-visualizer'); host.replaceChildren();
+      const prereq = document.getElementById('community-perk-requires');
+      if (!tree || !tree.perks.length) { host.textContent = 'Add a starting perk to see the skill tree here.'; return; }
+      const preview = document.createElement('div'); preview.className = 'community-tree-preview';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.classList.add('community-tree-preview-lines'); svg.setAttribute('aria-hidden', 'true');
+      const byId = new Map(tree.perks.map(perk => [perk.id, perk])); const depthMemo = new Map();
+      const depthOf = (perk, seen = new Set()) => {
+        if (depthMemo.has(perk.id)) return depthMemo.get(perk.id);
+        if (seen.has(perk.id)) return 0;
+        const next = new Set(seen); next.add(perk.id);
+        const depth = perk.requires?.length ? 1 + Math.max(...perk.requires.map(id => byId.has(id) ? depthOf(byId.get(id), next) : -1)) : 0;
+        depthMemo.set(perk.id, depth); return depth;
+      };
+      const levels = new Map();
+      tree.perks.forEach(perk => { const depth = depthOf(perk); if (!levels.has(depth)) levels.set(depth, []); levels.get(depth).push(perk); });
+      const nodes = new Map();
+      [...levels.keys()].sort((a,b) => a-b).forEach(depth => {
+        const row = document.createElement('div'); row.className = 'community-tree-preview-level'; row.dataset.depth = String(depth);
+        levels.get(depth).forEach(perk => {
+          const button = document.createElement('button'); button.type = 'button'; button.className = 'community-tree-preview-node'; button.dataset.previewPerk = perk.id; button.textContent = perk.name;
+          button.setAttribute('aria-pressed', String([...prereq.options].some(option => option.value === perk.id && option.selected)));
+          button.addEventListener('click', () => {
+            if (perk.id === communityEditingPerkId) return;
+            const option = [...prereq.options].find(item => item.value === perk.id); if (!option) return;
+            option.selected = !option.selected;
+            communityRenderPrereqVisualizer(tree);
+          });
+          row.append(button); nodes.set(perk.id, button);
+        });
+        preview.append(row);
+      });
+      const newName = document.getElementById('community-perk-name').value.trim() || 'New perk';
+      const targetDepth = Math.max(-1, ...[...prereq.selectedOptions].map(option => { const perk = byId.get(option.value); return perk ? depthOf(perk) : -1; })) + 1;
+      const targetRow = document.createElement('div'); targetRow.className = 'community-tree-preview-level'; targetRow.dataset.depth = String(Math.max(0, targetDepth));
+      const target = document.createElement('span'); target.className = 'community-tree-preview-node is-new-perk'; target.dataset.previewTarget = 'true'; target.textContent = newName; targetRow.append(target); preview.append(targetRow);
+      preview.prepend(svg); host.append(preview);
+      const draw = () => {
+        const rect = preview.getBoundingClientRect(); if (!rect.width || !rect.height) return;
+        svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`); svg.replaceChildren();
+        tree.perks.forEach(perk => (perk.requires || []).forEach(parentId => {
+          const fromNode = nodes.get(parentId), toNode = nodes.get(perk.id); if (!fromNode || !toNode) return;
+          const a = fromNode.getBoundingClientRect(), b = toNode.getBoundingClientRect();
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'path'); const x1 = a.left + a.width/2 - rect.left, y1 = a.bottom - rect.top, x2 = b.left + b.width/2 - rect.left, y2 = b.top - rect.top;
+          line.setAttribute('d', `M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`); line.classList.add('community-tree-preview-line'); svg.append(line);
+        }));
+        [...prereq.selectedOptions].forEach(option => {
+          const fromNode = nodes.get(option.value); if (!fromNode) return;
+          const a = fromNode.getBoundingClientRect(), b = target.getBoundingClientRect();
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'path'); const x1 = a.left + a.width/2 - rect.left, y1 = a.bottom - rect.top, x2 = b.left + b.width/2 - rect.left, y2 = b.top - rect.top;
+          line.setAttribute('d', `M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`); line.classList.add('community-tree-preview-line'); svg.append(line);
+        });
+      };
+      requestAnimationFrame(draw);
     }
     function communityEditPerk(id) {
       const tree = communityCatalog.trees.find(item => item.id === communityCurrentTreeId); const perk = tree?.perks.find(item => item.id === id); if (!perk) return;
@@ -2860,6 +2927,7 @@
       document.getElementById('community-perk-description').value = perk.description;
       document.getElementById('community-perk-category').value = perk.category || 'passive';
       [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = (perk.requires || []).includes(option.value));
+      communityRenderPrereqVisualizer(tree);
       document.getElementById('community-perk-form-title').textContent = 'Edit perk';
       document.getElementById('community-save-perk').textContent = 'Save perk changes';
       document.getElementById('community-cancel-perk-edit').hidden = false;
@@ -2871,6 +2939,7 @@
       document.getElementById('community-perk-description').value = '';
       document.getElementById('community-perk-category').value = 'passive';
       [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = false);
+      communityRenderPrereqVisualizer(communityCatalog.trees.find(tree => tree.id === communityCurrentTreeId));
       document.getElementById('community-perk-form-title').textContent = 'Add a perk';
       document.getElementById('community-save-perk').textContent = 'Add perk';
       document.getElementById('community-cancel-perk-edit').hidden = true;
@@ -2882,6 +2951,10 @@
       communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communitySetDirty();
     }
     document.getElementById('community-tree-select').addEventListener('change', event => communityLoadEditorTree(event.target.value));
+    document.getElementById('community-perk-name').addEventListener('input', () => {
+      const pendingName = document.querySelector('#community-prereq-visualizer [data-preview-target]');
+      if (pendingName) pendingName.textContent = document.getElementById('community-perk-name').value.trim() || 'New perk';
+    });
     document.getElementById('community-new-tree').addEventListener('click', () => { communityCurrentTreeId = ''; document.getElementById('community-tree-select').value = ''; communityLoadEditorTree(''); communityClearPerkForm(); });
     document.getElementById('community-save-tree').addEventListener('click', () => {
       const title = document.getElementById('community-title').value.trim(); if (!title) return alert('Enter a title for the tree.');
