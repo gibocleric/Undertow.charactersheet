@@ -692,6 +692,7 @@
             <button type="submit">Sign in</button>
           </form>
           <div id="community-editor" hidden>
+            <button id="community-hide-admin" type="button">Hide admin editor</button>
             <label>Choose a shared tree<select id="community-tree-select"><option value="">Create a new tree</option></select></label>
             <div class="community-admin-fields">
               <label>Tree title<input id="community-title" maxlength="80"></label>
@@ -2922,6 +2923,14 @@
         communityAuthToken = result.token; document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; status.textContent = 'Signed in to the local editor.';
       } catch (error) { status.textContent = error.message; }
     });
+    document.getElementById('community-hide-admin').addEventListener('click', () => {
+      if (communityDraftDirty && !window.confirm('Hide the admin editor? Your unpublished changes will remain in this tab until you publish or leave it.')) return;
+      communityAuthToken = '';
+      document.getElementById('community-password').value = '';
+      document.getElementById('community-editor').hidden = true;
+      document.getElementById('community-login').hidden = false;
+      document.getElementById('community-admin').hidden = true;
+    });
     document.getElementById('community-publish').addEventListener('click', async () => {
       if (!communityAuthToken) return alert('Sign in to the local admin editor first.');
       if (!window.confirm('Publish these skill tree changes for everyone using the app?')) return;
@@ -2954,8 +2963,24 @@
       } catch {
         try { const response = await fetch('./community-trees.json', { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
       }
-      if (communityAdminAvailable) document.getElementById('community-admin').hidden = false;
     })();
+    window.addEventListener('keydown', event => {
+      if (!communityAdminAvailable || !event.ctrlKey || !event.altKey || !event.shiftKey || event.code !== 'KeyU') return;
+      event.preventDefault();
+      const admin = document.getElementById('community-admin');
+      if (admin.hidden) {
+        admin.hidden = false;
+        choosePerkTree(10);
+        admin.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      } else {
+        if (communityDraftDirty && !window.confirm('Hide the admin editor? Your unpublished changes will remain in this tab until you publish or leave it.')) return;
+        communityAuthToken = '';
+        document.getElementById('community-password').value = '';
+        document.getElementById('community-editor').hidden = true;
+        document.getElementById('community-login').hidden = false;
+        admin.hidden = true;
+      }
+    });
   </script>
 </body>
 </html>

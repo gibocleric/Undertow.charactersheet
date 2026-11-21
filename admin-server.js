@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const readline = require('node:readline/promises');
-const { spawnSync } = require('node:child_process');
+const { spawnSync, spawn } = require('node:child_process');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4173);
@@ -137,9 +137,14 @@ async function main() {
     } catch (error) { json(res, 400, { error: error.message || 'Request failed.' }); }
   });
   server.listen(PORT, '127.0.0.1', () => {
-    console.log(`Undertow local editor: http://127.0.0.1:${PORT}`);
+    const address = `http://127.0.0.1:${PORT}`;
+    console.log(`Undertow local editor: ${address}`);
     console.log('This editor only accepts connections from this computer. Press Ctrl+C to stop it.');
     if (!isGitRepo()) console.log('No GitHub repository clone detected beside admin-server.js; edits can be saved locally but not published yet.');
+    if (process.platform === 'win32') {
+      const opener = spawn('cmd', ['/c', 'start', '', address], { detached: true, stdio: 'ignore', windowsHide: true });
+      opener.unref();
+    }
   });
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
