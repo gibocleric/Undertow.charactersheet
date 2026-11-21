@@ -143,7 +143,7 @@ async function main() {
     const address = `http://127.0.0.1:${PORT}`;
     console.log(`Undertow local editor: ${address}`);
     console.log('This editor only accepts connections from this computer. Press Ctrl+C to stop it.');
-    if (!matchingAppBundle) console.warn('This folder has an older or mismatched index.html. Replace index.html and admin-server.js with the files from the latest package, then restart this launcher.');
+    if (!matchingAppBundle) console.warn('This folder has an older or mismatched index.html. Stop this server, run update-admin.bat from the latest package, and select this folder to switch the service to the new app.');
     if (!isGitRepo()) console.log('No GitHub repository clone detected beside admin-server.js; edits can be saved locally but not published yet.');
     if (process.platform === 'win32') {
       const opener = spawn('cmd', ['/c', 'start', '', address], { detached: true, stdio: 'ignore', windowsHide: true });
