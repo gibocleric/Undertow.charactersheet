@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Undertow admin bundle: page-builder-v9 -->
+<!-- Undertow admin bundle: page-builder-v11 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -1360,7 +1360,7 @@
         <div class="admin-form-actions"><button id="admin-built-in-cancel" type="button" class="admin-secondary-button">Cancel</button><button type="submit">Save block</button></div>
       </form>
     </dialog>
-    <footer class="admin-tools-footer"><button id="admin-save-config" type="button">Save this scope</button><p id="admin-config-status" role="status" aria-live="polite">Changes save to the selected scope.</p></footer>
+    <footer class="admin-tools-footer"><button id="admin-save-config" type="button">Apply all changes</button><p id="admin-config-status" role="status" aria-live="polite">Applies changes to the selected scope. Universal changes publish for all devices.</p></footer>
   </aside>
   <section id="print-sheet" class="print-only" hidden aria-label="Character sheet"></section>
   <div id="admin-text-edit-banner" class="admin-placement-banner" hidden><span id="admin-text-edit-note">Click the text you want to change.</span><button id="admin-text-edit-exit" type="button" class="admin-secondary-button">Finish editing</button></div>
@@ -3454,7 +3454,7 @@
       }else if(pageId==='skills-screen'){
         add('title','Page title',q('h1'));add('instructions','Instructions',q(':scope > .intro'));add('skill-groups','Skill groups and values',q('#skill-groups'),{textTarget:false,inputTarget:false});add('reserve','Reserve points field',q('#reserve-points')?.closest('.skill-row'),{inputTarget:false});add('point-total','Point total',q('#allocation-total'),{textTarget:false,inputTarget:false});add('validation-message','Validation message',q('#skills-error'),{textTarget:false,inputTarget:false});add('continue','Continue button',q('#skills-continue'));
       }else if(pageId==='perks-screen'){
-        add('title','Page title',q('h1'));const intros=qa(':scope > .wheel-paper-content > .intro');add('instructions','Instructions',intros[0]);add('unused-points-note','Unused points note',intros.at(-1));add('time-period','Time period selector',q('.time-period-picker'),{inputTarget:false});add('tree-status','Perk status',q('#perk-status'),{textTarget:false,inputTarget:false});add('custom-perk-editor','Custom perk editor',q('#custom-perk-panel'),{textTarget:false,inputTarget:false});add('inventory-continue','Continue to Inventory button',q('#to-inventory-button'));
+        add('title','Page title',q('h1'));const intros=qa(':scope > .wheel-paper-content > .intro');add('instructions','Instructions',intros[0]);add('unused-points-note','Unused points note',intros.at(-1));add('time-period','Time period selector',q('.time-period-picker'),{inputTarget:q('#time-period-slider')});add('tree-status','Perk status',q('#perk-status'),{textTarget:false,inputTarget:false});add('custom-perk-editor','Custom perk editor',q('#custom-perk-panel'),{textTarget:false,inputTarget:false});add('inventory-continue','Continue to Inventory button',q('#to-inventory-button'));
         perkTreeChoices.forEach((choice,index)=>{const panel=choice.panel;if(!panel)return;const name=panel.id||communitySafeId(choice.label);const button=document.querySelector(`.cryptex-picker [data-tree-index="${index}"]`);add(`tree-${communitySafeId(name)}`,`${choice.label} perk tree`,[panel,button],{textTarget:choice.community?false:button,inputTarget:false});});
       }else if(pageId==='inventory-screen'){
         add('title','Page title',q('h1'));add('instructions','Instructions',q(':scope > .intro'));add('items','Inventory items list',q('#perk-inventory-list'),{textTarget:false,inputTarget:false});add('continue','Continue button',q('#inventory-continue-button'));
@@ -3606,10 +3606,10 @@
     document.getElementById('admin-background-add').addEventListener('click',()=>{const file=document.getElementById('admin-background-file').files[0];const name=document.getElementById('admin-background-name').value.trim();if(!file)return alert('Choose a background image first.');if(!['image/png','image/jpeg','image/webp'].includes(file.type))return alert('Choose a PNG, JPG, or WebP image.');if(file.size>1_000_000)return alert('Choose a background image under 1 MB.');if(!confirm(`Add “${name||file.name}” to the background images for this scope?`))return;const reader=new FileReader();reader.onerror=()=>alert('The image could not be read.');reader.onload=()=>{const id=siteItemId('background');clearSiteItemRemoval('backgrounds',id);siteConfig.backgrounds.unshift({id,label:name||file.name,data:String(reader.result)});siteConfig.activeBackgroundId=id;applySiteBackground();document.getElementById('admin-background-file').value='';document.getElementById('admin-background-name').value='';persistCurrentScope(false);};reader.readAsDataURL(file);});
     document.getElementById('admin-save-config').addEventListener('click', async () => {
       const status = document.getElementById('admin-config-status');
-      if (activeAdminScope !== 'universal') { persistCurrentScope(true); return; }
+      if (activeAdminScope !== 'universal') { persistCurrentScope(true);applySiteDefinitions();renderAdminBlocks();status.textContent=activeAdminScope==='character'?'All changes applied to this character on this device.':'All changes applied on this device.';return; }
       if (!communityAuthToken || !confirm('Publish these settings for everyone using the app?')) return;
       status.textContent = 'Publishing universal settings…';
-      try { const response = await fetch('/api/publish-site-config', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':communityAuthToken }, body:JSON.stringify(siteConfig) }); const result=await response.json(); if (!response.ok) throw new Error(result.error || 'Publish failed.'); universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;status.textContent=result.message; }
+      try { const response = await fetch('/api/publish-site-config', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':communityAuthToken }, body:JSON.stringify(siteConfig) }); const result=await response.json(); if (!response.ok) throw new Error(result.error || 'Publish failed.'); if(result.published!==true){status.textContent=`Saved only on this computer. Universal changes are not active across devices until GitHub publish succeeds. ${result.message}`;return;} universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;applySiteDefinitions();renderAdminBlocks();status.textContent='All changes published for everyone. '+result.message; }
       catch (error) { status.textContent=error.message; }
     });
     siteConfigReady = (async () => {

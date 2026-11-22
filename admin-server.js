@@ -9,7 +9,7 @@ const { spawnSync, spawn } = require('node:child_process');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4173);
-const BUNDLE_MARKER = 'Undertow admin bundle: page-builder-v9';
+const BUNDLE_MARKER = 'Undertow admin bundle: page-builder-v11';
 const DATA_FILE = path.join(ROOT, 'community-trees.json');
 const SITE_CONFIG_FILE = path.join(ROOT, 'site-config.json');
 const CONFIG_FILE = path.join(ROOT, '.admin-access.json');
