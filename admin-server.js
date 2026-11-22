@@ -9,7 +9,7 @@ const { spawnSync, spawn } = require('node:child_process');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4173);
-const BUNDLE_MARKER = 'Undertow admin bundle: page-builder-v5';
+const BUNDLE_MARKER = 'Undertow admin bundle: page-builder-v8';
 const DATA_FILE = path.join(ROOT, 'community-trees.json');
 const SITE_CONFIG_FILE = path.join(ROOT, 'site-config.json');
 const CONFIG_FILE = path.join(ROOT, '.admin-access.json');
@@ -35,10 +35,10 @@ function readCatalog() {
 }
 function readSiteConfig() {
   try { return JSON.parse(fs.readFileSync(SITE_CONFIG_FILE, 'utf8')); }
-  catch { return { version: 1, blocks: [], pageParts: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' }; }
+  catch { return { version: 1, blocks: [], pageParts: [], textOverrides: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' }; }
 }
 function validSiteConfig(data) {
-  if (!data || !['blocks', 'pageParts', 'perkOverrides', 'inventoryItems', 'perkItems', 'stats', 'skills', 'removedSkills', 'removedItems', 'statValues', 'backgrounds'].every(key => Array.isArray(data[key]) && data[key].length <= 500)) return false;
+  if (!data || !['blocks', 'pageParts', 'textOverrides', 'perkOverrides', 'inventoryItems', 'perkItems', 'stats', 'skills', 'removedSkills', 'removedItems', 'statValues', 'backgrounds'].every(key => Array.isArray(data[key]) && data[key].length <= 500)) return false;
   if (JSON.stringify(data).length > 3_000_000) return false;
   const ids = new Set();
   for (const item of [...data.blocks, ...data.pageParts, ...data.inventoryItems, ...data.perkItems, ...data.stats, ...data.skills, ...data.backgrounds]) {
@@ -64,6 +64,7 @@ function validSiteConfig(data) {
     if (part.step != null && part.step <= 0) return false;
   }
   for (const perk of data.perkOverrides) if (!perk || typeof perk.id !== 'string' || !/^[a-z0-9-]{1,100}$/.test(perk.id) || (perk.name !== undefined && (typeof perk.name !== 'string' || perk.name.length > 100)) || (perk.description !== undefined && (typeof perk.description !== 'string' || perk.description.length > 2000)) || (perk.cost !== undefined && (!Number.isInteger(perk.cost) || perk.cost < 0 || perk.cost > 500)) || (perk.requires !== undefined && (!Array.isArray(perk.requires) || perk.requires.length > 30 || perk.requires.some(id => typeof id !== 'string' || !/^[a-z0-9-]{1,100}$/.test(id)))) || (perk.removed !== undefined && typeof perk.removed !== 'boolean')) return false;
+  for (const item of data.textOverrides) if (!item || typeof item.id !== 'string' || !/^[a-z0-9-]{1,100}$/.test(item.id) || !['character-screen','stats-screen','skills-screen','perks-screen','inventory-screen','final-screen','print-sheet'].includes(item.root) || typeof item.selector !== 'string' || item.selector.length > 1000 || typeof item.text !== 'string' || item.text.length > 2000) return false;
   const removableCollections = new Set(['blocks', 'pageParts', 'inventoryItems', 'perkItems', 'stats', 'skills', 'backgrounds']);
   for (const removed of data.removedItems) if (!removed || !removableCollections.has(removed.collection) || typeof removed.id !== 'string' || removed.id.length > 100) return false;
   for (const background of data.backgrounds) if (typeof background.data !== 'string' || background.data.length > 1_500_000 || !/^data:image\/(png|jpeg|webp);base64,/.test(background.data)) return false;
@@ -178,7 +179,7 @@ async function main() {
         if (!token || !sessions.has(token)) return json(res, 401, { error: 'Sign in to the local admin editor first.' });
         const body = await readBody(req);
         if (!validSiteConfig(body)) return json(res, 400, { error: 'The site settings are invalid or too large.' });
-        const serialized = JSON.stringify({ version: 1, blocks: body.blocks, pageParts: body.pageParts, perkOverrides: body.perkOverrides, inventoryItems: body.inventoryItems, perkItems: body.perkItems, stats: body.stats, skills: body.skills, removedSkills: body.removedSkills, removedItems: body.removedItems, statValues: body.statValues, backgrounds: body.backgrounds, activeBackgroundId: body.activeBackgroundId || '' }, null, 2) + '\n';
+        const serialized = JSON.stringify({ version: 1, blocks: body.blocks, pageParts: body.pageParts, textOverrides: body.textOverrides, perkOverrides: body.perkOverrides, inventoryItems: body.inventoryItems, perkItems: body.perkItems, stats: body.stats, skills: body.skills, removedSkills: body.removedSkills, removedItems: body.removedItems, statValues: body.statValues, backgrounds: body.backgrounds, activeBackgroundId: body.activeBackgroundId || '' }, null, 2) + '\n';
         const temp = SITE_CONFIG_FILE + '.tmp'; fs.writeFileSync(temp, serialized, 'utf8'); fs.renameSync(temp, SITE_CONFIG_FILE);
         if (!isGitRepo()) return json(res, 200, { published: false, saved: true, message: 'Saved locally. Put this folder in your GitHub repository clone to publish for everyone.' });
         try {
