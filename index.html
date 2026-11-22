@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Undertow admin bundle: tree-visualizer-v2 -->
+<!-- Undertow admin bundle: page-builder-v5 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -575,12 +575,158 @@
     .community-tree-preview-node:disabled { opacity: 1; }
     .community-tree-preview-line { fill: none; stroke: #88704e; stroke-width: 2; }
     #community-admin .danger { color: #8d261e; }
+    #admin-phase-dock { position: fixed; z-index: 2000; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 10px; padding: 10px 13px; border: 1px solid #9c815c; border-radius: 12px; background: #f9f2e6; color: #392b1d; box-shadow: 0 4px 18px #261a1060; }
+    #admin-phase-dock[hidden] { display: none; }
+    #admin-phase-dock label { font-weight: 700; }
+    #admin-phase-dock select { max-width: 190px; padding: 6px; }
+    #admin-page-tools { position: fixed; z-index: 1999; top: 4vh; right: 4vw; width: min(430px, 92vw); max-height: 88vh; overflow: auto; padding: 18px; border: 1px solid #9c815c; border-radius: 12px; background: #fbf5e9; color: #392b1d; box-shadow: 0 5px 24px #261a1070; }
+    #admin-page-tools[hidden] { display: none; }
+    #admin-page-tools label { display: grid; gap: 5px; margin: 8px 0; font-weight: 700; }
+    #admin-page-tools input, #admin-page-tools select { width: 100%; box-sizing: border-box; padding: 8px; }
+    #admin-number-limits { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+    .admin-page-block { display:flex; align-items:center; gap:8px; margin:6px 0; padding:7px; border:1px solid #cdbb9e; border-radius:7px; background:#fffdf8; }
+    .admin-page-block[draggable="true"] { cursor:grab; }
+    .admin-page-block.dragging { opacity:.45; }
+    .admin-added-fields { display:grid; gap:8px; margin:12px 0; padding:12px; border:1px dashed #aa916e; border-radius:8px; }
+    .admin-added-field { display:grid; grid-template-columns:1fr minmax(100px, 2fr); align-items:center; gap:10px; }
+    @media (max-width: 560px) { #admin-phase-dock { right: 8px; bottom: 8px; left: 8px; justify-content: space-between; } }
     @media (max-width: 560px) { .community-admin-form, .community-admin-fields { grid-template-columns: 1fr; } }
     #archer-perk-tree .perk-fork > .perk-lane:first-child { order: 2; }
     #archer-perk-tree .perk-fork > .perk-lane:last-child { order: 1; }
     #firearm-perk-tree .perk-subfork > .perk-level { grid-column: 1 / -1; }
     @media (max-width: 560px) { #custom-perk-editor .custom-perk-fields { grid-template-columns: 1fr; } }
     @media (max-width: 560px) { #perks-screen .perk-node, #perks-screen .perk-node:hover, #perks-screen .perk-node:focus-visible { min-height: 54px; padding: 10px 8px; grid-template-columns: 10px minmax(0, 1fr); } #perks-screen .perk-node::after { top: 5px; right: 5px; font-size: .5rem; } #perks-screen .perk-level > .perk-node { width: 90%; } #perks-screen .perk-node .perk-name { padding-top: 6px; font-size: .75rem; } }
+    :root { --ui-ink:#2f291f; --ui-muted:#6b6255; --ui-accent:#76502c; --ui-accent-dark:#593b20; --ui-paper:#fffdfa; --ui-border:#e2dbcf; --ui-soft:#f6f2eb; --ui-shadow:0 12px 36px #2e26151a; }
+    body { background:#f2efe9; color:var(--ui-ink); }
+    main { width:min(100%, 820px); padding:clamp(24px, 4vw, 42px); border:1px solid var(--ui-border); border-radius:20px; background:var(--ui-paper); box-shadow:var(--ui-shadow); }
+    main > section:not(#perks-screen) > h1 { margin:0 0 8px; color:var(--ui-ink); font-size:clamp(1.75rem, 4vw, 2.3rem); line-height:1.15; }
+    .intro { margin:0 0 20px; color:var(--ui-muted); }
+    form { gap:16px; }
+    input:not([type=radio]):not([type=checkbox]):not([type=range]), select, textarea { border:1px solid #d4ccbf; border-radius:10px; background:#fff; transition:border-color .15s ease, box-shadow .15s ease; }
+    textarea { width:100%; min-height:84px; padding:11px 12px; color:inherit; font:inherit; resize:vertical; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px solid #b7894c66; outline-offset:2px; }
+    input[type=range] { padding:0; accent-color:var(--ui-accent); }
+    input[type=checkbox], input[type=radio] { accent-color:var(--ui-accent); }
+    button:not(.perk-node):not(.tree-choice-button):not(.community-tree-preview-node) { border-radius:10px; transition:background .15s ease, transform .15s ease, box-shadow .15s ease; }
+    button:not(:disabled):not(.perk-node):not(.tree-choice-button):not(.community-tree-preview-node):hover { transform:translateY(-1px); box-shadow:0 4px 12px #3326171a; }
+    fieldset { padding:16px; border:1px solid var(--ui-border); border-radius:14px; background:#fcfaf6; }
+    .choice span { border-color:var(--ui-border); background:#fff; transition:background .15s ease, border-color .15s ease; }
+    .category { border-top:1px solid var(--ui-border); padding-top:18px; }
+    .allocation-total { border:1px solid #e9d9c2; box-shadow:0 5px 16px #412e1510; }
+    .saved-card, .inventory-card, #account-panel { border-color:var(--ui-border); border-radius:14px; background:#fcfaf6; }
+    #account-panel { padding:18px; }
+    .inventory-card { padding:15px; }
+    #community-admin { border-color:var(--ui-border); border-radius:16px; box-shadow:0 5px 18px #3326170d; }
+    #community-admin button { min-height:40px; }
+    #community-admin .community-admin-actions button { padding:9px 13px; }
+    [data-admin-hidden="true"] { display:none !important; }
+    #admin-phase-dock { z-index:4000; right:18px; bottom:18px; max-width:min(760px, calc(100vw - 36px)); flex-wrap:wrap; gap:8px 12px; padding:10px 12px; border:1px solid #ddd2bf; border-radius:16px; background:#fffdfa; color:var(--ui-ink); box-shadow:0 12px 34px #21180f2b; }
+    #admin-phase-dock .admin-dock-title { display:grid; gap:1px; padding:0 8px 0 2px; }
+    .admin-kicker { color:#8b6a45; font:700 .62rem/1.2 system-ui,sans-serif; letter-spacing:.13em; }
+    #admin-phase-dock label { margin:0; color:var(--ui-muted); font-size:.76rem; font-weight:700; }
+    #admin-phase-dock select { width:auto; max-width:190px; padding:8px 10px; }
+    .admin-secondary-button { border:1px solid var(--ui-border) !important; background:#f4f0e9 !important; color:var(--ui-ink) !important; }
+    .admin-secondary-button:hover { background:#ebe4d9 !important; }
+    #admin-page-tools { z-index:4100; top:16px; right:16px; width:min(560px, calc(100vw - 32px)); max-height:calc(100vh - 32px); padding:18px; border:1px solid #ded6c9; border-radius:18px; background:#fffdfa; color:var(--ui-ink); box-shadow:0 20px 65px #21180f45; }
+    #admin-page-tools[hidden] { display:none !important; }
+    .admin-tools-header, .admin-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .admin-tools-header { position:sticky; top:-18px; z-index:2; margin:-18px -18px 12px; padding:16px 18px 12px; border-bottom:1px solid var(--ui-border); background:#fffdfa; }
+    .admin-tools-header h2 { margin:3px 0 0; font-size:1.2rem; }
+    .admin-close-button { width:36px; height:36px; padding:0 !important; border-radius:50% !important; background:#f3efe7 !important; color:var(--ui-ink) !important; font-size:1.25rem !important; }
+    #admin-page-tools label { display:grid; gap:6px; margin:0; color:#514638; font-size:.82rem; font-weight:700; }
+    #admin-page-tools input:not([type=checkbox]):not([type=range]), #admin-page-tools select, #admin-page-tools textarea { width:100%; box-sizing:border-box; padding:10px 11px; border:1px solid #d8d0c4; border-radius:9px; background:#fff; color:var(--ui-ink); font:inherit; }
+    #admin-page-tools input[type=file] { padding:8px; font-size:.78rem; }
+    #admin-page-tools .admin-wide-field { margin:0 0 10px; }
+    .admin-note { margin:0 0 12px; padding:9px 11px; border-radius:9px; background:#f5f1e9; color:var(--ui-muted); font-size:.78rem; line-height:1.4; }
+    .admin-manager-card { margin:10px 0; padding:14px; border:1px solid var(--ui-border); border-radius:13px; background:#fff; }
+    details.admin-manager-card { padding:0; overflow:hidden; }
+    details.admin-manager-card > summary { display:grid; gap:3px; padding:13px 14px; cursor:pointer; font-weight:750; list-style-position:inside; }
+    details.admin-manager-card > summary small { padding-left:20px; color:var(--ui-muted); font-weight:400; }
+    details.admin-manager-card[open] > summary { border-bottom:1px solid var(--ui-border); background:#faf8f4; }
+    .admin-editor-form { display:grid; gap:10px; padding:14px; }
+    .admin-editor-form textarea { min-height:60px; }
+    .admin-limit-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .admin-form-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .admin-form-actions button { flex:1 1 150px; }
+    .admin-check-field { display:flex !important; grid-template-columns:none !important; align-items:center; gap:9px !important; }
+    .admin-check-field input { width:18px; height:18px; }
+    .admin-section-heading { align-items:center; margin-bottom:10px; }
+    .admin-section-heading h3 { margin:0 0 4px; font-size:1rem; }
+    .admin-section-heading p { margin:0; color:var(--ui-muted); font-size:.77rem; line-height:1.35; }
+    .admin-count { display:grid; place-items:center; min-width:28px; height:28px; padding:0 8px; border-radius:99px; background:#f1ece3; color:#66543d; font-size:.75rem; font-weight:750; }
+    .admin-block-list { display:grid; gap:7px; }
+    .admin-block-item, .admin-built-in-item { display:flex; align-items:center; justify-content:space-between; gap:10px; min-width:0; padding:9px 10px; border:1px solid #ebe5da; border-radius:10px; background:#fff; }
+    .admin-block-item.dragging { opacity:.45; }
+    .admin-block-item[draggable=true] { cursor:grab; }
+    .admin-block-meta { display:grid; gap:2px; min-width:0; }
+    .admin-block-meta strong { overflow-wrap:anywhere; font-size:.82rem; }
+    .admin-block-meta span { color:var(--ui-muted); font-size:.7rem; }
+    .admin-block-actions { display:flex; flex:0 0 auto; gap:5px; }
+    .admin-block-actions button, .admin-built-in-item button { min-height:34px; padding:7px 10px; font-size:.75rem; }
+    .admin-built-in-item button { background:#f2eee7; color:#514638; }
+    .admin-background-add { display:grid; grid-template-columns:1fr 1fr; gap:9px; align-items:end; }
+    .admin-background-add button { grid-column:1/-1; }
+    .admin-tools-footer { position:sticky; bottom:-18px; margin:12px -18px -18px; padding:12px 18px; border-top:1px solid var(--ui-border); background:#fffdfa; }
+    .admin-tools-footer #admin-save-config { width:100%; }
+    .admin-tools-footer p { margin:7px 0 0; color:var(--ui-muted); font-size:.76rem; text-align:center; }
+    .admin-added-fields { gap:12px; padding:16px; border:1px solid var(--ui-border); border-radius:14px; background:#fcfaf6; }
+    .admin-added-fields h2 { margin:0; font-size:1.05rem; }
+    .admin-added-field { display:grid; grid-template-columns:minmax(0,1fr) minmax(120px,1.2fr); align-items:center; gap:10px; color:#4d4539; font-size:.86rem; }
+    .admin-added-field input:not([type=checkbox]):not([type=range]), .admin-added-field select, .admin-added-field textarea { width:100%; min-width:0; }
+    .admin-added-field textarea { min-height:72px; }
+    .admin-added-switch { display:flex; align-items:center; gap:10px; }
+    .admin-added-switch input { width:20px; height:20px; }
+    .admin-added-choice-list { display:grid; gap:6px; }
+    .admin-added-choice-list label { display:flex; align-items:center; gap:8px; margin:0; font-weight:400; }
+    .admin-added-choice-list input { width:18px; height:18px; }
+    .admin-added-image { max-width:min(100%, 520px); max-height:420px; object-fit:contain; border-radius:10px; }
+    .admin-added-image-figure { display:grid; justify-items:start; gap:7px; margin:0; }
+    .admin-added-divider { width:100%; border:0; border-top:1px solid var(--ui-border); }
+    #admin-built-in-dialog { width:min(460px,calc(100vw - 32px)); max-height:calc(100vh - 32px); padding:0; overflow:auto; border:1px solid #ded6c9; border-radius:16px; background:#fffdfa; color:var(--ui-ink); box-shadow:0 24px 80px #21180f50; }
+    #admin-built-in-dialog::backdrop { background:#241c14a8; backdrop-filter:blur(2px); }
+    #admin-built-in-form { display:grid; gap:12px; padding:20px; }
+    #admin-built-in-form header h2 { margin:4px 0 0; font-size:1.2rem; }
+    #admin-built-in-form label { display:grid; gap:6px; color:#514638; font-size:.82rem; font-weight:700; }
+    #admin-built-in-form input:not([type=hidden]) { width:100%; box-sizing:border-box; padding:10px 11px; border:1px solid #d8d0c4; border-radius:9px; font:inherit; }
+    #admin-built-in-form .admin-note { margin:0; }
+    #admin-built-in-form .admin-form-actions { justify-content:flex-end; }
+    @media (max-width: 640px) {
+      body { padding:12px; }
+      main { padding:22px 18px; border-radius:16px; }
+      #admin-phase-dock { right:8px; bottom:8px; left:8px; max-width:none; justify-content:space-between; gap:7px; padding:8px; }
+      #admin-phase-dock .admin-dock-title { display:none; }
+      #admin-phase-dock label { display:none; }
+      #admin-phase-dock select { flex:1 1 140px; max-width:none; }
+      #admin-phase-dock button { flex:1 1 130px; padding:9px 10px; font-size:.78rem; }
+      #admin-page-tools { top:8px; right:8px; width:calc(100vw - 16px); max-height:calc(100dvh - 16px); padding:12px; }
+      .admin-tools-header { top:-12px; margin:-12px -12px 10px; padding:12px; }
+      .admin-tools-footer { bottom:-12px; margin:10px -12px -12px; padding:10px 12px; }
+      .admin-manager-card { padding:11px; }
+      .admin-background-add { grid-template-columns:1fr; }
+      .admin-background-add button { grid-column:auto; }
+      .admin-block-item, .admin-built-in-item { align-items:flex-start; }
+      .admin-added-field { grid-template-columns:1fr; gap:5px; }
+    }
+    #admin-page-tools [hidden] { display:none !important; }
+    .admin-form-note { margin:0; color:var(--ui-muted); font-size:.76rem; }
+    .admin-danger-button { background:#fff1ee !important; color:#8c3427 !important; }
+    .admin-empty-state { margin:4px 0; padding:12px; border:1px dashed #ded6c9; border-radius:10px; color:var(--ui-muted); font-size:.82rem; line-height:1.45; }
+    .admin-added-block { display:grid; gap:8px; min-width:0; }
+    .admin-added-field-label { display:grid; grid-template-columns:minmax(0,1fr) minmax(120px,1.2fr); align-items:center; gap:10px; margin:0; color:#4d4539; font-size:.86rem; }
+    .admin-added-check, .admin-added-switch { display:flex; align-items:center; gap:9px; margin:0; color:#4d4539; font-size:.86rem; }
+    .admin-added-block small { color:var(--ui-muted); font-size:.76rem; }
+    .admin-added-heading { margin:4px 0 0; color:var(--ui-ink); font-size:1.15rem; }
+    .admin-added-paragraph { margin:0; color:var(--ui-muted); line-height:1.55; }
+    .admin-added-link { display:inline-flex; justify-self:start; padding:9px 13px; border-radius:9px; background:var(--ui-accent); color:white; font-weight:700; text-decoration:none; }
+    .admin-added-slider-value { color:var(--ui-accent-dark); font-weight:750; }
+    .admin-added-block input[type=checkbox] { width:18px; height:18px; accent-color:var(--ui-accent); }
+    .admin-added-choice-list { display:grid; gap:7px; min-width:0; margin:0; padding:12px; border:1px solid var(--ui-border); border-radius:10px; background:#fff; }
+    .admin-added-choice-list label { display:flex; align-items:center; gap:8px; margin:0; font-weight:450; }
+    .admin-added-choice-list input { width:18px; height:18px; accent-color:var(--ui-accent); }
+    .admin-added-image-figure { display:grid; gap:7px; margin:0; }
+    .admin-added-image { display:block; max-width:min(100%,520px); max-height:420px; object-fit:contain; border-radius:10px; }
+    .admin-added-divider { width:100%; border:0; border-top:1px solid var(--ui-border); }
+    @media (max-width:640px) { .admin-added-field-label { grid-template-columns:1fr; gap:5px; } }
   </style>
 </head>
 <body>
@@ -1136,6 +1282,57 @@
       <button id="print-button" type="button" disabled>Print / Save as PDF</button>
     </section>
   </main>
+  <aside id="admin-phase-dock" hidden aria-label="Admin controls">
+    <div class="admin-dock-title"><span class="admin-kicker">UNDERTOW EDITOR</span><strong>Admin mode</strong></div>
+    <label for="admin-settings-scope">Save changes to</label>
+    <select id="admin-settings-scope"><option value="me">Just for me</option><option value="character">Just for this character</option><option value="universal">Universal</option></select>
+    <button id="admin-open-page-tools" type="button">Edit pages</button>
+    <button id="admin-next-phase" type="button" class="admin-secondary-button">Skip to next phase</button>
+  </aside>
+  <aside id="admin-page-tools" hidden aria-label="Page content editor">
+    <header class="admin-tools-header">
+      <div><span class="admin-kicker">PAGE BUILDER</span><h2 id="admin-page-tools-title">Manage page content</h2></div>
+      <button id="admin-close-page-tools" type="button" class="admin-close-button" aria-label="Close page editor">×</button>
+    </header>
+    <label class="admin-wide-field">Page to edit
+      <select id="admin-target-page"><option value="character-screen">Character details</option><option value="stats-screen">Major stats</option><option value="skills-screen">Skills</option><option value="perks-screen">Perks</option><option value="inventory-screen">Inventory</option><option value="final-screen">Final Changes</option></select>
+    </label>
+    <p id="admin-scope-note" class="admin-note"></p>
+    <details class="admin-manager-card" open>
+      <summary><span>Add a page block</span><small>Inputs, choices, text, images, and more</small></summary>
+      <form id="admin-block-form" class="admin-editor-form">
+        <input id="admin-block-edit-id" type="hidden" value="">
+        <label>Block name<input id="admin-block-label" type="text" maxlength="80" required placeholder="For example: Character notes"></label>
+        <label>Block type<select id="admin-block-type">
+          <option value="text">Short text input</option><option value="textarea">Long text box</option><option value="number">Number input</option><option value="slider">Slider</option><option value="switch">On / off switch</option><option value="checkbox">Checkbox</option><option value="multiselect">Multiple checkboxes</option><option value="dropdown">Dropdown choices</option><option value="radio">Single choice</option><option value="date">Date</option><option value="url">Link input</option><option value="file">File upload</option><option value="heading">Heading</option><option value="paragraph">Description text</option><option value="divider">Divider</option><option value="button">Button link</option><option value="image">Image</option>
+        </select></label>
+        <label id="admin-block-content-wrap">Display text or helper text<textarea id="admin-block-content" rows="3" maxlength="1200" placeholder="Optional instructions or a short description"></textarea></label>
+        <label id="admin-block-options-wrap" hidden>Choice options<textarea id="admin-block-options" rows="4" maxlength="1200" placeholder="One choice per line"></textarea></label>
+        <div id="admin-number-limits" class="admin-limit-grid" hidden><label>Minimum<input id="admin-block-min" type="number" value="0"></label><label>Maximum<input id="admin-block-max" type="number" value="100"></label><label>Step<input id="admin-block-step" type="number" min="0.01" step="any" value="1"></label></div>
+        <label id="admin-block-url-wrap" hidden>Button destination<input id="admin-block-url" type="url" placeholder="https://example.com"></label>
+        <label id="admin-block-image-wrap" hidden>Image file<input id="admin-block-image" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        <label id="admin-block-required-wrap" class="admin-check-field"><input id="admin-block-required" type="checkbox"> Require an answer</label>
+        <p id="admin-block-form-page-note" class="admin-form-note">New blocks are added at the bottom of the selected page.</p>
+        <div class="admin-form-actions"><button id="admin-block-submit" type="submit">Add block</button><button id="admin-block-cancel-edit" type="button" class="admin-secondary-button" hidden>Cancel edit</button></div>
+      </form>
+    </details>
+    <section class="admin-manager-card"><div class="admin-section-heading"><div><h3>Blocks on this page</h3><p>Drag to reorder. Edit or delete any custom block.</p></div><span id="admin-block-count" class="admin-count">0</span></div><div id="admin-block-list" class="admin-block-list"></div></section>
+    <section class="admin-manager-card"><div class="admin-section-heading"><div><h3>Built-in sections</h3><p><span id="admin-built-in-page-label">This page</span>. Hide or restore a section without losing its original content.</p></div><span id="admin-built-in-count" class="admin-count">0</span></div><div id="admin-built-in-list" class="admin-block-list"></div></section>
+    <section id="admin-background-manager" class="admin-manager-card"><div class="admin-section-heading"><div><h3>Background image</h3><p>Choose an image for the page background in this scope.</p></div></div><div class="admin-background-add"><label>Background image<input id="admin-background-file" type="file" accept="image/png,image/jpeg,image/webp"></label><label>Image name<input id="admin-background-name" type="text" maxlength="80" placeholder="Optional name"></label><button id="admin-background-add" type="button">Add background</button></div><div id="admin-background-list" class="admin-block-list"></div></section>
+    <section id="admin-page-specific" class="admin-manager-card"></section>
+    <dialog id="admin-built-in-dialog" aria-labelledby="admin-built-in-dialog-title">
+      <form id="admin-built-in-form">
+        <header><span class="admin-kicker">BUILT-IN BLOCK</span><h2 id="admin-built-in-dialog-title">Edit block</h2></header>
+        <p id="admin-built-in-dialog-note" class="admin-note"></p>
+        <input id="admin-built-in-edit-id" type="hidden">
+        <label>Block text<input id="admin-built-in-text" type="text" maxlength="1200" required></label>
+        <div id="admin-built-in-number-limits" class="admin-limit-grid" hidden><label>Minimum<input id="admin-built-in-min" type="number" step="any"></label><label>Maximum<input id="admin-built-in-max" type="number" step="any"></label><label>Step<input id="admin-built-in-step" type="number" min="0.01" step="any"></label></div>
+        <p class="admin-form-note">Other built-in controls keep their original behavior. Use the custom block editor to add new field types and choices.</p>
+        <div class="admin-form-actions"><button id="admin-built-in-cancel" type="button" class="admin-secondary-button">Cancel</button><button type="submit">Save block</button></div>
+      </form>
+    </dialog>
+    <footer class="admin-tools-footer"><button id="admin-save-config" type="button">Save this scope</button><p id="admin-config-status" role="status" aria-live="polite">Changes save to the selected scope.</p></footer>
+  </aside>
   <section id="print-sheet" class="print-only" hidden aria-label="Character sheet"></section>
 
   <script>
@@ -1367,6 +1564,13 @@
         const sourceName = document.querySelector(`.perk-node[data-perk="${perkId}"] .perk-name`)?.textContent.trim() || 'Perk';
         items.forEach((item) => acquiredItems.push({ ...item, sourceName }));
       });
+      (siteConfig.perkItems || []).forEach((link) => {
+        if (!selectedPerks.has(link.perkId)) return;
+        const item = siteConfig.inventoryItems.find((entry) => entry.id === link.itemId);
+        if (!item) return;
+        const sourceName = document.querySelector(`.perk-node[data-perk="${link.perkId}"] .perk-name`)?.textContent.trim() || perkNameById(link.perkId) || 'Perk';
+        acquiredItems.push({ name: item.label, description: item.description || '', damageDice: item.damage || '', range: item.range || '', tags: item.tags || '', quantity: item.quantity, special: item.special || '', weapon: item.kind === 'weapon' || item.kind === 'attachment', attachment: item.kind === 'attachment', ammunition: item.kind === 'ammunition', sourceName });
+      });
       if (!acquiredItems.length) {
         const empty = document.createElement('p');
         empty.className = 'inventory-empty';
@@ -1386,6 +1590,7 @@
         description.className = 'inventory-description';
         description.textContent = item.description;
         card.append(name, source);
+        if (Number.isFinite(Number(item.quantity)) && item.quantity !== '' && item.quantity !== undefined) { const quantity=document.createElement('p');quantity.className='inventory-weapon-stats';quantity.textContent=`Quantity: ${item.quantity}`;card.append(quantity); }
         if (item.choices) {
           const select = document.createElement('select');
           select.className = 'inventory-select';
@@ -1439,6 +1644,15 @@
         card.append(description);
         list.append(card);
       });
+    }
+
+    function perkNameById(perkId) {
+      const node = document.querySelector(`.perk-node[data-perk="${CSS.escape(perkId)}"] .perk-name`);
+      if (node) return node.textContent.trim();
+      const community = communityCatalog?.trees?.flatMap((tree) => tree.perks.map((perk) => ({ tree, perk }))).find(({ tree, perk }) => communityPerkDomId(tree, perk) === perkId);
+      if (community) return community.perk.name;
+      const custom = customPerks.find((perk) => `custom-${perk.id}` === perkId);
+      return custom?.title || perkId;
     }
 
     function perkRequirementsMet(perk) {
@@ -2083,7 +2297,8 @@
       const derivedTitle = document.createElement('h2');
       derivedTitle.textContent = 'Derived values';
       derived.append(derivedTitle);
-      [['Reputation (Inf)', 'reputation'], ['Base health ((Res + Str) / 2)', 'base-health'], ['Limb health ((Res + Str) / 4)', 'limb-health'], ['Stress die', 'stress-die'], ['Move die', 'move-die']].forEach(([labelText, id]) => {
+      const statRef=(key)=>categories[key]?.short||categories[key]?.label||'removed stat';
+      [[`Reputation (${statRef('influence')})`, 'reputation'], [`Base health ((${statRef('resolve')} + ${statRef('strength')}) / 2)`, 'base-health'], [`Limb health ((${statRef('resolve')} + ${statRef('strength')}) / 4)`, 'limb-health'], ['Stress die', 'stress-die'], [`Move die (${statRef('perceive')})`, 'move-die']].forEach(([labelText, id]) => {
         const row = document.createElement('div');
         row.className = 'derived-row';
         const label = document.createElement('span');
@@ -2147,7 +2362,7 @@
       document.getElementById('final-limb-health').textContent = String(Math.round(((currentStats.resolve || 0) + (currentStats.strength || 0)) / 4));
       document.getElementById('final-stress-die').textContent = '1d6';
       document.getElementById('final-move-die').textContent = moveDieFor(currentStats.perceive || 0);
-      const invalidStats = new Set(finalStatSelects.map((select) => select.value).filter(Boolean)).size !== 5 || finalStatSelects.some((select) => !select.value);
+      const invalidStats = new Set(finalStatSelects.map((select) => select.value).filter(Boolean)).size !== categoryKeys.length || finalStatSelects.length !== categoryKeys.length || finalStatSelects.some((select) => !select.value);
       const invalidSkills = finalSkillInputs.some((input) => input.value === '' || !input.checkValidity());
       const invalidDetails = !['final-name', 'final-occupation', 'final-age'].every((id) => document.getElementById(id).checkValidity());
       const valid = !invalidStats && !invalidSkills && !invalidDetails && finalReserve.checkValidity() && totals.total === budget;
@@ -2233,6 +2448,7 @@
       const makeWeaponLine = (item, choice, sourceName) => {
         const details = choice || item;
         const parts = [`${details.name || item.name} (${sourceName})`];
+        if (details.quantity !== undefined && details.quantity !== '') parts.push(`Quantity: ${details.quantity}`);
         if (details.damageDice || details.range) {
           parts.push(`Damage: ${details.damageDice || '—'}; range: ${details.range || '—'}`);
         }
@@ -2261,6 +2477,17 @@
           }
           weaponEntries += 1;
         });
+      });
+      const otherInventoryItems=[];
+      (siteConfig.perkItems||[]).forEach(link=>{
+        if(!selectedPerks.has(link.perkId))return;
+        const item=siteConfig.inventoryItems.find(entry=>entry.id===link.itemId);if(!item)return;
+        const sourceName=perkNameById(link.perkId)||'Perk';
+        const normalized={name:item.label,damageDice:item.damage||'',range:item.range||'',tags:item.tags||'',description:item.description||'',quantity:item.quantity,special:item.special||'',weapon:item.kind==='weapon',attachment:item.kind==='attachment',ammunition:item.kind==='ammunition'};
+        if(!(normalized.weapon||normalized.attachment||normalized.ammunition)){otherInventoryItems.push({item:normalized,sourceName});return;}
+        const li=document.createElement('li');li.textContent=makeWeaponLine(normalized,null,sourceName);
+        if(normalized.attachment){if(!attachmentGroups.has(sourceName))attachmentGroups.set(sourceName,[]);attachmentGroups.get(sourceName).push(li);}else weaponList.append(li);
+        weaponEntries+=1;
       });
       if (weaponEntries === 0) {
         const empty = document.createElement('li');
@@ -2421,6 +2648,12 @@
       health.append(healthTitle, trackerValuesRow, healthLayout);
       trackerGroup.append(health);
       pageTwo.append(trackerGroup);
+
+      if(otherInventoryItems.length){
+        const otherBox=document.createElement('section');otherBox.className='print-weapons-box print-other-inventory';
+        const otherTitle=document.createElement('h2');otherTitle.textContent='Other inventory';const otherList=document.createElement('ul');otherList.className='print-weapons-list';
+        otherInventoryItems.forEach(({item,sourceName})=>{const li=document.createElement('li');li.textContent=`${item.name} (${sourceName})${item.quantity!==undefined&&item.quantity!==''?` — Quantity: ${item.quantity}`:''}${item.description?` — ${item.description}`:''}${item.tags?` — Tags: ${item.tags}`:''}${item.special?` — ${item.special}`:''}`;otherList.append(li);});otherBox.append(otherTitle,otherList);pageTwo.append(otherBox);
+      }
 
       const perksGrid = document.createElement('div');
       perksGrid.className = 'print-perks';
@@ -2640,6 +2873,7 @@
         reserve: Number(finalReserve.value) || 0,
         perks: [...selectedPerks],
         inventoryChoices: { ...inventoryChoices },
+        adminBlockValues: { ...adminBlockValues },
         customPerks: customPerks.map((perk) => ({ ...perk })),
         savedAt: new Date().toISOString()
       };
@@ -2656,6 +2890,11 @@
       else saved.push(character);
       try {
         writeSavedCharacters(saved);
+        if (!activeSaveId && activeAdminScope === 'character') {
+          const draftKey='undertow-site-config-character-draft';
+          const draftConfig=localStorage.getItem(draftKey);
+          if(draftConfig){localStorage.setItem(`undertow-site-config-character-${id}`,draftConfig);localStorage.removeItem(draftKey);}
+        }
         activeSaveId = id;
         document.getElementById('save-status').textContent = 'Character saved in this browser.';
         renderSavedCharacters();
@@ -2666,7 +2905,10 @@
 
     async function loadSavedCharacter(character) {
       await communityReady;
+      await siteConfigReady;
       activeSaveId = character.id;
+      if(activeAdminScope==='character'){siteConfig=readScopedConfig('character');applySiteDefinitions();renderAdminBlocks();}
+      adminBlockValues = { ...(character.adminBlockValues || {}) };
       const storedPeriod = character.timePeriod;
       if (storedPeriod?.id === 'custom') {
         customPeriodName.value = storedPeriod.label || 'Custom';
@@ -2725,7 +2967,8 @@
       target.scrollIntoView({ block: 'start' });
     }));
 
-    document.getElementById('to-inventory-button').addEventListener('click', () => {
+    document.getElementById('to-inventory-button').addEventListener('click', async () => {
+      await siteConfigReady;
       document.getElementById('perks-screen').hidden = true;
       document.getElementById('inventory-screen').hidden = false;
       renderPerkInventory();
@@ -2818,6 +3061,7 @@
       communityCatalog.trees.forEach(communityRenderTree);
       choosePerkTree(activePerkTreeIndex);
       updatePerkTree();
+      if(typeof applyPageParts==='function')applyPageParts();
     }
     function communityLoadCatalog(data) {
       communityCatalog = communityCleanCatalog({ trees: Array.isArray(data?.trees) ? data.trees : [] });
@@ -2994,7 +3238,7 @@
       try {
         const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
-        communityAuthToken = result.token; document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; status.textContent = 'Signed in to the local editor.';
+        communityAuthToken = result.token; document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('admin-phase-dock').hidden = false; status.textContent = 'Signed in to the local editor.';
       } catch (error) { status.textContent = error.message; }
     });
     document.getElementById('community-hide-admin').addEventListener('click', () => {
@@ -3004,6 +3248,7 @@
       document.getElementById('community-editor').hidden = true;
       document.getElementById('community-login').hidden = false;
       document.getElementById('community-admin').hidden = true;
+      document.getElementById('admin-phase-dock').hidden = true;
     });
     document.getElementById('community-publish').addEventListener('click', async () => {
       if (!communityAuthToken) return alert('Sign in to the local admin editor first.');
@@ -3015,7 +3260,41 @@
         status.textContent = result.message; if (result.published) { communityDraftDirty = false; communityUndoStack = []; document.getElementById('community-undo').disabled = true; }
       } catch (error) { status.textContent = error.message; }
     });
-    window.addEventListener('beforeunload', event => { if (communityDraftDirty) { event.preventDefault(); event.returnValue = ''; } });
+    const adminPhaseIds = ['character-screen', 'stats-screen', 'skills-screen', 'perks-screen', 'inventory-screen', 'final-screen'];
+    const adminPhaseNames = ['Character details', 'Stats', 'Skills', 'Perks', 'Inventory', 'Final Changes'];
+    function refreshAdminPhaseButton() {
+      const current = adminPhaseIds.findIndex(id => !document.getElementById(id).hidden);
+      const button = document.getElementById('admin-next-phase');
+      const next = current + 1;
+      button.disabled = !communityAuthToken || current < 0 || next >= adminPhaseIds.length;
+      button.textContent = next < adminPhaseNames.length ? `Go to next phase: ${adminPhaseNames[next]}` : 'Final phase';
+    }
+    document.getElementById('admin-next-phase').addEventListener('click', async () => {
+      await siteConfigReady;
+      if (!communityAuthToken) return;
+      const currentIndex = adminPhaseIds.findIndex(id => !document.getElementById(id).hidden);
+      if (currentIndex < 0 || currentIndex >= adminPhaseIds.length - 1) return;
+      const currentId = adminPhaseIds[currentIndex];
+      if (currentId === 'character-screen') {
+        activeSaveId = null; finalReady = false; selectedPerks = new Set();
+        const normal = document.querySelector('#character-form input[name="difficulty"][value="Normal"]'); if (normal) normal.checked = true;
+        document.getElementById('difficulty-message').hidden = true; document.getElementById('stats-form').hidden = false;
+      }
+      if (currentId === 'stats-screen') {
+        const used=new Set();
+        initialStatSelects.forEach((select, i) => { if(!statValues.includes(select.value)||used.has(select.value))select.value='';if(!select.value){select.value=statValues.find(value=>!used.has(value))||'';}if(select.value)used.add(select.value);stats[select.name]=Number(select.value)||0; });
+        updateUniqueOptions(statsFields); reserveInput.value = '0'; buildSkills(); updateSkills();
+      }
+      if (currentId === 'skills-screen') updatePerkTree();
+      if (currentId === 'perks-screen') renderPerkInventory();
+      if (currentId === 'inventory-screen') buildFinalPage();
+      document.getElementById(currentId).hidden = true;
+      const nextId = adminPhaseIds[currentIndex + 1]; document.getElementById(nextId).hidden = false;
+      if (nextId === 'final-screen') updateFinalPage();
+      refreshAdminPhaseButton(); if(!document.getElementById('admin-page-tools').hidden)showAdminBlockList();document.getElementById(nextId).scrollIntoView({ block: 'start' });
+    });
+    document.querySelectorAll('main > section').forEach(section => new MutationObserver(refreshAdminPhaseButton).observe(section, { attributes: true, attributeFilter: ['hidden'] }));
+    window.addEventListener('beforeunload', event => { if (communityDraftDirty || siteConfigDraftDirty) { event.preventDefault(); event.returnValue = ''; } });
     document.addEventListener('click', event => {
       if (!communityDraftDirty) return;
       const button = event.target.closest('button');
@@ -3038,11 +3317,261 @@
         try { const response = await fetch('./community-trees.json', { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
       }
     })();
+    const siteConfigDefaults = { version: 1, blocks: [], pageParts: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' };
+    const siteConfigLocalKey = 'undertow-site-config-local-v1';
+    let siteConfig = structuredClone(siteConfigDefaults);
+    let universalSiteConfig = structuredClone(siteConfigDefaults);
+    let siteConfigReady = Promise.resolve();
+    let activeAdminScope = 'me';
+    let adminBlockValues = {};
+    let siteConfigDraftDirty = false;
+    function cleanSiteConfig(config) { return { ...structuredClone(siteConfigDefaults), ...(config || {}), blocks: [...(config?.blocks || [])], pageParts: [...(config?.pageParts || [])], perkOverrides: [...(config?.perkOverrides || [])], inventoryItems: [...(config?.inventoryItems || [])], perkItems: [...(config?.perkItems || [])], stats: [...(config?.stats || [])], skills: [...(config?.skills || [])], removedSkills: [...(config?.removedSkills || [])], removedItems: [...(config?.removedItems || [])], statValues: [...(config?.statValues || [])], backgrounds: [...(config?.backgrounds || [])], activeBackgroundId: String(config?.activeBackgroundId || '') }; }
+    function siteItemId(prefix) { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`; }
+    function markSiteItemRemoved(collection, id) { if (activeAdminScope !== 'universal' && !siteConfig.removedItems.some(item => item.collection === collection && item.id === id)) siteConfig.removedItems.push({ collection, id }); }
+    function clearSiteItemRemoval(collection, id) { siteConfig.removedItems = siteConfig.removedItems.filter(item => item.collection !== collection || item.id !== id); }
+    const baseCategoryKeys = [...categoryKeys];
+    const baseCategoryDefinitions = structuredClone(categories);
+    const baseStatValues = [...statValues];
+    function resetStatDefinitions() { Object.keys(categories).forEach(key=>delete categories[key]); Object.assign(categories, structuredClone(baseCategoryDefinitions)); categoryKeys.splice(0,categoryKeys.length,...baseCategoryKeys); }
+    function applySiteDefinitions() {
+      resetStatDefinitions();
+      if (siteConfig.stats.length) {
+        const savedKeys = new Set(siteConfig.stats.map(item=>item.id));
+        categoryKeys.slice().forEach(key=>{if(!savedKeys.has(key)){categoryKeys.splice(categoryKeys.indexOf(key),1);delete categories[key];}});
+        siteConfig.stats.forEach(item=>{if(!categories[item.id]){categories[item.id]={label:item.label,short:item.short||item.label.slice(0,3),description:item.description||'',skills:[]};categoryKeys.push(item.id);}else{categories[item.id].label=item.label;categories[item.id].short=item.short||categories[item.id].short;}});
+      }
+      statValues.splice(0,statValues.length,...(siteConfig.statValues.length?siteConfig.statValues.map(String):baseStatValues));
+      while(statValues.length<categoryKeys.length)statValues.push(String(Number(statValues.at(-1)||50)+5));
+      siteConfig.removedSkills.forEach(key=>{const [category,skill]=key.split('::');if(categories[category])categories[category].skills=categories[category].skills.filter(name=>name!==skill);});
+      const removedSkillSet=new Set(siteConfig.removedSkills);
+      siteConfig.skills.filter(item=>!removedSkillSet.has(`${item.category}::${item.label}`)).forEach(item=>{if(categories[item.category]&&!categories[item.category].skills.includes(item.label))categories[item.category].skills.push(item.label);});
+      rebuildStatFields(); buildSkills(); applyStatLabels(); applySiteBackground(); applyPageParts(); applySitePerkOverrides(); finalReady=false;
+    }
+    function currentCharacterConfigKey() { return `undertow-site-config-character-${activeSaveId || 'draft'}`; }
+    function currentAdminPage() { const chosen=document.getElementById('admin-target-page')?.value; return !document.getElementById('admin-page-tools')?.hidden && chosen ? chosen : (adminPhaseIds.find(id => !document.getElementById(id).hidden) || 'character-screen'); }
+    function readScopedConfig(scope) {
+      if (scope === 'universal') return cleanSiteConfig(universalSiteConfig);
+      const key = scope === 'me' ? siteConfigLocalKey : currentCharacterConfigKey();
+      try {
+        const local=JSON.parse(localStorage.getItem(key)||'null'); if(!local)return cleanSiteConfig(universalSiteConfig);
+        const merged=cleanSiteConfig(universalSiteConfig);
+        merged.removedSkills=[...new Set([...merged.removedSkills,...(local.removedSkills||[])])];
+        merged.removedItems=[...new Map([...merged.removedItems,...(local.removedItems||[])].map(item=>[`${item.collection}:${item.id}`,item])).values()];
+        for(const collection of ['blocks','pageParts','perkOverrides','inventoryItems','perkItems','stats','skills','backgrounds']) {
+          const byId=new Map(merged[collection].map(item=>[item.id,item]));
+          (local[collection]||[]).forEach(item=>byId.set(item.id,item));
+          const removed=new Set(merged.removedItems.filter(item=>item.collection===collection).map(item=>item.id));
+          merged[collection]=[...byId.values()].filter(item=>!removed.has(item.id));
+        }
+        if(local.statValues?.length) merged.statValues=[...local.statValues];
+        if(Object.hasOwn(local,'activeBackgroundId'))merged.activeBackgroundId=String(local.activeBackgroundId||'');
+        return merged;
+      } catch { return cleanSiteConfig(universalSiteConfig); }
+    }
+    function renderAdminBlocks() {
+      document.querySelectorAll('.admin-added-fields').forEach(node => node.remove());
+      const grouped = new Map();
+      siteConfig.blocks.forEach(block => { if (!grouped.has(block.page)) grouped.set(block.page, []); grouped.get(block.page).push(block); });
+      grouped.forEach((blocks, pageId) => {
+        const page = document.getElementById(pageId); if (!page) return;
+        const host = document.createElement('section'); host.className = 'admin-added-fields';
+        const title = document.createElement('h2'); title.textContent = 'Additional fields'; host.append(title);
+        blocks.sort((a,b)=>(a.order??0)-(b.order??0)).forEach(block => host.append(renderAdminBlock(block)));
+        page.append(host);
+      });
+      applyPageParts();
+    }
+    function renderAdminBlock(block) {
+      const wrap=document.createElement('div');wrap.className='admin-added-block';wrap.dataset.adminBlockWrap=block.id;
+      const options=(block.options||[]).map(String);const stored=adminBlockValues[block.id];
+      const appendLabel=(control)=>{const label=document.createElement('label');label.className='admin-added-field-label';label.textContent=block.label;label.append(control);wrap.append(label);};
+      const setValue=(input)=>{input.dataset.adminBlock=block.id;if(input.type==='checkbox')input.checked=Boolean(stored);else if(input.type==='radio')input.checked=String(stored??'')===input.value;else input.value=stored??'';if(block.required)input.required=true;input.addEventListener('input',()=>{adminBlockValues[block.id]=input.type==='checkbox'?input.checked:input.value;});input.addEventListener('change',()=>{adminBlockValues[block.id]=input.type==='checkbox'?input.checked:input.value;});};
+      if(block.type==='heading'){const h=document.createElement('h2');h.className='admin-added-heading';h.textContent=block.label;wrap.append(h);if(block.content){const p=document.createElement('p');p.textContent=block.content;wrap.append(p);}return wrap;}
+      if(block.type==='paragraph'){const p=document.createElement('p');p.className='admin-added-paragraph';p.textContent=block.content||block.label;wrap.append(p);return wrap;}
+      if(block.type==='divider'){const line=document.createElement('hr');line.className='admin-added-divider';line.setAttribute('aria-label',block.label);wrap.append(line);return wrap;}
+      if(block.type==='image'){if(block.imageData){const figure=document.createElement('figure');figure.className='admin-added-image-figure';const img=document.createElement('img');img.className='admin-added-image';img.src=block.imageData;img.alt=block.content||block.label;figure.append(img);if(block.content){const caption=document.createElement('figcaption');caption.textContent=block.content;figure.append(caption);}wrap.append(figure);}return wrap;}
+      if(block.type==='button'){const a=document.createElement('a');a.className='admin-added-link';a.textContent=block.content||block.label;a.href=block.url||'#';a.target='_blank';a.rel='noopener noreferrer';wrap.append(a);return wrap;}
+      if(block.type==='file'){const input=document.createElement('input');input.type='file';input.dataset.adminBlock=block.id;if(block.required)input.required=true;const label=document.createElement('label');label.className='admin-added-field-label';label.textContent=block.label;label.append(input);wrap.append(label);const note=document.createElement('small');note.textContent=stored?.name?`Saved with this character: ${stored.name}`:'Files up to 250 KB are saved with this character.';wrap.append(note);input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;if(file.size>250_000){alert('Choose a file under 250 KB so the character can be saved and exported.');input.value='';return;}const reader=new FileReader();reader.onerror=()=>alert('The file could not be read.');reader.onload=()=>{adminBlockValues[block.id]={name:file.name,data:String(reader.result)};note.textContent=`Ready to save with this character: ${file.name}`;};reader.readAsDataURL(file);});if(block.content){const help=document.createElement('small');help.textContent=block.content;wrap.append(help);}return wrap;}
+      if(block.type==='checkbox'||block.type==='switch'){
+        const input=document.createElement('input');input.type='checkbox';setValue(input);const label=document.createElement('label');label.className=block.type==='switch'?'admin-added-switch':'admin-added-check';label.append(input,document.createTextNode(block.label));wrap.append(label);if(block.content){const help=document.createElement('small');help.textContent=block.content;wrap.append(help);}return wrap;
+      }
+      if(block.type==='multiselect'||block.type==='radio'){
+        const fieldset=document.createElement('fieldset');fieldset.className='admin-added-choice-list';const legend=document.createElement('legend');legend.textContent=block.label;fieldset.append(legend);
+        options.forEach((option,index)=>{const input=document.createElement('input');input.type=block.type==='radio'?'radio':'checkbox';input.name=`admin-block-${block.id}`;input.value=option;input.dataset.adminBlock=block.id;if(block.required&&index===0)input.required=true;const values=Array.isArray(stored)?stored:[];input.checked=block.type==='radio'?String(stored??'')===option:values.includes(option);input.addEventListener('change',()=>{if(block.type==='radio'){if(input.checked)adminBlockValues[block.id]=option;}else{const next=new Set(Array.isArray(adminBlockValues[block.id])?adminBlockValues[block.id]:[]);input.checked?next.add(option):next.delete(option);adminBlockValues[block.id]=[...next];}});const label=document.createElement('label');label.append(input,document.createTextNode(option));fieldset.append(label);});wrap.append(fieldset);if(block.content){const help=document.createElement('small');help.textContent=block.content;wrap.append(help);}return wrap;
+      }
+      let input;
+      if(block.type==='textarea'){input=document.createElement('textarea');input.rows=3;}
+      else if(block.type==='dropdown'){input=document.createElement('select');input.add(new Option('Choose an option',''));options.forEach(option=>input.add(new Option(option,option)));}
+      else {input=document.createElement('input');input.type=block.type==='slider'?'range':block.type;}
+      if(['number','range'].includes(input.type)){input.min=block.min??0;input.max=block.max??100;input.step=block.step||1;}
+      setValue(input);appendLabel(input);
+      if(block.type==='slider'){const output=document.createElement('output');output.className='admin-added-slider-value';output.textContent=input.value||block.min||0;input.addEventListener('input',()=>output.textContent=input.value);wrap.append(output);}
+      if(block.content){const help=document.createElement('small');help.textContent=block.content;wrap.append(help);}
+      return wrap;
+    }
+    const adminPageLabels={'character-screen':'Character details','stats-screen':'Major stats','skills-screen':'Skills','perks-screen':'Perks','inventory-screen':'Inventory','final-screen':'Final Changes'};
+    function pagePartCatalog(pageId){
+      const page=document.getElementById(pageId);if(!page)return[];const parts=[];
+      const add=(key,label,nodes,edit={})=>{const resolved=(Array.isArray(nodes)?nodes:[nodes]).filter(Boolean);if(!resolved.length)return;let textTarget=edit.textTarget;if(textTarget===undefined){for(const node of resolved){if(node.matches?.('h1,h2,h3,h4,p,button,legend,label')){textTarget=node;break;}textTarget=node.querySelector?.('h1,h2,h3,h4,legend,label,button,p')||null;if(textTarget)break;}}const inputTarget=edit.inputTarget===false?null:(edit.inputTarget||resolved.map(node=>node.matches?.('input[type="number"]')?node:node.querySelector?.('input[type="number"]')).find(Boolean)||null);parts.push({id:`part-${pageId}-${key}`,page:pageId,label,nodes:resolved,textTarget,inputTarget});};
+      const q=(selector)=>page.querySelector(selector);const qa=(selector)=>[...page.querySelectorAll(selector)];
+      if(pageId==='character-screen'){
+        add('title','Page title',q('h1'));add('intro','Introduction',q(':scope > .intro'));
+        ['Character name','Occupation','Age'].forEach((label,i)=>add(`identity-${i}`,label,q(`#character-form > div:nth-of-type(${i+1})`)));
+        add('difficulty','Difficulty choices',q('#character-form fieldset'));add('continue','Continue button',q('#character-form > button[type="submit"]'));add('character-files','Character import and export',q('#account-panel'));add('saved-characters','Saved characters',q('.saved-library'));
+      }else if(pageId==='stats-screen'){
+        add('title','Page title',q('h1'));add('difficulty-notice','Difficulty notice',q('#difficulty-message'),{textTarget:false,inputTarget:false});add('instructions','Instructions',q('#stats-form > .intro'));add('stat-choices','Major stat choices',q('#stats-fields'),{textTarget:false,inputTarget:false});add('continue','Continue button',q('#stats-form > button'));
+      }else if(pageId==='skills-screen'){
+        add('title','Page title',q('h1'));add('instructions','Instructions',q(':scope > .intro'));add('skill-groups','Skill groups and values',q('#skill-groups'),{textTarget:false,inputTarget:false});add('reserve','Reserve points field',q('#reserve-points')?.closest('.skill-row'),{inputTarget:false});add('point-total','Point total',q('#allocation-total'),{textTarget:false,inputTarget:false});add('validation-message','Validation message',q('#skills-error'),{textTarget:false,inputTarget:false});add('continue','Continue button',q('#skills-continue'));
+      }else if(pageId==='perks-screen'){
+        add('title','Page title',q('h1'));const intros=qa(':scope > .wheel-paper-content > .intro');add('instructions','Instructions',intros[0]);add('unused-points-note','Unused points note',intros.at(-1));add('time-period','Time period selector',q('.time-period-picker'),{inputTarget:false});add('tree-status','Perk status',q('#perk-status'),{textTarget:false,inputTarget:false});add('custom-perk-editor','Custom perk editor',q('#custom-perk-panel'),{textTarget:false,inputTarget:false});add('inventory-continue','Continue to Inventory button',q('#to-inventory-button'));
+        perkTreeChoices.forEach((choice,index)=>{const panel=choice.panel;if(!panel)return;const name=panel.id||communitySafeId(choice.label);const button=document.querySelector(`.cryptex-picker [data-tree-index="${index}"]`);add(`tree-${communitySafeId(name)}`,`${choice.label} perk tree`,[panel,button],{textTarget:choice.community?false:button,inputTarget:false});});
+      }else if(pageId==='inventory-screen'){
+        add('title','Page title',q('h1'));add('instructions','Instructions',q(':scope > .intro'));add('items','Inventory items list',q('#perk-inventory-list'),{textTarget:false,inputTarget:false});add('continue','Continue button',q('#inventory-continue-button'));
+      }else if(pageId==='final-screen'){
+        add('title','Page title',q('h1'));add('instructions','Instructions',q(':scope > .intro'));qa('#final-form > *').forEach((node,index)=>add(`final-section-${index}`,node.querySelector('h2')?.textContent||node.querySelector('legend')?.textContent||`Final change section ${index+1}`,node));add('perk-summary','Selected perks summary',q('#final-perk-list'));add('points-total','Point total',q('#final-total'));add('validation-message','Validation message',q('#final-error'));add('save-character','Save character button',q('#save-character-button'));add('save-status','Save status',q('#save-status'));add('print','Print / Save as PDF button',q('#print-button'));
+      }
+      return parts;
+    }
+    const adminPagePartBaseText=new Map();const adminPagePartBaseLimits=new Map();
+    function readPagePartText(target){if(!target)return'';if(target.matches('label'))return[...target.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).map(node=>node.textContent).join('').trim();return target.textContent.trim();}
+    function writePagePartText(target,value){if(!target)return;if(target.matches('label')){let textNode=[...target.childNodes].find(node=>node.nodeType===Node.TEXT_NODE);if(!textNode){textNode=document.createTextNode('');target.insertBefore(textNode,target.firstChild);}textNode.textContent=`${value} `;}else target.textContent=value;}
+    function applyPageParts(){
+      const pages=['character-screen','stats-screen','skills-screen','perks-screen','inventory-screen','final-screen'];
+      pages.forEach(pageId=>pagePartCatalog(pageId).forEach(part=>{const config=siteConfig.pageParts.find(item=>item.id===part.id);const hidden=config?.visible===false;part.nodes.forEach(node=>{if(hidden)node.dataset.adminHidden='true';else delete node.dataset.adminHidden;});if(part.textTarget){if(!adminPagePartBaseText.has(part.id))adminPagePartBaseText.set(part.id,readPagePartText(part.textTarget));writePagePartText(part.textTarget,config?.displayText??adminPagePartBaseText.get(part.id));if(part.textTarget.classList.contains('tree-choice-button')){const choice=perkTreeChoices[Number(part.textTarget.dataset.treeIndex)];if(choice){choice.label=config?.displayText??adminPagePartBaseText.get(part.id);choice.panel.setAttribute('aria-label',`${choice.label} perk tree`);}}}if(part.inputTarget){if(!adminPagePartBaseLimits.has(part.id))adminPagePartBaseLimits.set(part.id,{min:part.inputTarget.getAttribute('min'),max:part.inputTarget.getAttribute('max'),step:part.inputTarget.getAttribute('step')});const base=adminPagePartBaseLimits.get(part.id);for(const key of ['min','max','step']){const value=config?.[key]??base[key];if(value===null||value===undefined||value==='')part.inputTarget.removeAttribute(key);else part.inputTarget.setAttribute(key,String(value));}}}));
+    }
+    function renderAdminBuiltIns(){
+      const pageId=currentAdminPage();const list=document.getElementById('admin-built-in-list');list.replaceChildren();const parts=pagePartCatalog(pageId);
+      document.getElementById('admin-built-in-count').textContent=String(parts.length);
+      if(!parts.length){const empty=document.createElement('p');empty.className='admin-empty-state';empty.textContent='No built-in sections are available on this page yet.';list.append(empty);return;}
+      parts.forEach(part=>{const config=siteConfig.pageParts.find(item=>item.id===part.id);const hidden=config?.visible===false;const row=document.createElement('div');row.className='admin-built-in-item';const text=document.createElement('span');text.textContent=config?.displayText||part.label;const actions=document.createElement('div');actions.className='admin-block-actions';if(part.textTarget||part.inputTarget){const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>editBuiltInPart(part));actions.append(edit);}const button=document.createElement('button');button.type='button';button.textContent=hidden?'Restore':'Remove';button.setAttribute('aria-pressed',String(!hidden));button.addEventListener('click',()=>{if(!confirm(`${hidden?'Restore':'Remove'} “${part.label}” on ${adminPageLabels[pageId]}? You can restore it later.`))return;const existing=siteConfig.pageParts.find(item=>item.id===part.id);if(existing)existing.visible=hidden;else siteConfig.pageParts.push({id:part.id,page:pageId,label:part.label,visible:false});applyPageParts();renderAdminBuiltIns();persistCurrentScope(false);});actions.append(button);row.append(text,actions);list.append(row);});
+    }
+    function editBuiltInPart(part){const config=siteConfig.pageParts.find(item=>item.id===part.id);document.getElementById('admin-built-in-edit-id').value=part.id;document.getElementById('admin-built-in-text').value=config?.displayText??readPagePartText(part.textTarget);const limits=document.getElementById('admin-built-in-number-limits');limits.hidden=!part.inputTarget;if(part.inputTarget){const base=adminPagePartBaseLimits.get(part.id)||{};document.getElementById('admin-built-in-min').value=config?.min??base.min??'';document.getElementById('admin-built-in-max').value=config?.max??base.max??'';document.getElementById('admin-built-in-step').value=config?.step??base.step??'1';}document.getElementById('admin-built-in-dialog-title').textContent=`Edit ${part.label}`;document.getElementById('admin-built-in-dialog-note').textContent=`These changes apply to ${adminPageLabels[part.page]} in the selected save scope.`;document.getElementById('admin-built-in-dialog').showModal();}
+    function showAdminBlockList() {
+      const pageId = currentAdminPage(); const list = document.getElementById('admin-block-list'); list.replaceChildren();
+      const blocks = siteConfig.blocks.filter(block => block.page === pageId).sort((a,b)=>(a.order??0)-(b.order??0));
+      document.getElementById('admin-page-tools-title').textContent=`${adminPageLabels[pageId]} editor`;document.getElementById('admin-block-count').textContent=String(blocks.length);
+      document.getElementById('admin-built-in-page-label').textContent=adminPageLabels[pageId];
+      blocks.forEach(block => {
+        const row = document.createElement('div'); row.className = 'admin-block-item'; row.draggable = true; row.dataset.blockId = block.id;
+        const meta=document.createElement('div');meta.className='admin-block-meta';const name=document.createElement('strong');name.textContent=block.label;const kind=document.createElement('span');kind.textContent=`${block.type} block${['number','slider'].includes(block.type)?` · ${block.min} to ${block.max}`:''}`;meta.append(name,kind);
+        const actions=document.createElement('div');actions.className='admin-block-actions';const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = 'Edit'; edit.addEventListener('click', () => fillAdminBlockForm(block));
+        const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Delete'; remove.className='admin-danger-button'; remove.addEventListener('click', () => { if (!confirm(`Delete “${block.label}” from this page?`)) return; markSiteItemRemoved('blocks',block.id);siteConfig.blocks = siteConfig.blocks.filter(item => item.id !== block.id);persistCurrentScope(false); });
+        actions.append(edit,remove);row.append(meta,actions);row.addEventListener('dragstart', () => row.classList.add('dragging')); row.addEventListener('dragend', () => { row.classList.remove('dragging'); const reordered=[...list.querySelectorAll('.admin-block-item')].map(item=>siteConfig.blocks.find(entry=>entry.id===item.dataset.blockId)).filter(Boolean);reordered.forEach((item,index)=>item.order=index);siteConfig.blocks=[...siteConfig.blocks.filter(item=>item.page!==pageId),...reordered];persistCurrentScope(false); });
+        row.addEventListener('dragover', event => { event.preventDefault(); const moving = list.querySelector('.dragging'); if (moving && moving !== row) {const box=row.getBoundingClientRect();list.insertBefore(moving,event.clientY<box.top+box.height/2?row:row.nextSibling);} });
+        list.append(row);
+      });
+      if(!blocks.length){const empty=document.createElement('p');empty.className='admin-empty-state';empty.textContent='No custom blocks on this page yet. Use “Add a page block” above to create one.';list.append(empty);}
+      renderAdminBuiltIns();renderAdminBackgrounds();
+      renderAdminPageSpecific(pageId);
+    }
+    function fillAdminBlockForm(block){
+      const form=document.getElementById('admin-block-form');document.getElementById('admin-block-edit-id').value=block.id;document.getElementById('admin-block-label').value=block.label;document.getElementById('admin-block-type').value=block.type;document.getElementById('admin-block-content').value=block.content||'';document.getElementById('admin-block-options').value=(block.options||[]).join('\n');document.getElementById('admin-block-min').value=block.min??0;document.getElementById('admin-block-max').value=block.max??100;document.getElementById('admin-block-step').value=block.step||1;document.getElementById('admin-block-url').value=block.url||'';document.getElementById('admin-block-required').checked=Boolean(block.required);document.getElementById('admin-block-form-page-note').textContent=`Editing on ${adminPageLabels[block.page]}.`;
+      document.getElementById('admin-block-type').dispatchEvent(new Event('change'));document.getElementById('admin-block-submit').textContent='Save block';document.getElementById('admin-block-cancel-edit').hidden=false;form.scrollIntoView({block:'center',behavior:'smooth'});
+    }
+    function renderAdminPageSpecific(pageId) {
+      const host = document.getElementById('admin-page-specific'); host.replaceChildren();
+      host.hidden=!['inventory-screen','perks-screen','stats-screen','skills-screen'].includes(pageId);
+      if(host.hidden)return;
+      const heading = document.createElement('h3');
+      if (pageId === 'inventory-screen') {
+        heading.textContent = 'Inventory item manager'; host.append(heading);
+        const form = document.createElement('form'); form.className = 'community-admin-fields';
+        const makeField = (label, type='text') => { const wrap=document.createElement('label'); wrap.append(document.createTextNode(label)); const input=document.createElement('input'); input.type=type; input.required=label==='Item name'; wrap.append(input); form.append(wrap); return input; };
+        const name=makeField('Item name'), description=makeField('Description'), damage=makeField('Damage dice'), range=makeField('Range'), tags=makeField('Tags'), quantity=makeField('Quantity','number'), special=makeField('Notes / special effect');quantity.min='0';quantity.step='1';
+        const kindWrap=document.createElement('label');kindWrap.append(document.createTextNode('Item type'));const kind=document.createElement('select');[['equipment','Equipment'],['weapon','Weapon'],['attachment','Weapon attachment'],['ammunition','Ammunition']].forEach(([value,label])=>kind.add(new Option(label,value)));kindWrap.append(kind);form.append(kindWrap);
+        const add=document.createElement('button'); add.type='submit'; add.textContent='Add inventory item'; form.append(add);
+        form.addEventListener('submit',event=>{event.preventDefault(); const label=name.value.trim(); if(!label||!confirm(`Add “${label}” to the inventory catalog for this scope?`))return;if(quantity.value!==''&&(!Number.isInteger(Number(quantity.value))||Number(quantity.value)<0))return alert('Quantity must be a non-negative whole number.');const id=siteItemId('item');clearSiteItemRemoval('inventoryItems',id);siteConfig.inventoryItems.push({id,label,description:description.value.trim(),damage:damage.value.trim(),range:range.value.trim(),tags:tags.value.trim(),quantity:quantity.value===''?'':Number(quantity.value),special:special.value.trim(),kind:kind.value});persistCurrentScope(false); }); host.append(form);
+        siteConfig.inventoryItems.forEach(item=>{
+          const row=document.createElement('div');row.className='admin-page-block';row.append(document.createTextNode(`${item.label}${item.damage?` · ${item.damage}`:''}${item.range?` · Range ${item.range}`:''} · ${item.kind||'equipment'}`));
+          const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const label=prompt('Item name:',item.label);if(label===null||!label.trim())return;if(!confirm(`Save changes to “${label.trim()}”?`))return;const description=prompt('Description:',item.description||'');if(description===null)return;const damage=prompt('Damage dice (leave blank if none):',item.damage||'');if(damage===null)return;const range=prompt('Range (leave blank if none):',item.range||'');if(range===null)return;const tags=prompt('Tags (comma separated):',item.tags||'');if(tags===null)return;const quantity=prompt('Quantity (leave blank if not applicable):',item.quantity??'');if(quantity===null)return;if(quantity!==''&&!/^\d+$/.test(quantity))return alert('Quantity must be a whole number.');const special=prompt('Notes / special effect:',item.special||'');if(special===null)return;const kind=prompt('Type: equipment, weapon, attachment, or ammunition',item.kind||'equipment');if(!['equipment','weapon','attachment','ammunition'].includes(kind))return alert('Choose equipment, weapon, attachment, or ammunition.');Object.assign(item,{label:label.trim(),description,damage,range,tags,quantity:quantity===''?'':Number(quantity),special,kind});persistCurrentScope(false);});
+          const remove=document.createElement('button');remove.type='button';remove.textContent='Delete';remove.addEventListener('click',()=>{if(!confirm(`Delete “${item.label}”?`))return;markSiteItemRemoved('inventoryItems',item.id);siteConfig.inventoryItems=siteConfig.inventoryItems.filter(entry=>entry.id!==item.id);siteConfig.perkItems=siteConfig.perkItems.filter(link=>link.itemId!==item.id);persistCurrentScope(false);});row.append(edit,remove);host.append(row);
+        });
+      } else if (pageId === 'perks-screen') {
+        renderBuiltInPerkManager(host);
+        heading.textContent='Attach inventory to a perk'; host.append(heading);
+        const perk=document.createElement('select'); perk.setAttribute('aria-label','Choose perk'); perk.add(new Option('Choose a perk',''));
+        const perkNodes=[...document.querySelectorAll('.perk-node[data-perk]')];
+        const seenPerks=new Set();
+        perkNodes.forEach(node=>{if(seenPerks.has(node.dataset.perk))return;seenPerks.add(node.dataset.perk);perk.add(new Option(node.querySelector('.perk-name')?.textContent.trim()||node.dataset.perk,node.dataset.perk));});
+        const items=document.createElement('select'); items.multiple=true; items.size=5; items.setAttribute('aria-label','Choose inventory items'); siteConfig.inventoryItems.forEach(item=>items.add(new Option(item.label,item.id)));
+        const syncAttached=()=>{const attached=new Set(siteConfig.perkItems.filter(link=>link.perkId===perk.value).map(link=>link.itemId));[...items.options].forEach(option=>option.selected=attached.has(option.value));};
+        perk.addEventListener('change',syncAttached);
+        const save=document.createElement('button'); save.type='button'; save.textContent='Attach selected items'; save.addEventListener('click',()=>{if(!perk.value)return alert('Choose a perk first.');const ids=[...items.selectedOptions].map(option=>option.value);if(!confirm(`Attach ${ids.length} inventory item(s) to ${perk.options[perk.selectedIndex].text}?`))return;siteConfig.perkItems.filter(link=>link.perkId===perk.value).forEach(link=>markSiteItemRemoved('perkItems',link.id));siteConfig.perkItems=siteConfig.perkItems.filter(link=>link.perkId!==perk.value);ids.forEach(itemId=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===itemId);if(item){const id=siteItemId('grant');clearSiteItemRemoval('perkItems',id);siteConfig.perkItems.push({id,perkId:perk.value,itemId,label:`${perk.value}-${itemId}`});}});persistCurrentScope(false);}); host.append(perk,items,save);
+        siteConfig.perkItems.forEach(link=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===link.itemId);const node=document.querySelector(`.perk-node[data-perk="${link.perkId}"] .perk-name`);if(!item)return;const row=document.createElement('div');row.className='admin-page-block';row.textContent=`${node?.textContent||link.perkId} → ${item.label}`;host.append(row);});
+      } else if (pageId === 'stats-screen') {
+        heading.textContent='Major stats'; host.append(heading);
+        categoryKeys.forEach(key=>{
+          const row=document.createElement('div');row.className='admin-page-block';const label=document.createElement('input');label.value=categories[key].label;label.setAttribute('aria-label',`Display name for ${key}`);const description=document.createElement('input');description.value=categories[key].description;description.setAttribute('aria-label',`Description for ${categories[key].label}`);
+          const save=document.createElement('button');save.type='button';save.textContent='Save';save.addEventListener('click',()=>{if(!label.value.trim())return alert('Enter a stat name.');if(!confirm(`Save “${label.value.trim()}” as the display name for this stat?`))return;categories[key].label=label.value.trim();if(key.startsWith('customstat'))categories[key].short=label.value.trim().slice(0,3);categories[key].description=description.value.trim();siteConfig.stats=categoryKeys.map(id=>({id,label:categories[id].label,short:categories[id].short,description:categories[id].description}));applyStatLabels();finalReady=false;persistCurrentScope(false);});
+          const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.disabled=categoryKeys.length<=1;remove.addEventListener('click',()=>{if(!confirm(`Remove ${categories[key].label} and its skills?`))return;if(!confirm('This changes character stat assignment, skill categories, and derived values. Continue?'))return;markSiteItemRemoved('stats',key);categories[key].skills.forEach(skill=>siteConfig.removedSkills.push(`${key}::${skill}`));siteConfig.skills=siteConfig.skills.filter(item=>item.category!==key);categoryKeys.splice(categoryKeys.indexOf(key),1);delete categories[key];delete stats[key];rebuildStatFields();buildSkills();finalReady=false;siteConfig.stats=categoryKeys.map(id=>({id,label:categories[id].label,short:categories[id].short,description:categories[id].description}));persistCurrentScope(false);});
+          row.append(label,description,save,remove);host.append(row);
+        });
+        const valuesLabel=document.createElement('label');valuesLabel.textContent='Values players can assign (comma separated)';const values=document.createElement('input');values.value=statValues.join(', ');valuesLabel.append(values);host.append(valuesLabel);const saveValues=document.createElement('button');saveValues.type='button';saveValues.textContent='Save stat values';saveValues.addEventListener('click',()=>{const parsed=values.value.split(',').map(value=>value.trim()).filter(Boolean);if(!parsed.length||parsed.some(value=>!/^\d+$/.test(value))||new Set(parsed).size!==parsed.length)return alert('Enter unique whole-number stat values, separated by commas.');if(!confirm('Use these options for every major stat?'))return;statValues.splice(0,statValues.length,...parsed);siteConfig.statValues=[...parsed];rebuildStatFields();finalReady=false;persistCurrentScope(false);});host.append(saveValues);
+        const addRow=document.createElement('div');const add=document.createElement('button');add.type='button';add.textContent='Add major stat';add.addEventListener('click',()=>{const label=prompt('New major stat name:');if(!label?.trim())return;if(!confirm(`Add “${label.trim()}” as a major stat?`))return;if(!confirm('This changes character stat assignment and point rules. Continue?'))return;let n=1;let key=`customstat${n}`;while(categories[key]){n++;key=`customstat${n}`;}categories[key]={label:label.trim(),short:label.trim().slice(0,3),description:'Custom major stat.',skills:[]};categoryKeys.push(key);delete stats[key];while(statValues.length<categoryKeys.length)statValues.push(String(Number(statValues.at(-1)||20)+5));siteConfig.statValues=[...statValues];clearSiteItemRemoval('stats',key);siteConfig.stats=categoryKeys.map(id=>({id,label:categories[id].label,short:categories[id].short,description:categories[id].description}));rebuildStatFields();buildSkills();finalReady=false;persistCurrentScope(false);});addRow.append(add);host.append(addRow);
+      } else if (pageId === 'skills-screen') {
+        heading.textContent='Skill manager';host.append(heading);
+        const category=document.createElement('select');categoryKeys.forEach(key=>category.add(new Option(categories[key].label,key)));const input=document.createElement('input');input.placeholder='New skill name';const add=document.createElement('button');add.type='button';add.textContent='Add skill';add.addEventListener('click',()=>{const name=input.value.trim();const key=category.value;if(!name)return alert('Enter a skill name.');if(categories[key].skills.includes(name))return alert('That skill is already in this category.');if(!confirm(`Add “${name}” under ${categories[key].label}?`))return;categories[key].skills.push(name);siteConfig.removedSkills=siteConfig.removedSkills.filter(value=>value!==`${key}::${name}`);siteConfig.skills.push({id:siteItemId('skill'),label:name,category:key});buildSkills();finalReady=false;persistCurrentScope(false);});host.append(category,input,add);
+        categoryKeys.forEach(key=>{const group=document.createElement('section');const title=document.createElement('strong');title.textContent=categories[key].label;group.append(title);categories[key].skills.forEach(skill=>{const row=document.createElement('div');row.className='admin-page-block';row.append(document.createTextNode(skill));const rename=document.createElement('button');rename.type='button';rename.textContent='Rename';rename.addEventListener('click',()=>{const next=prompt(`Rename ${skill}:`,skill);if(next===null||!next.trim()||next.trim()===skill)return;if(categories[key].skills.includes(next.trim()))return alert('That skill is already in this category.');if(!confirm(`Rename “${skill}” to “${next.trim()}”?`))return;const priorValues=Object.fromEntries(skillInputs.map(input=>[input.name,input.value]));priorValues[next.trim()]=priorValues[skill];categories[key].skills=categories[key].skills.map(item=>item===skill?next.trim():item);const stored=siteConfig.skills.find(item=>item.category===key&&item.label===skill);if(stored)stored.label=next.trim();else siteConfig.skills.push({id:siteItemId('skill'),label:next.trim(),category:key});if(!siteConfig.removedSkills.includes(`${key}::${skill}`))siteConfig.removedSkills.push(`${key}::${skill}`);siteConfig.removedSkills=siteConfig.removedSkills.filter(item=>item!==`${key}::${next.trim()}`);buildSkills();skillInputs.forEach(input=>{if(priorValues[input.name]!==undefined)input.value=priorValues[input.name];});updateSkills();finalReady=false;persistCurrentScope(false);});const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>{if(!confirm(`Remove “${skill}” from ${categories[key].label}?`))return;categories[key].skills=categories[key].skills.filter(item=>item!==skill);siteConfig.skills=siteConfig.skills.filter(item=>item.label!==skill||item.category!==key);if(!siteConfig.removedSkills.includes(`${key}::${skill}`))siteConfig.removedSkills.push(`${key}::${skill}`);buildSkills();finalReady=false;persistCurrentScope(false);});row.append(rename,remove);group.append(row);});host.append(group);});
+      }
+    }
+    function rebuildStatFields() { statsFields.replaceChildren(); initialStatSelects.splice(0,initialStatSelects.length,...addStatSelects(statsFields,'stat',stats)); updateUniqueOptions(statsFields); }
+    function applyStatLabels() {
+      initialStatSelects.forEach(select=>{const label=select.closest('.stat-row')?.querySelector('label');if(label)label.textContent=categories[select.name]?.label||select.name;});
+      document.querySelectorAll('#skill-groups .category').forEach((group,index)=>{const key=categoryKeys[index];if(!key)return;const heading=group.querySelector('h2');const description=group.querySelector('.category-description');if(heading)heading.textContent=categories[key].label;if(description)description.textContent=categories[key].description;});
+      document.querySelectorAll('[id^="final-heading-"]').forEach(node=>{const key=node.id.replace('final-heading-','');if(categories[key])node.textContent=`${categories[key].label} (${categories[key].short} ${stats[key]||'—'})`;});
+    }
+    function applySiteBackground() { const active=siteConfig.backgrounds?.find(item=>item.id===siteConfig.activeBackgroundId)||siteConfig.backgrounds?.[0];document.body.style.backgroundImage=active?.data?`url("${active.data}")`:'';document.body.style.backgroundSize=active?.data?'cover':'';document.body.style.backgroundPosition=active?.data?'center':'';document.body.style.backgroundAttachment=active?.data?'fixed':''; }
+    function applySitePerkOverrides(){document.querySelectorAll('.perk-node[data-perk]').forEach(node=>{const id=node.dataset.perk;if(id.startsWith('community-'))return;const saved=siteConfig.perkOverrides.find(item=>item.id===id);if(!saved)return;const name=node.querySelector('.perk-name'),desc=node.querySelector('.perk-description'),cost=node.querySelector('.perk-cost');if(saved.name&&name)name.textContent=saved.name;if(saved.description!==undefined&&desc)desc.textContent=saved.description;if(cost&&Number.isFinite(saved.cost))cost.textContent=`Cost: ${saved.cost} points`;if(saved.removed){node.hidden=true;selectedPerks.delete(id);}else node.hidden=false;if(perkDefinitions[id]){if(Number.isFinite(saved.cost))perkDefinitions[id].cost=saved.cost;if(Array.isArray(saved.requires))perkDefinitions[id].requires=[...saved.requires];}});updatePerkTree();}
+    function renderBuiltInPerkManager(host){const title=document.createElement('h3');title.textContent='Manage built-in skill trees';host.append(title);const note=document.createElement('p');note.textContent='Edit each built-in perk, its cost and prerequisites, or remove and restore it.';host.append(note);perkTreeChoices.slice(0,10).forEach(tree=>{const section=document.createElement('details');section.className='admin-manager-card';const summary=document.createElement('summary');summary.textContent=tree.label;section.append(summary);tree.panel.querySelectorAll('.perk-node[data-perk]').forEach(node=>{const id=node.dataset.perk,saved=siteConfig.perkOverrides.find(item=>item.id===id),row=document.createElement('div');row.className='admin-page-block';const name=document.createElement('span');name.textContent=saved?.name||node.querySelector('.perk-name')?.textContent||id;const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const base=siteConfig.perkOverrides.find(item=>item.id===id)||{};const n=prompt('Perk name:',base.name||node.querySelector('.perk-name')?.textContent||'');if(n===null||!n.trim())return;const d=prompt('Description:',base.description??node.querySelector('.perk-description')?.textContent??'');if(d===null)return;const c=prompt('Point cost:',String(base.cost??perkDefinitions[id]?.cost??5));if(c===null||!/^(\d|[1-9]\d|[1-4]\d\d|500)$/.test(c))return alert('Cost must be a whole number from 0 to 500.');const r=prompt('Prerequisite perk IDs, comma separated:',(base.requires||perkDefinitions[id]?.requires||[]).join(', '));if(r===null)return;const requires=r.split(',').map(x=>x.trim()).filter(Boolean),ids=new Set([...tree.panel.querySelectorAll('.perk-node[data-perk]')].map(x=>x.dataset.perk));if(requires.some(x=>!ids.has(x)||x===id))return alert('Use IDs from this tree only; a perk cannot require itself.');if(!confirm(`Save edits to ${n.trim()}?`))return;let item=siteConfig.perkOverrides.find(x=>x.id===id);if(!item){item={id};siteConfig.perkOverrides.push(item);}Object.assign(item,{name:n.trim(),description:d,cost:Number(c),requires});applySitePerkOverrides();persistCurrentScope(false);});const remove=document.createElement('button');remove.type='button';remove.textContent=saved?.removed?'Restore':'Remove';remove.addEventListener('click',()=>{if(!confirm(`${saved?.removed?'Restore':'Remove'} ${name.textContent}?`))return;let item=siteConfig.perkOverrides.find(x=>x.id===id);if(!item){item={id};siteConfig.perkOverrides.push(item);}item.removed=!item.removed;applySitePerkOverrides();persistCurrentScope(false);});row.append(name,edit,remove);section.append(row);});host.append(section);});}
+    function renderAdminBackgrounds(){
+      const list=document.getElementById('admin-background-list');list.replaceChildren();
+      siteConfig.backgrounds.forEach(background=>{const row=document.createElement('div');row.className='admin-block-item';const meta=document.createElement('div');meta.className='admin-block-meta';const title=document.createElement('strong');title.textContent=background.label;const state=document.createElement('span');state.textContent=background.id===siteConfig.activeBackgroundId?'Currently in use':'Saved image';meta.append(title,state);const actions=document.createElement('div');actions.className='admin-block-actions';const use=document.createElement('button');use.type='button';use.textContent=background.id===siteConfig.activeBackgroundId?'In use':'Use';use.disabled=background.id===siteConfig.activeBackgroundId;use.addEventListener('click',()=>{siteConfig.activeBackgroundId=background.id;applySiteBackground();persistCurrentScope(false);});const remove=document.createElement('button');remove.type='button';remove.textContent='Delete';remove.className='admin-danger-button';remove.addEventListener('click',()=>{if(!confirm(`Delete background image “${background.label}”?`))return;markSiteItemRemoved('backgrounds',background.id);siteConfig.backgrounds=siteConfig.backgrounds.filter(item=>item.id!==background.id);if(siteConfig.activeBackgroundId===background.id)siteConfig.activeBackgroundId=siteConfig.backgrounds[0]?.id||'';applySiteBackground();persistCurrentScope(false);});actions.append(use,remove);row.append(meta,actions);list.append(row);});
+      if(!siteConfig.backgrounds.length){const empty=document.createElement('p');empty.className='admin-empty-state';empty.textContent='No background images yet. Add a PNG, JPG, or WebP image up to 1 MB.';list.append(empty);}
+    }
+    function persistCurrentScope(publish = false) {
+      const status = document.getElementById('admin-config-status');
+      renderAdminBlocks(); showAdminBlockList();
+      if (activeAdminScope === 'universal') { siteConfigDraftDirty=true; status.textContent = 'Universal changes are drafts. Choose Save this scope to publish them.'; return; }
+      const key = activeAdminScope === 'me' ? siteConfigLocalKey : currentCharacterConfigKey();
+      localStorage.setItem(key, JSON.stringify(siteConfig));
+      status.textContent = activeAdminScope === 'me' ? 'Saved on this device.' : 'Saved for this character on this device.';
+    }
+    document.getElementById('admin-open-page-tools').addEventListener('click', async () => { await siteConfigReady;siteConfig=readScopedConfig(activeAdminScope);const visiblePage=adminPhaseIds.find(id=>!document.getElementById(id).hidden)||'character-screen';document.getElementById('admin-target-page').value=visiblePage;document.getElementById('admin-page-tools').hidden=false;document.getElementById('admin-scope-note').textContent=activeAdminScope==='me'?'Saved only on this browser on this device.':activeAdminScope==='character'?'Saved only for the character currently being edited.':'Changes apply to everyone after you save and publish.';renderAdminBlocks();showAdminBlockList(); });
+    document.getElementById('admin-close-page-tools').addEventListener('click', () => { document.getElementById('admin-page-tools').hidden = true; });
+    document.getElementById('admin-settings-scope').addEventListener('change', async event => { await siteConfigReady;if(siteConfigDraftDirty&&!confirm('Discard the unsaved Universal settings draft and change scope?')){event.target.value='universal';return;}activeAdminScope = event.target.value;siteConfigDraftDirty=false;siteConfig = readScopedConfig(activeAdminScope); applySiteDefinitions(); renderAdminBlocks(); showAdminBlockList(); document.getElementById('admin-scope-note').textContent = activeAdminScope === 'me' ? 'Saved only on this browser on this device.' : activeAdminScope === 'character' ? 'Saved only for the character currently being edited.' : 'Changes apply to everyone after you save and publish.'; });
+    document.getElementById('admin-target-page').addEventListener('change',()=>{resetAdminBlockForm();showAdminBlockList();});
+    document.getElementById('admin-built-in-cancel').addEventListener('click',()=>document.getElementById('admin-built-in-dialog').close());
+    document.getElementById('admin-built-in-form').addEventListener('submit',event=>{event.preventDefault();const id=document.getElementById('admin-built-in-edit-id').value;const part=pagePartCatalog(currentAdminPage()).find(item=>item.id===id);if(!part)return;const text=document.getElementById('admin-built-in-text').value.trim();const limits=!!part.inputTarget;let min=null,max=null,step=null;if(limits){const minText=document.getElementById('admin-built-in-min').value;const maxText=document.getElementById('admin-built-in-max').value;const stepText=document.getElementById('admin-built-in-step').value;min=minText===''?null:Number(minText);max=maxText===''?null:Number(maxText);step=stepText===''?null:Number(stepText);if((min!==null&&!Number.isFinite(min))||(max!==null&&!Number.isFinite(max))||(min!==null&&max!==null&&min>max)||(step!==null&&(!Number.isFinite(step)||step<=0)))return alert('Check the minimum, maximum, and step values.');}if(!confirm(`Save the changes to “${part.label}” on ${adminPageLabels[part.page]}?`))return;let config=siteConfig.pageParts.find(item=>item.id===id);if(!config){config={id,page:part.page,label:part.label,visible:true};siteConfig.pageParts.push(config);}config.displayText=text;config.label=part.label;if(limits){config.min=min;config.max=max;config.step=step;}document.getElementById('admin-built-in-dialog').close();applyPageParts();persistCurrentScope(false);});
+    function resetAdminBlockForm(){const form=document.getElementById('admin-block-form');form.reset();document.getElementById('admin-block-edit-id').value='';document.getElementById('admin-block-submit').textContent='Add block';document.getElementById('admin-block-cancel-edit').hidden=true;document.getElementById('admin-block-form-page-note').textContent=`New blocks are added at the bottom of ${adminPageLabels[currentAdminPage()]}.`;document.getElementById('admin-block-type').dispatchEvent(new Event('change'));}
+    document.getElementById('admin-block-type').addEventListener('change', event => {const type=event.target.value;document.getElementById('admin-number-limits').hidden=!['number','slider'].includes(type);document.getElementById('admin-block-options-wrap').hidden=!['dropdown','radio','multiselect'].includes(type);document.getElementById('admin-block-url-wrap').hidden=type!=='button';document.getElementById('admin-block-image-wrap').hidden=type!=='image';document.getElementById('admin-block-required-wrap').hidden=!['text','textarea','number','slider','switch','checkbox','multiselect','dropdown','radio','date','url','file'].includes(type);document.getElementById('admin-block-content-wrap').hidden=['divider','checkbox','switch'].includes(type);});
+    document.getElementById('admin-block-form').addEventListener('submit', event => {
+      event.preventDefault();const page=document.getElementById('admin-target-page').value;const type=document.getElementById('admin-block-type').value;const label=document.getElementById('admin-block-label').value.trim();const id=document.getElementById('admin-block-edit-id').value;
+      const min=Number(document.getElementById('admin-block-min').value);const max=Number(document.getElementById('admin-block-max').value);const step=Number(document.getElementById('admin-block-step').value);const content=document.getElementById('admin-block-content').value.trim();const options=document.getElementById('admin-block-options').value.split(/\r?\n/).map(item=>item.trim()).filter(Boolean);const url=document.getElementById('admin-block-url').value.trim();const image=document.getElementById('admin-block-image').files[0];
+      if(!label)return alert('Give this block a short name.');if(['number','slider'].includes(type)&&(!Number.isFinite(min)||!Number.isFinite(max)||min>max||!Number.isFinite(step)||step<=0))return alert('Check the minimum, maximum, and step values.');if(['dropdown','radio','multiselect'].includes(type)&&(options.length<2||new Set(options).size!==options.length))return alert('Add at least two different choices, one per line.');if(type==='button'){const relative=/^(#|\/(?!\/)|\.\.?\/)/.test(url);if(!relative){try{const parsed=new URL(url);if(!['http:','https:','mailto:'].includes(parsed.protocol))throw new Error();}catch{return alert('Enter a valid web, email, or relative link.');}}}if(type==='image'&&image&&image.size>1_000_000)return alert('Choose an image under 1 MB.');
+      const saveBlock=(imageData)=>{const existing=siteConfig.blocks.find(item=>item.id===id);if(existing&&!confirm(`Save your changes to “${label}”?`))return;if(!existing&&!confirm(`Add “${label}” to the ${adminPageLabels[page]} page?`))return;const block={...(existing||{}),id:existing?.id||siteItemId('block'),page,type,label,content,options,min,max,step,url,required:document.getElementById('admin-block-required').checked};if(type==='image'){block.imageData=imageData||existing?.imageData||'';if(!block.imageData)return alert('Choose an image file for this image block.');}clearSiteItemRemoval('blocks',block.id);if(existing)Object.assign(existing,block);else{block.order=siteConfig.blocks.filter(item=>item.page===page).length;siteConfig.blocks.push(block);}resetAdminBlockForm();persistCurrentScope(false);};
+      if(image){const reader=new FileReader();reader.onerror=()=>alert('The image could not be read.');reader.onload=()=>saveBlock(String(reader.result));reader.readAsDataURL(image);}else saveBlock();
+    });
+    document.getElementById('admin-block-cancel-edit').addEventListener('click',resetAdminBlockForm);
+    document.getElementById('admin-background-add').addEventListener('click',()=>{const file=document.getElementById('admin-background-file').files[0];const name=document.getElementById('admin-background-name').value.trim();if(!file)return alert('Choose a background image first.');if(!['image/png','image/jpeg','image/webp'].includes(file.type))return alert('Choose a PNG, JPG, or WebP image.');if(file.size>1_000_000)return alert('Choose a background image under 1 MB.');if(!confirm(`Add “${name||file.name}” to the background images for this scope?`))return;const reader=new FileReader();reader.onerror=()=>alert('The image could not be read.');reader.onload=()=>{const id=siteItemId('background');clearSiteItemRemoval('backgrounds',id);siteConfig.backgrounds.unshift({id,label:name||file.name,data:String(reader.result)});siteConfig.activeBackgroundId=id;applySiteBackground();document.getElementById('admin-background-file').value='';document.getElementById('admin-background-name').value='';persistCurrentScope(false);};reader.readAsDataURL(file);});
+    document.getElementById('admin-save-config').addEventListener('click', async () => {
+      const status = document.getElementById('admin-config-status');
+      if (activeAdminScope !== 'universal') { persistCurrentScope(true); return; }
+      if (!communityAuthToken || !confirm('Publish these settings for everyone using the app?')) return;
+      status.textContent = 'Publishing universal settings…';
+      try { const response = await fetch('/api/publish-site-config', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':communityAuthToken }, body:JSON.stringify(siteConfig) }); const result=await response.json(); if (!response.ok) throw new Error(result.error || 'Publish failed.'); universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;status.textContent=result.message; }
+      catch (error) { status.textContent=error.message; }
+    });
+    siteConfigReady = (async () => {
+      try { let response=await fetch('/api/site-config',{cache:'no-store'}); if (!response.ok) response=await fetch('./site-config.json',{cache:'no-store'}); if (response.ok) universalSiteConfig=cleanSiteConfig(await response.json()); }
+      catch { universalSiteConfig=cleanSiteConfig(); }
+      siteConfig=readScopedConfig('me'); applySiteDefinitions(); renderAdminBlocks();
+    })();
     window.addEventListener('keydown', event => {
       if (!communityAdminAvailable || !event.ctrlKey || !event.altKey || !event.shiftKey || event.code !== 'KeyU') return;
       event.preventDefault();
       const admin = document.getElementById('community-admin');
       if (admin.hidden) {
+        document.querySelectorAll('main > section').forEach(section => { section.hidden = section.id !== 'perks-screen'; });
         admin.hidden = false;
         choosePerkTree(10);
         admin.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -3053,6 +3582,8 @@
         document.getElementById('community-editor').hidden = true;
         document.getElementById('community-login').hidden = false;
         admin.hidden = true;
+        document.getElementById('admin-phase-dock').hidden = true;
+        document.getElementById('admin-page-tools').hidden = true;
       }
     });
   </script>
