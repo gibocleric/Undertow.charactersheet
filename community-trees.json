@@ -2,16 +2,16 @@
   "version": 1,
   "trees": [
     {
-      "id": "reaction",
-      "title": "Reaction",
+      "id": "reactive",
+      "title": "Reactive",
       "periods": [
         "all"
       ],
       "perks": [
         {
-          "id": "oprotunity-attack",
-          "name": "Oprotunity attack",
-          "description": "When a character is in a square adjacent to you and then exits you can use a set of reaction dice to roll any form of attack against them",
+          "id": "opportunity-attack",
+          "name": "Opportunity attack",
+          "description": "As a reaction when an enemy is in a square adjacent to yours and leaves that square, you can use your reaction to attack them",
           "cost": 5,
           "category": "reaction",
           "requires": []
