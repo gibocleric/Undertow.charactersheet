@@ -1615,7 +1615,12 @@
       Object.entries(perkInventoryGrants).forEach(([perkId, items]) => {
         if (!selectedPerks.has(perkId)) return;
         const sourceName = document.querySelector(`.perk-node[data-perk="${perkId}"] .perk-name`)?.textContent.trim() || 'Perk';
-        items.forEach((item) => acquiredItems.push({ ...item, sourceName }));
+        items.forEach((item) => {
+          const linked=(siteConfig.perkItems||[]).filter(link=>link.perkId===perkId&&link.asChoice).map(link=>siteConfig.inventoryItems.find(entry=>entry.id===link.itemId)).filter(Boolean).map(entry=>({name:entry.label,description:entry.description||'',damageDice:entry.damage||'',range:entry.range||'',tags:entry.tags||'',weapon:['weapon','attachment'].includes(entry.kind),special:entry.special||''}));
+          const defaultSword=perkId==='swordsman'?[{name:item.name,description:item.description,damageDice:item.damageDice,range:item.range,tags:item.tags,weapon:true}]:[];
+          const choices=[...(item.choices||defaultSword),...linked];
+          acquiredItems.push({ ...item, ...(choices.length?{choicePrompt:perkId==='swordsman'?'Choose a sword':item.choicePrompt,choices}:{}), sourceName });
+        });
       });
       (siteConfig.perkItems || []).forEach((link) => {
         if (!selectedPerks.has(link.perkId)) return;
@@ -3072,12 +3077,13 @@
     let communityUndoStack = [];
     let communityEditingPerkId = '';
     let communityCurrentTreeId = '';
+    const privateTreesStorageKey='undertow-private-trees-v1';
 
     function communitySafeId(text) { return String(text).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || `tree-${Date.now()}`; }
     function communityPerkDomId(tree, perk) { return `community-${tree.id}-${perk.id}`; }
     function communityCleanCatalog(data = communityCatalog) { return { version: 1, trees: (data.trees || []).map(tree => ({ id: tree.id, title: tree.title, private: tree.private === true, periods: [...(tree.periods || ['all'])], perks: (tree.perks || []).map(perk => ({ id: perk.id, name: perk.name, description: perk.description, cost: perk.cost, category: perk.category || 'passive', requires: [...(perk.requires || [])], itemSelection: perk.itemSelection === true, itemIds: [...(perk.itemIds || [])] })) })) }; }
     function communitySnapshot() { communityUndoStack.push(JSON.stringify(communityCleanCatalog())); if (communityUndoStack.length > 30) communityUndoStack.shift(); document.getElementById('community-undo').disabled = false; }
-    function communitySetDirty() { communityDraftDirty = true; document.getElementById('community-admin-status').textContent = 'Unpublished changes. Publish them to share these trees with everyone.'; }
+    function communitySetDirty() { communityDraftDirty = true; try{localStorage.setItem(privateTreesStorageKey,JSON.stringify(communityCatalog.trees.filter(tree=>tree.private)));}catch{} document.getElementById('community-admin-status').textContent = 'Unpublished changes. Public trees are shared when published; private trees stay on this device.'; }
     function communityPeriodLabel(id) { return communityPeriods.find(([key]) => key === id)?.[1] || id; }
     function communityRenderTree(tree) {
       if (!tree._panel) {
@@ -3123,18 +3129,24 @@
       });
     }
     function communityRenderAllTrees() {
-      perkTreeChoices.splice(11);
+      const picker=document.querySelector('.cryptex-picker');
+      const customChoice=perkTreeChoices.splice(10,1)[0];
+      perkTreeChoices.splice(10);
       document.querySelectorAll('.community-tree-choice, .community-perk-tree').forEach(element => element.remove());
-      activePerkTreeIndex = Math.min(activePerkTreeIndex, 10);
+      activePerkTreeIndex = Math.min(activePerkTreeIndex, Math.max(0,perkTreeChoices.length-1));
       const validPerkIds = new Set(communityCatalog.trees.flatMap(tree => tree.perks.map(perk => communityPerkDomId(tree, perk))));
       Object.keys(perkDefinitions).filter(id => id.startsWith('community-')).forEach(id => { delete perkDefinitions[id]; if (!validPerkIds.has(id)) selectedPerks.delete(id); });
       communityCatalog.trees.forEach(tree => { if (!tree.private) communityRenderTree(tree); });
+      if(customChoice){perkTreeChoices.push(customChoice);const customButton=picker.querySelector('.tree-choice-button[data-tree-index="10"]');if(customButton)picker.append(customButton);}
+      perkTreeChoices.forEach((choice,index)=>{const button=picker.querySelectorAll('.tree-choice-button')[index];if(button)button.dataset.treeIndex=String(index);});
       choosePerkTree(activePerkTreeIndex);
       updatePerkTree();
       if(typeof applyPageParts==='function')applyPageParts();
     }
     function communityLoadCatalog(data) {
-      communityCatalog = communityCleanCatalog({ trees: Array.isArray(data?.trees) ? data.trees : [] });
+      let localPrivate=[];try{localPrivate=JSON.parse(localStorage.getItem(privateTreesStorageKey)||'[]').filter(tree=>tree&&tree.private);}catch{}
+      const published=Array.isArray(data?.trees)?data.trees:[];const ids=new Set(published.map(tree=>tree.id));
+      communityCatalog = communityCleanCatalog({ trees: [...published,...localPrivate.filter(tree=>!ids.has(tree.id))] });
       communityCatalog.trees.forEach(tree => { tree.periods = Array.isArray(tree.periods) && tree.periods.length ? tree.periods : ['all']; tree.perks = Array.isArray(tree.perks) ? tree.perks : []; });
       communityRenderAllTrees();
       communityRenderAdminTreeSelect();
@@ -3412,6 +3424,7 @@
     })();
     const siteConfigDefaults = { version: 1, blocks: [], pageParts: [], textOverrides: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' };
     const siteConfigLocalKey = 'undertow-site-config-local-v1';
+    const privateItemsStorageKey='undertow-private-items-v1';
     let siteConfig = structuredClone(siteConfigDefaults);
     let universalSiteConfig = structuredClone(siteConfigDefaults);
     let siteConfigReady = Promise.resolve();
@@ -3574,9 +3587,10 @@
         const kindWrap=document.createElement('label');kindWrap.append(document.createTextNode('Item type'));const kind=document.createElement('select');[['equipment','Equipment'],['weapon','Weapon'],['attachment','Weapon attachment'],['ammunition','Ammunition']].forEach(([value,label])=>kind.add(new Option(label,value)));kindWrap.append(kind);form.append(kindWrap);
         const add=document.createElement('button'); add.type='submit'; add.textContent='Add inventory item'; form.append(add);
         const privateWrap=document.createElement('label');privateWrap.textContent='Private to this device';const isPrivate=document.createElement('input');isPrivate.type='checkbox';privateWrap.append(isPrivate);form.append(privateWrap);
-        form.addEventListener('submit',event=>{event.preventDefault(); const label=name.value.trim(); if(!label||!confirm(`Add “${label}” to the inventory catalog for this scope?`))return;if(quantity.value!==''&&(!Number.isInteger(Number(quantity.value))||Number(quantity.value)<0))return alert('Quantity must be a non-negative whole number.');const id=siteItemId('item');clearSiteItemRemoval('inventoryItems',id);siteConfig.inventoryItems.push({id,label,description:description.value.trim(),damage:damage.value.trim(),range:range.value.trim(),tags:tags.value.trim(),quantity:quantity.value===''?'':Number(quantity.value),special:special.value.trim(),kind:kind.value,price:Number(price.value)||0,private:isPrivate.checked});persistCurrentScope(false); }); host.append(form);
+        form.addEventListener('submit',event=>{event.preventDefault(); const label=name.value.trim(); if(!label||!confirm(`Add “${label}” to the inventory catalog for this scope?`))return;if(quantity.value!==''&&(!Number.isInteger(Number(quantity.value))||Number(quantity.value)<0))return alert('Quantity must be a non-negative whole number.');const id=siteItemId('item');clearSiteItemRemoval('inventoryItems',id);siteConfig.inventoryItems.push({id,label,description:description.value.trim(),damage:damage.value.trim(),range:range.value.trim(),tags:tags.value.trim(),quantity:quantity.value===''?'':Number(quantity.value),special:special.value.trim(),kind:kind.value,price:Number(price.value)||0,private:isPrivate.checked});if(isPrivate.checked){try{localStorage.setItem(privateItemsStorageKey,JSON.stringify(siteConfig.inventoryItems.filter(item=>item.private)));}catch{}}persistCurrentScope(false); }); host.append(form);
         siteConfig.inventoryItems.forEach(item=>{
           const row=document.createElement('div');row.className='admin-page-block';row.append(document.createTextNode(`${item.label}${item.damage?` · ${item.damage}`:''}${item.range?` · Range ${item.range}`:''} · ${item.kind||'equipment'}`));
+          const privacy=document.createElement('button');privacy.type='button';privacy.textContent=item.private?'Make public':'Make private';privacy.addEventListener('click',()=>{item.private=!item.private;try{localStorage.setItem(privateItemsStorageKey,JSON.stringify(siteConfig.inventoryItems.filter(entry=>entry.private)));}catch{}persistCurrentScope(false);renderPerkInventory();renderAdminPageSpecific('inventory-screen');});row.append(privacy);
           const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const label=prompt('Item name:',item.label);if(label===null||!label.trim())return;if(!confirm(`Save changes to “${label.trim()}”?`))return;const description=prompt('Description:',item.description||'');if(description===null)return;const damage=prompt('Damage dice (leave blank if none):',item.damage||'');if(damage===null)return;const range=prompt('Range (leave blank if none):',item.range||'');if(range===null)return;const tags=prompt('Tags (comma separated):',item.tags||'');if(tags===null)return;const quantity=prompt('Quantity (leave blank if not applicable):',item.quantity??'');if(quantity===null)return;if(quantity!==''&&!/^\d+$/.test(quantity))return alert('Quantity must be a whole number.');const special=prompt('Notes / special effect:',item.special||'');if(special===null)return;const kind=prompt('Type: equipment, weapon, attachment, or ammunition',item.kind||'equipment');if(!['equipment','weapon','attachment','ammunition'].includes(kind))return alert('Choose equipment, weapon, attachment, or ammunition.');Object.assign(item,{label:label.trim(),description,damage,range,tags,quantity:quantity===''?'':Number(quantity),special,kind});persistCurrentScope(false);});
           const remove=document.createElement('button');remove.type='button';remove.textContent='Delete';remove.addEventListener('click',()=>{if(!confirm(`Delete “${item.label}”?`))return;markSiteItemRemoved('inventoryItems',item.id);siteConfig.inventoryItems=siteConfig.inventoryItems.filter(entry=>entry.id!==item.id);siteConfig.perkItems=siteConfig.perkItems.filter(link=>link.itemId!==item.id);persistCurrentScope(false);});row.append(edit,remove);host.append(row);
         });
@@ -3588,9 +3602,10 @@
         const seenPerks=new Set();
         perkNodes.forEach(node=>{if(seenPerks.has(node.dataset.perk))return;seenPerks.add(node.dataset.perk);perk.add(new Option(node.querySelector('.perk-name')?.textContent.trim()||node.dataset.perk,node.dataset.perk));});
         const items=document.createElement('select'); items.multiple=true; items.size=5; items.setAttribute('aria-label','Choose inventory items'); siteConfig.inventoryItems.forEach(item=>items.add(new Option(item.label,item.id)));
-        const syncAttached=()=>{const attached=new Set(siteConfig.perkItems.filter(link=>link.perkId===perk.value).map(link=>link.itemId));[...items.options].forEach(option=>option.selected=attached.has(option.value));};
+        const choiceLabel=document.createElement('label');const asChoice=document.createElement('input');asChoice.type='checkbox';choiceLabel.append(asChoice,document.createTextNode('Offer selected items as choices for this perk (for example, extra sword options)'));host.append(choiceLabel);
+        const syncAttached=()=>{const links=siteConfig.perkItems.filter(link=>link.perkId===perk.value);const attached=new Set(links.map(link=>link.itemId));[...items.options].forEach(option=>option.selected=attached.has(option.value));asChoice.checked=links.some(link=>link.asChoice);};
         perk.addEventListener('change',syncAttached);
-        const save=document.createElement('button'); save.type='button'; save.textContent='Attach selected items'; save.addEventListener('click',()=>{if(!perk.value)return alert('Choose a perk first.');const ids=[...items.selectedOptions].map(option=>option.value);if(!confirm(`Attach ${ids.length} inventory item(s) to ${perk.options[perk.selectedIndex].text}?`))return;siteConfig.perkItems.filter(link=>link.perkId===perk.value).forEach(link=>markSiteItemRemoved('perkItems',link.id));siteConfig.perkItems=siteConfig.perkItems.filter(link=>link.perkId!==perk.value);ids.forEach(itemId=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===itemId);if(item){const id=siteItemId('grant');clearSiteItemRemoval('perkItems',id);siteConfig.perkItems.push({id,perkId:perk.value,itemId,label:`${perk.value}-${itemId}`});}});persistCurrentScope(false);}); host.append(perk,items,save);
+        const save=document.createElement('button'); save.type='button'; save.textContent='Attach selected items'; save.addEventListener('click',()=>{if(!perk.value)return alert('Choose a perk first.');const ids=[...items.selectedOptions].map(option=>option.value);if(!confirm(`Attach ${ids.length} inventory item(s) to ${perk.options[perk.selectedIndex].text}?`))return;siteConfig.perkItems.filter(link=>link.perkId===perk.value).forEach(link=>markSiteItemRemoved('perkItems',link.id));siteConfig.perkItems=siteConfig.perkItems.filter(link=>link.perkId!==perk.value);ids.forEach(itemId=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===itemId);if(item){const id=siteItemId('grant');clearSiteItemRemoval('perkItems',id);siteConfig.perkItems.push({id,perkId:perk.value,itemId,label:`${perk.value}-${itemId}`,asChoice:asChoice.checked});}});persistCurrentScope(false);}); host.append(perk,items,save);
         siteConfig.perkItems.forEach(link=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===link.itemId);const node=document.querySelector(`.perk-node[data-perk="${link.perkId}"] .perk-name`);if(!item)return;const row=document.createElement('div');row.className='admin-page-block';row.textContent=`${node?.textContent||link.perkId} → ${item.label}`;host.append(row);});
       } else if (pageId === 'stats-screen') {
         heading.textContent='Major stats'; host.append(heading);
@@ -3674,8 +3689,9 @@
       publishUniversalSiteSettings(status);
     });
     siteConfigReady = (async () => {
-      try { let response=await fetch('/api/site-config',{cache:'no-store'}); if (!response.ok) response=await fetch(`./site-config.json?v=${Date.now()}`,{cache:'no-store'}); if (response.ok) universalSiteConfig=cleanSiteConfig(await response.json()); }
+      try { let response=await fetch('/api/site-config',{cache:'no-store'}); if (!response.ok) response=await fetch(new URL(`site-config.json?v=${Date.now()}`,document.baseURI),{cache:'no-store'}); if (response.ok) universalSiteConfig=cleanSiteConfig(await response.json()); }
       catch { universalSiteConfig=cleanSiteConfig(); }
+      try{const privateItems=JSON.parse(localStorage.getItem(privateItemsStorageKey)||'[]');const known=new Set(universalSiteConfig.inventoryItems.map(item=>item.id));universalSiteConfig.inventoryItems.push(...privateItems.filter(item=>item.private&&!known.has(item.id)));}catch{}
       siteConfig=readScopedConfig('me'); applySiteDefinitions(); renderAdminBlocks();
     })();
     window.addEventListener('keydown', event => {
