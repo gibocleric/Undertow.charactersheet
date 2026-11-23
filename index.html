@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Undertow admin bundle: universal-admin-v14 -->
+<!-- Undertow admin bundle: universal-admin-v15 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -871,8 +871,8 @@
         <div id="custom-perk-list" class="perk-tree" aria-label="Custom perks"></div>
         <p class="intro">Custom perks are available in every time period. Click a perk below to select it and spend its point cost.</p>
         <section id="community-admin" hidden aria-label="Universal perk and tree manager">
-          <h2>Shared skill trees</h2>
-          <p class="intro">Sign in with your local admin account to add, edit, or remove trees for everyone using this app.</p>
+          <h2>Admin: Perks and skill trees</h2>
+          <p class="intro">Sign in from the local Undertow Admin service to manage universal perks, trees, inventory, and attachments.</p>
           <form id="community-login" class="community-admin-form">
             <label>Admin account<input id="community-account" autocomplete="username" required></label>
             <label>Password<input id="community-password" type="password" autocomplete="current-password" required></label>
@@ -3047,6 +3047,7 @@
     let communityCatalog = { version: 1, trees: [] };
     let communityReady = Promise.resolve();
     let communityAdminAvailable = false;
+    let communityGitReady = false;
     let communityAuthToken = '';
     let communityDraftDirty = false;
     let communityUndoStack = [];
@@ -3283,11 +3284,11 @@
     });
     document.getElementById('perks-screen').append(document.getElementById('community-admin'));
     document.getElementById('community-login').addEventListener('submit', async event => {
-      event.preventDefault(); await siteConfigReady; const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
+      event.preventDefault(); await Promise.all([siteConfigReady,communityReady]); const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
       try {
         const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
-        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = 'Signed in. Universal perk and inventory tools are ready.';
+        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = communityGitReady?'Signed in. Universal changes can publish to GitHub for everyone.':'Signed in, but this admin service is not running inside your GitHub repository clone. Universal edits will only save locally until it is started from that clone.';
       } catch (error) { status.textContent = error.message; }
     });
     document.getElementById('community-hide-admin').addEventListener('click', () => {
@@ -3368,7 +3369,7 @@
       try {
         let response = await fetch('/api/community-trees', { cache: 'no-store' });
         let data;
-        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; }
+        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; communityGitReady=data.gitReady===true; }
         else throw new Error('Local admin API unavailable');
         communityLoadCatalog(data);
       } catch {
