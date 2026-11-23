@@ -144,12 +144,24 @@ function publishSharedData(catalog, config) {
     git(['add', '--force', '--', ...trackedPaths]);
     const status = git(['status', '--porcelain', '--', ...trackedPaths]);
     if (status) git(['commit', '--only', '-m', 'Publish Undertow shared character data', '--', ...trackedPaths]);
-    const localCommit = git(['rev-parse', 'HEAD']);
     const repoRelative = details.relativeDir ? `${details.relativeDir}/` : '';
     for (const file of trackedPaths) {
       const inCommit = git(['ls-tree', '-r', '--name-only', 'HEAD', '--', `${repoRelative}${file}`]);
       if (!inCommit.split(/\r?\n/).includes(`${repoRelative}${file}`)) throw new Error(`${file} is missing from the commit; the publishing folder may not be the website's tracked folder.`);
     }
+    // Bring in commits created on GitHub or another device before pushing.
+    // Rebase preserves both histories and avoids force-pushing over remote work.
+    git(['fetch', 'origin', details.branch]);
+    const remoteRef = `refs/remotes/origin/${details.branch}`;
+    try { git(['merge-base', '--is-ancestor', remoteRef, 'HEAD']); }
+    catch {
+      try { git(['rebase', remoteRef]); }
+      catch (error) {
+        try { git(['rebase', '--abort']); } catch {}
+        throw new Error(`GitHub has newer commits. The publisher fetched them, but could not safely rebase because the same files changed on both sides. Your local files are preserved. Resolve the conflict in GitHub Desktop (or sync the checkout), then publish again. Details: ${error.message}`);
+      }
+    }
+    const localCommit = git(['rev-parse', 'HEAD']);
     git(['push', 'origin', `HEAD:refs/heads/${details.branch}`]);
     for (const pushRemote of details.pushRemotes) {
       const remoteLine = git(['ls-remote', '--heads', pushRemote, `refs/heads/${details.branch}`]).split(/\r?\n/).find(Boolean) || '';

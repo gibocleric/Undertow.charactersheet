@@ -3316,7 +3316,7 @@
       const perk = { id: communityEditingPerkId || communitySafeId(name), name, description, cost, category: document.getElementById('community-perk-category').value, itemSelection:document.getElementById('community-perk-has-items').checked, itemIds:document.getElementById('community-perk-has-items').checked?[...document.getElementById('community-perk-items').selectedOptions].map(option=>option.value):[], requires: [...document.getElementById('community-perk-requires').selectedOptions].map(option => option.value).filter(id => id !== communityEditingPerkId) };
       if (!isEdit && tree.perks.some(item => item.id === perk.id)) perk.id += `-${Date.now().toString(36)}`;
       if (isEdit) tree.perks = tree.perks.map(item => item.id === communityEditingPerkId ? perk : item); else tree.perks.push(perk);
-      communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communityClearPerkForm(); communitySetDirty();
+      communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communityClearPerkForm(); document.getElementById('community-perk-name').value='';document.getElementById('community-perk-description').value='';document.getElementById('community-perk-cost').value='5';document.getElementById('community-perk-category').value='passive';document.getElementById('community-perk-name').focus();communitySetDirty();
     });
     document.getElementById('community-cancel-perk-edit').addEventListener('click', communityClearPerkForm);
     document.getElementById('community-perk-has-items').addEventListener('change',event=>{document.getElementById('community-perk-items-wrap').hidden=!event.target.checked;});
