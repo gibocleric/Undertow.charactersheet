@@ -9,9 +9,13 @@ const { spawnSync, spawn } = require('node:child_process');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT || 4173);
-const BUNDLE_MARKER = 'Undertow admin bundle: universal-admin-v15';
-const DATA_FILE = path.join(ROOT, 'community-trees.json');
-const SITE_CONFIG_FILE = path.join(ROOT, 'site-config.json');
+const BUNDLE_MARKER = 'Undertow admin bundle: universal-admin-v16';
+// This must be the GitHub Pages publishing folder (the folder that contains
+// the deployed index.html and the two shared JSON files). start-admin.ps1
+// remembers the folder locally and supplies this environment variable.
+const PUBLISH_DIR = path.resolve(process.env.UNDERTOW_PUBLISH_DIR || ROOT);
+const DATA_FILE = path.join(PUBLISH_DIR, 'community-trees.json');
+const SITE_CONFIG_FILE = path.join(PUBLISH_DIR, 'site-config.json');
 const CONFIG_FILE = path.join(ROOT, '.admin-access.json');
 const sessions = new Set();
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf' };
@@ -88,12 +92,75 @@ function validCatalog(data) {
   return true;
 }
 function git(args) {
-  const result = spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', windowsHide: true });
+  const result = spawnSync('git', args, { cwd: PUBLISH_DIR, encoding: 'utf8', windowsHide: true, stdio: ['inherit', 'pipe', 'pipe'], env: { ...process.env, GIT_TERMINAL_PROMPT: '1' } });
   if (result.error || result.status !== 0) throw new Error((result.stderr || result.error?.message || 'Git command failed.').trim());
   return result.stdout.trim();
 }
+function gitOptional(args) {
+  const result = spawnSync('git', args, { cwd: PUBLISH_DIR, encoding: 'utf8', windowsHide: true, stdio: ['inherit', 'pipe', 'pipe'], env: { ...process.env, GIT_TERMINAL_PROMPT: '1' } });
+  if (result.error) throw new Error(result.error.message);
+  return result.status === 0 ? result.stdout.trim() : '';
+}
+function isGitHubRemote(remote) {
+  if (/^(?:[^@/]+@)?github\.com[:/].+/i.test(remote)) return true;
+  try { return new URL(remote).hostname.toLowerCase() === 'github.com'; } catch { return false; }
+}
 function isGitRepo() {
   try { git(['rev-parse', '--show-toplevel']); git(['remote', 'get-url', 'origin']); return true; } catch { return false; }
+}
+function publishDetails() {
+  if (!isGitRepo()) return null;
+  try {
+    const branch = git(['symbolic-ref', '--quiet', '--short', 'HEAD']);
+    const remote = git(['config', '--get', 'remote.origin.url']);
+    const configuredPushUrls = gitOptional(['config', '--get-all', 'remote.origin.pushurl']).split(/\r?\n/).filter(Boolean);
+    const pushRemotes = configuredPushUrls.length ? configuredPushUrls : [remote];
+    if (!isGitHubRemote(remote) || !pushRemotes.every(isGitHubRemote)) return null;
+    const repoRoot = git(['rev-parse', '--show-toplevel']);
+    const relativeDir = path.relative(repoRoot, PUBLISH_DIR).replace(/\\/g, '/');
+    return { branch, remote, pushRemotes, repoRoot, relativeDir };
+  } catch { return null; }
+}
+function writeJsonAtomically(file, value) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const temp = file + '.tmp';
+  fs.writeFileSync(temp, JSON.stringify(value, null, 2) + '\n', 'utf8');
+  fs.renameSync(temp, file);
+}
+function publishSharedData(catalog, config) {
+  const normalizedCatalog = { version: 1, trees: catalog.trees };
+  const normalizedConfig = {
+    version: 1, blocks: config.blocks, pageParts: config.pageParts, textOverrides: config.textOverrides,
+    perkOverrides: config.perkOverrides, inventoryItems: config.inventoryItems, perkItems: config.perkItems,
+    stats: config.stats, skills: config.skills, removedSkills: config.removedSkills, removedItems: config.removedItems,
+    statValues: config.statValues, backgrounds: config.backgrounds, activeBackgroundId: config.activeBackgroundId || ''
+  };
+  writeJsonAtomically(DATA_FILE, normalizedCatalog);
+  writeJsonAtomically(SITE_CONFIG_FILE, normalizedConfig);
+  const details = publishDetails();
+  if (!details) return { published: false, saved: true, message: 'Saved on this computer only. The selected folder is not on a publishable GitHub branch with a GitHub origin. Start the editor again and select the Pages folder inside your GitHub checkout, then try Apply again.' };
+  try {
+    const trackedPaths = ['community-trees.json', 'site-config.json'];
+    git(['add', '--force', '--', ...trackedPaths]);
+    const status = git(['status', '--porcelain', '--', ...trackedPaths]);
+    if (status) git(['commit', '--only', '-m', 'Publish Undertow shared character data', '--', ...trackedPaths]);
+    const localCommit = git(['rev-parse', 'HEAD']);
+    const repoRelative = details.relativeDir ? `${details.relativeDir}/` : '';
+    for (const file of trackedPaths) {
+      const inCommit = git(['ls-tree', '-r', '--name-only', 'HEAD', '--', `${repoRelative}${file}`]);
+      if (!inCommit.split(/\r?\n/).includes(`${repoRelative}${file}`)) throw new Error(`${file} is missing from the commit; the publishing folder may not be the website's tracked folder.`);
+    }
+    git(['push', 'origin', `HEAD:refs/heads/${details.branch}`]);
+    for (const pushRemote of details.pushRemotes) {
+      const remoteLine = git(['ls-remote', '--heads', pushRemote, `refs/heads/${details.branch}`]).split(/\r?\n/).find(Boolean) || '';
+      const remoteCommit = remoteLine.split(/\s+/)[0];
+      if (remoteCommit !== localCommit) throw new Error(`GitHub branch ${details.branch} at ${pushRemote} did not confirm commit ${localCommit.slice(0, 12)}.`);
+    }
+    const location = details.relativeDir ? `/${details.relativeDir}` : ' (repository root)';
+    return { published: true, saved: true, branch: details.branch, commit: localCommit.slice(0, 12), remote: details.remote, message: `GitHub confirmed commit ${localCommit.slice(0, 12)} on origin/${details.branch}${location}. GitHub Pages will show these shared files after its deployment finishes.` };
+  } catch (error) {
+    return { published: false, saved: true, branch: details.branch, remote: details.remote, message: `Saved in the publishing folder, but GitHub did not confirm the publish: ${error.message}` };
+  }
 }
 function secureEqual(a, b) {
   const aa = Buffer.from(String(a)); const bb = Buffer.from(String(b));
@@ -145,49 +212,39 @@ async function main() {
   const server = http.createServer(async (req, res) => {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     try {
-      if (req.method === 'GET' && pathname === '/api/community-trees') return json(res, 200, { ...readCatalog(), adminAvailable: true, gitReady: isGitRepo() });
-      if (req.method === 'GET' && pathname === '/api/site-config') return json(res, 200, { ...readSiteConfig(), adminAvailable: true, gitReady: isGitRepo() });
+      if (req.method === 'GET' && (pathname === '/api/community-trees' || pathname === '/api/site-config')) {
+        const details = publishDetails();
+        const sharedData = pathname === '/api/community-trees' ? readCatalog() : readSiteConfig();
+        return json(res, 200, { ...sharedData, adminAvailable: true, gitReady: !!details, publishBranch: details?.branch || '' });
+      }
       if (req.method === 'POST' && pathname === '/api/admin-login') {
         const body = await readBody(req);
         if (!verifyLogin(body.account, body.password)) return json(res, 401, { error: 'Account or password is incorrect.' });
         const token = crypto.randomBytes(32).toString('hex'); sessions.add(token);
         return json(res, 200, { token });
       }
+      if (req.method === 'POST' && pathname === '/api/publish-universal') {
+        const token = req.headers['x-admin-token'];
+        if (!token || !sessions.has(token)) return json(res, 401, { error: 'Sign in to the local admin editor first.' });
+        const body = await readBody(req);
+        if (!validCatalog(body.catalog) || !validSiteConfig(body.siteConfig)) return json(res, 400, { error: 'The skill trees or shared site settings are incomplete or invalid.' });
+        return json(res, 200, publishSharedData(body.catalog, body.siteConfig));
+      }
+      // Older buttons still publish both files together, never one half alone.
       if (req.method === 'POST' && pathname === '/api/publish-trees') {
         const token = req.headers['x-admin-token'];
         if (!token || !sessions.has(token)) return json(res, 401, { error: 'Sign in to the local admin editor first.' });
         const body = await readBody(req);
         if (!validCatalog(body)) return json(res, 400, { error: 'The skill tree data is incomplete or invalid.' });
-        const serialized = JSON.stringify({ version: 1, trees: body.trees }, null, 2) + '\n';
-        const temp = DATA_FILE + '.tmp';
-        fs.writeFileSync(temp, serialized, 'utf8'); fs.renameSync(temp, DATA_FILE);
-        if (!isGitRepo()) return json(res, 200, { published: false, saved: true, message: 'Saved locally. Put this folder in your GitHub repository clone to publish it for everyone.' });
-        try {
-          git(['add', '--', 'community-trees.json']);
-          const status = git(['status', '--porcelain', '--', 'community-trees.json']);
-          if (status) {
-            git(['commit', '--only', '-m', 'Publish community skill trees', '--', 'community-trees.json']);
-            git(['push', 'origin', 'HEAD']);
-          }
-          return json(res, 200, { published: true, saved: true, message: status ? 'Skill trees were saved and pushed. GitHub Pages will update from your publishing branch.' : 'No changes to publish.' });
-        } catch (error) {
-          return json(res, 200, { published: false, saved: true, message: `Saved locally, but Git could not publish it: ${error.message}` });
-        }
+        const result = publishSharedData(body, readSiteConfig());
+        return json(res, 200, result);
       }
       if (req.method === 'POST' && pathname === '/api/publish-site-config') {
         const token = req.headers['x-admin-token'];
         if (!token || !sessions.has(token)) return json(res, 401, { error: 'Sign in to the local admin editor first.' });
         const body = await readBody(req);
         if (!validSiteConfig(body)) return json(res, 400, { error: 'The site settings are invalid or too large.' });
-        const serialized = JSON.stringify({ version: 1, blocks: body.blocks, pageParts: body.pageParts, textOverrides: body.textOverrides, perkOverrides: body.perkOverrides, inventoryItems: body.inventoryItems, perkItems: body.perkItems, stats: body.stats, skills: body.skills, removedSkills: body.removedSkills, removedItems: body.removedItems, statValues: body.statValues, backgrounds: body.backgrounds, activeBackgroundId: body.activeBackgroundId || '' }, null, 2) + '\n';
-        const temp = SITE_CONFIG_FILE + '.tmp'; fs.writeFileSync(temp, serialized, 'utf8'); fs.renameSync(temp, SITE_CONFIG_FILE);
-        if (!isGitRepo()) return json(res, 200, { published: false, saved: true, message: 'Saved locally. Put this folder in your GitHub repository clone to publish for everyone.' });
-        try {
-          git(['add', '--', 'site-config.json']);
-          const status = git(['status', '--porcelain', '--', 'site-config.json']);
-          if (status) { git(['commit', '--only', '-m', 'Update shared character builder settings', '--', 'site-config.json']); git(['push', 'origin', 'HEAD']); }
-          return json(res, 200, { published: true, saved: true, message: status ? 'Shared settings were pushed. GitHub Pages will update for everyone.' : 'No settings changes to publish.' });
-        } catch (error) { return json(res, 200, { published: false, saved: true, message: `Saved locally, but Git could not publish settings: ${error.message}` }); }
+        return json(res, 200, publishSharedData(readCatalog(), body));
       }
       if (req.method === 'GET' && pathname.startsWith('/api/')) return json(res, 404, { error: 'Not found.' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed.' });
@@ -211,7 +268,9 @@ async function main() {
       console.log(`Undertow local editor: ${address}`);
       console.log('This editor only accepts connections from this computer. Press Ctrl+C to stop it.');
       if (!matchingAppBundle) console.warn('This folder has an older or mismatched index.html. Run update-admin.bat from the latest package to replace it.');
-      if (!isGitRepo()) console.log('No GitHub repository clone detected beside admin-server.js; edits can be saved locally but not published yet.');
+      const destination = publishDetails();
+      if (!destination) console.log('No connected GitHub Pages publishing folder was selected; universal changes will not publish until one is selected.');
+      else console.log(`Universal publishes will push to origin/${destination.branch}; ensure GitHub Pages serves this folder and branch.`);
       if (process.platform === 'win32' && process.env.UNDERTOW_NO_OPEN !== '1') {
         const opener = spawn('cmd', ['/c', 'start', '', address], { detached: true, stdio: 'ignore', windowsHide: true });
         opener.unref();
@@ -220,4 +279,6 @@ async function main() {
   };
   listen();
 }
-main().catch(error => { console.error(error); process.exitCode = 1; });
+if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
+
+module.exports = { validCatalog, validSiteConfig, publishDetails, publishSharedData };

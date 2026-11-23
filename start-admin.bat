@@ -19,6 +19,6 @@ if errorlevel 1 (
     exit /b 1
   )
 )
-"%NODE_EXE%" "%~dp0admin-server.js"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0start-admin.ps1" -NodeExecutable "%NODE_EXE%"
 if errorlevel 1 echo The editor stopped because of the error shown above.
 pause

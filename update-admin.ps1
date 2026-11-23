@@ -20,7 +20,7 @@ if ($source.TrimEnd('\') -ieq $target.TrimEnd('\')) {
   Start-UndertowAdmin $target
   exit 0
 }
-foreach ($file in @('index.html', 'admin-server.js', 'start-admin.bat', 'update-admin.bat', 'update-admin.ps1', 'README.md')) {
+foreach ($file in @('index.html', 'admin-server.js', 'start-admin.bat', 'start-admin.ps1', 'update-admin.bat', 'update-admin.ps1', 'README.md')) {
   Copy-Item -LiteralPath (Join-Path $source $file) -Destination (Join-Path $target $file) -Force
 }
 if (-not (Test-Path -LiteralPath (Join-Path $target 'community-trees.json'))) {
@@ -34,7 +34,7 @@ foreach ($folder in @('assets', 'fonts')) {
 }
 $ignorePath = Join-Path $target '.gitignore'
 $ignoreText = if (Test-Path -LiteralPath $ignorePath) { Get-Content -LiteralPath $ignorePath -Raw } else { '' }
-foreach ($entry in @('.admin-access.json', '*.tmp')) {
+foreach ($entry in @('.admin-access.json', '.admin-publish-dir', '*.tmp')) {
   if ($ignoreText -notmatch ('(?m)^' + [regex]::Escape($entry) + '$')) { Add-Content -LiteralPath $ignorePath -Value $entry }
 }
 [System.Windows.Forms.MessageBox]::Show('The new app and server files are now in the selected folder. Your local admin account and community tree catalog were kept. The updated service is starting now.', 'Undertow updater', 'OK', 'Information') | Out-Null

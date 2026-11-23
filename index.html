@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Undertow admin bundle: universal-admin-v15 -->
+<!-- Undertow admin bundle: universal-admin-v16 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -3048,6 +3048,7 @@
     let communityReady = Promise.resolve();
     let communityAdminAvailable = false;
     let communityGitReady = false;
+    let communityPublishBranch = '';
     let communityAuthToken = '';
     let communityDraftDirty = false;
     let communityUndoStack = [];
@@ -3288,7 +3289,7 @@
       try {
         const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
-        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = communityGitReady?'Signed in. Universal changes can publish to GitHub for everyone.':'Signed in, but this admin service is not running inside your GitHub repository clone. Universal edits will only save locally until it is started from that clone.';
+        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = communityGitReady?`Signed in. GitHub publishing is connected to branch ${communityPublishBranch}. Check that this is the branch and folder GitHub Pages serves.`:'Signed in, but no GitHub publishing folder is connected. Universal edits stay local until you start the editor and choose the folder that GitHub Pages serves.';
       } catch (error) { status.textContent = error.message; }
     });
     document.getElementById('community-hide-admin').addEventListener('click', () => {
@@ -3301,21 +3302,12 @@
       document.getElementById('admin-phase-dock').hidden = true;
       document.getElementById('inventory-admin-panel').hidden=true;
     });
-    document.getElementById('community-publish').addEventListener('click', async () => {
-      if (!communityAuthToken) return alert('Sign in to the local admin editor first.');
-      if (!window.confirm('Publish these skill tree changes for everyone using the app?')) return;
-      const status = document.getElementById('community-admin-status'); status.textContent = 'Saving and publishing…';
-      try {
-        const response = await fetch('/api/publish-trees', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Token': communityAuthToken }, body: JSON.stringify({ version: 1, trees: communityCatalog.trees }) });
-        const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Publishing failed.');
-        status.textContent = result.message; if (result.published) { communityDraftDirty = false; communityUndoStack = []; document.getElementById('community-undo').disabled = true; }
-      } catch (error) { status.textContent = error.message; }
-    });
+    document.getElementById('community-publish').addEventListener('click', () => publishUniversalSiteSettings(document.getElementById('community-admin-status')));
     async function publishUniversalSiteSettings(statusNode){
       if(!communityAuthToken){statusNode.textContent='Sign in to the Undertow admin account first.';return;}
-      if(!confirm('Publish all perk edits, built-in perk changes, inventory items, and perk attachments for everyone?'))return;
-      statusNode.textContent='Publishing universal site data…';
-      try{const treesResponse=await fetch('/api/publish-trees',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify(communityCleanCatalog())});const treesResult=await treesResponse.json();if(!treesResponse.ok)throw new Error(treesResult.error||'Tree publishing failed.');if(treesResult.published!==true){statusNode.textContent=`Perk trees were not published to all devices. ${treesResult.message}`;return;}const response=await fetch('/api/publish-site-config',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify(siteConfig)});const result=await response.json();if(!response.ok)throw new Error(result.error||'Publishing failed.');if(result.published!==true){statusNode.textContent=`Perk trees were published, but inventory/settings were not published to all devices. ${result.message}`;return;}universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;communityDraftDirty=false;siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();renderAdminBlocks();statusNode.textContent='All universal perk, tree, inventory, and attachment changes are live for everyone. '+result.message;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;}catch(error){statusNode.textContent=`Could not publish all universal changes: ${error.message}`;}
+      if(!confirm('Publish all universal perk trees, inventory, and site settings to the GitHub Pages folder for everyone?'))return;
+      statusNode.textContent='Sending both shared data files to GitHub…';
+      try{const response=await fetch('/api/publish-universal',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify({catalog:communityCleanCatalog(),siteConfig:cleanSiteConfig(siteConfig)})});const result=await response.json();if(!response.ok)throw new Error(result.error||'Publishing failed.');if(result.published!==true){statusNode.textContent=`NOT PUBLISHED. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;window.alert(statusNode.textContent);return;}universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;communityDraftDirty=false;siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();renderAdminBlocks();statusNode.textContent=`GitHub accepted the shared changes. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;}catch(error){statusNode.textContent=`NOT PUBLISHED. ${error.message}`;window.alert(statusNode.textContent);}
     }
     document.getElementById('universal-publish-all').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('inventory-admin-status')));
     document.getElementById('universal-publish-perks').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('community-admin-status')));
@@ -3369,11 +3361,11 @@
       try {
         let response = await fetch('/api/community-trees', { cache: 'no-store' });
         let data;
-        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; communityGitReady=data.gitReady===true; }
+        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; communityGitReady=data.gitReady===true; communityPublishBranch=String(data.publishBranch||''); }
         else throw new Error('Local admin API unavailable');
         communityLoadCatalog(data);
       } catch {
-        try { const response = await fetch('./community-trees.json', { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
+        try { const response = await fetch(`./community-trees.json?v=${Date.now()}`, { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
       }
     })();
     const siteConfigDefaults = { version: 1, blocks: [], pageParts: [], textOverrides: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' };
@@ -3633,16 +3625,13 @@
     });
     document.getElementById('admin-block-cancel-edit').addEventListener('click',resetAdminBlockForm);
     document.getElementById('admin-background-add').addEventListener('click',()=>{const file=document.getElementById('admin-background-file').files[0];const name=document.getElementById('admin-background-name').value.trim();if(!file)return alert('Choose a background image first.');if(!['image/png','image/jpeg','image/webp'].includes(file.type))return alert('Choose a PNG, JPG, or WebP image.');if(file.size>1_000_000)return alert('Choose a background image under 1 MB.');if(!confirm(`Add “${name||file.name}” to the background images for this scope?`))return;const reader=new FileReader();reader.onerror=()=>alert('The image could not be read.');reader.onload=()=>{const id=siteItemId('background');clearSiteItemRemoval('backgrounds',id);siteConfig.backgrounds.unshift({id,label:name||file.name,data:String(reader.result)});siteConfig.activeBackgroundId=id;applySiteBackground();document.getElementById('admin-background-file').value='';document.getElementById('admin-background-name').value='';persistCurrentScope(false);};reader.readAsDataURL(file);});
-    document.getElementById('admin-save-config').addEventListener('click', async () => {
+    document.getElementById('admin-save-config').addEventListener('click', () => {
       const status = document.getElementById('admin-config-status');
       if (activeAdminScope !== 'universal') { persistCurrentScope(true);applySiteDefinitions();renderAdminBlocks();status.textContent=activeAdminScope==='character'?'All changes applied to this character on this device.':'All changes applied on this device.';return; }
-      if (!communityAuthToken || !confirm('Publish these settings for everyone using the app?')) return;
-      status.textContent = 'Publishing universal settings…';
-      try { const response = await fetch('/api/publish-site-config', { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':communityAuthToken }, body:JSON.stringify(siteConfig) }); const result=await response.json(); if (!response.ok) throw new Error(result.error || 'Publish failed.'); if(result.published!==true){status.textContent=`Saved only on this computer. Universal changes are not active across devices until GitHub publish succeeds. ${result.message}`;return;} universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;applySiteDefinitions();renderAdminBlocks();status.textContent='All changes published for everyone. '+result.message; }
-      catch (error) { status.textContent=error.message; }
+      publishUniversalSiteSettings(status);
     });
     siteConfigReady = (async () => {
-      try { let response=await fetch('/api/site-config',{cache:'no-store'}); if (!response.ok) response=await fetch('./site-config.json',{cache:'no-store'}); if (response.ok) universalSiteConfig=cleanSiteConfig(await response.json()); }
+      try { let response=await fetch('/api/site-config',{cache:'no-store'}); if (!response.ok) response=await fetch(`./site-config.json?v=${Date.now()}`,{cache:'no-store'}); if (response.ok) universalSiteConfig=cleanSiteConfig(await response.json()); }
       catch { universalSiteConfig=cleanSiteConfig(); }
       siteConfig=readScopedConfig('me'); applySiteDefinitions(); renderAdminBlocks();
     })();
