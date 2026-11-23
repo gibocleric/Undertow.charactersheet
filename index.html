@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- Undertow admin bundle: page-builder-v11 -->
+<!-- Undertow admin bundle: universal-admin-v14 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -630,6 +630,13 @@
     #admin-page-tools { z-index:4100; top:16px; right:16px; width:min(560px, calc(100vw - 32px)); max-height:calc(100vh - 32px); padding:18px; border:1px solid #ded6c9; border-radius:18px; background:#fffdfa; color:var(--ui-ink); box-shadow:0 20px 65px #21180f45; }
     #admin-page-tools[hidden] { display:none !important; }
     #admin-phase-dock { position:fixed; top:12px; right:12px; bottom:12px; width:min(300px,calc(100vw - 24px)); max-height:none; overflow:auto; display:flex; flex-direction:column; align-items:stretch; z-index:6000; }
+    #admin-phase-dock,#admin-page-tools,#admin-inspector,#admin-text-edit-banner { display:none!important; }
+    #community-admin { margin:18px 0; padding:18px; border:1px solid var(--ui-border); border-radius:16px; background:#fffdfa; }
+    #community-publish { display:none!important; }
+    #community-admin[hidden] { display:none!important; }
+    #builtin-perk-admin-panel { margin:14px 0; padding:14px; border:1px solid var(--ui-border); border-radius:12px; background:#faf8f4; }
+    #inventory-admin-panel { margin:18px 0; }
+    #inventory-admin-panel[hidden] { display:none!important; }
     #admin-phase-dock select,#admin-phase-dock button { width:100%; max-width:none; }
     .admin-mode-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
     .admin-mode-tabs button[aria-pressed="true"] { background:#74502e!important; color:#fff!important; }
@@ -863,7 +870,7 @@
         </form>
         <div id="custom-perk-list" class="perk-tree" aria-label="Custom perks"></div>
         <p class="intro">Custom perks are available in every time period. Click a perk below to select it and spend its point cost.</p>
-        <section id="community-admin" hidden aria-label="Shared skill tree publisher">
+        <section id="community-admin" hidden aria-label="Universal perk and tree manager">
           <h2>Shared skill trees</h2>
           <p class="intro">Sign in with your local admin account to add, edit, or remove trees for everyone using this app.</p>
           <form id="community-login" class="community-admin-form">
@@ -872,6 +879,8 @@
             <button type="submit">Sign in</button>
           </form>
           <div id="community-editor" hidden>
+            <p class="intro">Universal perk tools. Changes are saved to the shared site data files and remain when the app HTML is updated.</p>
+            <section id="builtin-perk-admin-panel" class="admin-manager-card"></section>
             <button id="community-hide-admin" type="button">Hide admin editor</button>
             <label>Choose a shared tree<select id="community-tree-select"><option value="">Create a new tree</option></select></label>
             <div class="community-admin-fields">
@@ -901,6 +910,7 @@
               <button id="community-undo" type="button" disabled>↶ Undo last change</button>
               <button id="community-publish" type="button" class="primary">Publish changes for everyone</button>
             </div>
+            <button id="universal-publish-perks" type="button" class="primary">Apply all perk changes for everyone</button>
             <p id="community-admin-status" aria-live="polite"></p>
           </div>
         </section>
@@ -1290,6 +1300,13 @@
       <h1>Inventory</h1>
       <p class="intro">Items granted by your selected perks appear here.</p>
       <div id="perk-inventory-list" class="inventory-list" aria-live="polite"></div>
+      <section id="inventory-admin-panel" class="admin-manager-card" hidden aria-label="Universal inventory manager">
+        <header class="admin-surface-header"><div><span class="admin-kicker">UNIVERSAL ADMIN</span><h2>Inventory manager</h2></div></header>
+        <p>Manage shared items and attach your items to perks. Changes are saved in the shared site settings file.</p>
+        <div id="inventory-admin-content"></div>
+        <button id="universal-publish-all" type="button">Apply universal changes</button>
+        <p id="inventory-admin-status" role="status" aria-live="polite"></p>
+      </section>
       <button id="inventory-continue-button" type="button">Continue to Final Changes</button>
     </section>
 
@@ -3264,12 +3281,13 @@
       communityCatalog = JSON.parse(previous); document.getElementById('community-undo').disabled = !communityUndoStack.length;
       communityLoadCatalog(communityCatalog); communityDraftDirty = true; document.getElementById('community-admin-status').textContent = 'Last edit undone. Publish to make the restored version public.';
     });
+    document.getElementById('perks-screen').append(document.getElementById('community-admin'));
     document.getElementById('community-login').addEventListener('submit', async event => {
-      event.preventDefault(); const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
+      event.preventDefault(); await siteConfigReady; const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
       try {
         const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
-        communityAuthToken = result.token; document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('admin-phase-dock').hidden = false; status.textContent = 'Signed in to the local editor.';
+        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = 'Signed in. Universal perk and inventory tools are ready.';
       } catch (error) { status.textContent = error.message; }
     });
     document.getElementById('community-hide-admin').addEventListener('click', () => {
@@ -3280,6 +3298,7 @@
       document.getElementById('community-login').hidden = false;
       document.getElementById('community-admin').hidden = true;
       document.getElementById('admin-phase-dock').hidden = true;
+      document.getElementById('inventory-admin-panel').hidden=true;
     });
     document.getElementById('community-publish').addEventListener('click', async () => {
       if (!communityAuthToken) return alert('Sign in to the local admin editor first.');
@@ -3291,6 +3310,14 @@
         status.textContent = result.message; if (result.published) { communityDraftDirty = false; communityUndoStack = []; document.getElementById('community-undo').disabled = true; }
       } catch (error) { status.textContent = error.message; }
     });
+    async function publishUniversalSiteSettings(statusNode){
+      if(!communityAuthToken){statusNode.textContent='Sign in to the Undertow admin account first.';return;}
+      if(!confirm('Publish all perk edits, built-in perk changes, inventory items, and perk attachments for everyone?'))return;
+      statusNode.textContent='Publishing universal site data…';
+      try{const treesResponse=await fetch('/api/publish-trees',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify(communityCleanCatalog())});const treesResult=await treesResponse.json();if(!treesResponse.ok)throw new Error(treesResult.error||'Tree publishing failed.');if(treesResult.published!==true){statusNode.textContent=`Perk trees were not published to all devices. ${treesResult.message}`;return;}const response=await fetch('/api/publish-site-config',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify(siteConfig)});const result=await response.json();if(!response.ok)throw new Error(result.error||'Publishing failed.');if(result.published!==true){statusNode.textContent=`Perk trees were published, but inventory/settings were not published to all devices. ${result.message}`;return;}universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;communityDraftDirty=false;siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();renderAdminBlocks();statusNode.textContent='All universal perk, tree, inventory, and attachment changes are live for everyone. '+result.message;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;}catch(error){statusNode.textContent=`Could not publish all universal changes: ${error.message}`;}
+    }
+    document.getElementById('universal-publish-all').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('inventory-admin-status')));
+    document.getElementById('universal-publish-perks').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('community-admin-status')));
     const adminPhaseIds = ['character-screen', 'stats-screen', 'skills-screen', 'perks-screen', 'inventory-screen', 'final-screen'];
     const adminPhaseNames = ['Character details', 'Stats', 'Skills', 'Perks', 'Inventory', 'Final Changes'];
     function refreshAdminPhaseButton() {
@@ -3500,8 +3527,8 @@
       document.getElementById('admin-block-type').dispatchEvent(new Event('change'));document.getElementById('admin-block-submit').textContent='Save block';document.getElementById('admin-block-cancel-edit').hidden=false;form.scrollIntoView({block:'center',behavior:'smooth'});
     }
     function renderAdminPageSpecific(pageId) {
-      const host = document.getElementById('admin-page-specific'); host.replaceChildren();
-      host.hidden=!['inventory-screen','perks-screen','stats-screen','skills-screen'].includes(pageId);
+      const host = pageId==='inventory-screen'?document.getElementById('inventory-admin-content'):document.getElementById('admin-page-specific'); host.replaceChildren();
+      host.hidden=pageId!=='inventory-screen'&&!['perks-screen','stats-screen','skills-screen'].includes(pageId);
       if(host.hidden)return;
       const heading = document.createElement('h3');
       if (pageId === 'inventory-screen') {
@@ -3556,7 +3583,8 @@
     function applySiteTextOverrides(rootId){const root=document.getElementById(rootId);if(!root)return;siteConfig.textOverrides.filter(item=>item.root===rootId).forEach(item=>{try{const node=root.querySelector(item.selector);if(node)node.textContent=item.text;}catch{}});}
     function startAdminTextEdit(rootId){if(rootId==='print-sheet'){preparePrintSheet();applySiteTextOverrides(rootId);const sheet=document.getElementById(rootId);sheet.hidden=false;sheet.classList.add('admin-print-preview');}adminTextEditRoot=rootId;const banner=document.getElementById('admin-text-edit-banner');banner.hidden=false;document.getElementById('admin-text-edit-note').textContent=rootId==='print-sheet'?'Click text in the printable sheet to edit it.':'Click page text to edit it.';}
     let adminTextEditRoot='';
-    document.addEventListener('click',event=>{if(!adminTextEditRoot||event.target.closest('#admin-page-tools,#admin-phase-dock,#admin-text-edit-banner,#admin-inspector'))return;const root=document.getElementById(adminTextEditRoot);if(!root||!root.contains(event.target))return;let node=event.target.closest('p,h1,h2,h3,h4,h5,span,td,th,li,legend,figcaption,label,button');if(!node||node.querySelector('input,select,textarea')||node.matches('label')&&node.querySelector('input,select,textarea'))return;const selector=adminTextSelector(root,node);if(!selector)return;event.preventDefault();event.stopImmediatePropagation();window.adminInspectedNode=node;window.adminInspectedSave=()=>{const next=document.getElementById('admin-inspector-text').value;node.textContent=next;const id=`text-${btoa(unescape(encodeURIComponent(`${adminTextEditRoot}|${selector}`))).replace(/[^a-z0-9]/gi,'').slice(0,70).toLowerCase()}`;const saved=siteConfig.textOverrides.find(item=>item.id===id);if(saved)saved.text=next;else siteConfig.textOverrides.push({id,root:adminTextEditRoot,selector,text:next});persistCurrentScope(false);};document.getElementById('admin-inspector-title').textContent='Edit text';document.getElementById('admin-inspector-help').textContent='Change this wording, then save it to the selected visibility scope.';const fields=document.getElementById('admin-inspector-fields');fields.replaceChildren();const label=document.createElement('label');label.textContent='Text';const input=document.createElement('textarea');input.id='admin-inspector-text';input.rows=8;input.value=node.textContent.trim();label.append(input);fields.append(label);document.getElementById('admin-inspector').hidden=false;},true);
+    function openTextInspector(node,rootId){const root=document.getElementById(rootId);if(!root||!node||!root.contains(node))return;const selector=adminTextSelector(root,node);if(!selector)return;adminTextEditRoot=rootId;window.adminInspectedNode=node;window.adminInspectedSave=()=>{const input=document.getElementById('admin-inspector-text');if(!input)return;const next=input.value;node.textContent=next;const id=`text-${rootId}-${btoa(unescape(encodeURIComponent(selector))).replace(/[^a-z0-9]/gi,'').slice(0,55).toLowerCase()}`;let saved=siteConfig.textOverrides.find(item=>item.id===id);if(!saved){saved={id,root:rootId,selector};siteConfig.textOverrides.push(saved);}saved.text=next;applySiteTextOverrides(rootId);if(rootId==='print-sheet')node.textContent=next;persistCurrentScope(false);document.getElementById('admin-config-status').textContent=activeAdminScope==='universal'?'Text change saved as a Universal draft. Press Apply all changes to publish it.':'Text change saved and applied.';};document.getElementById('admin-inspector-title').textContent='Edit selected text';document.getElementById('admin-inspector-help').textContent='Type the replacement text below, then choose Save changes.';const fields=document.getElementById('admin-inspector-fields');fields.replaceChildren();const label=document.createElement('label');label.textContent='Text or description';const input=document.createElement('textarea');input.id='admin-inspector-text';input.rows=10;input.value=node.textContent.trim();label.append(input);fields.append(label);document.getElementById('admin-inspector').hidden=false;input.focus();}
+    document.addEventListener('click',event=>{if(!adminTextEditRoot||event.target.closest('#admin-page-tools,#admin-phase-dock,#admin-text-edit-banner,#admin-inspector'))return;const root=document.getElementById(adminTextEditRoot);if(!root||!root.contains(event.target))return;const node=event.target.closest('p,h1,h2,h3,h4,h5,span,td,th,li,legend,figcaption,label,button,.perk-node');if(!node||node.querySelector('input,select,textarea')||node.matches('label')&&node.querySelector('input,select,textarea'))return;event.preventDefault();event.stopImmediatePropagation();openTextInspector(node,adminTextEditRoot);},true);
     document.getElementById('admin-edit-visible-text').addEventListener('click',()=>startAdminTextEdit(currentAdminPage()));
     document.getElementById('admin-edit-print-text').addEventListener('click',()=>startAdminTextEdit('print-sheet'));
     document.getElementById('admin-text-edit-exit').addEventListener('click',()=>{const sheet=document.getElementById('print-sheet');if(adminTextEditRoot==='print-sheet'){sheet.hidden=true;sheet.classList.remove('admin-print-preview');}adminTextEditRoot='';document.getElementById('admin-text-edit-banner').hidden=true;});
@@ -3585,10 +3613,10 @@
     document.querySelectorAll('[data-admin-mode]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-admin-mode]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));const mode=button.dataset.adminMode;if(mode==='point'){adminTextEditRoot='';document.getElementById('admin-text-edit-banner').hidden=true;document.getElementById('admin-inspector').hidden=true;document.getElementById('admin-page-tools').hidden=true;}else if(mode==='edit'){adminTextEditRoot=currentAdminPage()==='print-sheet'?'print-sheet':currentAdminPage();if(adminTextEditRoot==='print-sheet'){preparePrintSheet();document.getElementById('print-sheet').hidden=false;document.getElementById('print-sheet').classList.add('admin-print-preview');}document.getElementById('admin-text-edit-banner').hidden=false;document.getElementById('admin-text-edit-note').textContent='Click any text or block on the page to edit it.';}else if(mode==='add'){document.getElementById('admin-open-page-tools').click();document.querySelector('#admin-block-form').scrollIntoView({block:'center'});}else{document.getElementById('admin-page-tools').hidden=false;showAdminBlockList();alert('Delete mode is active. Use Delete beside the item in the editor.');}}));
     document.getElementById('admin-undo').addEventListener('click',()=>{const key='undertow-admin-undo-v1';const stack=JSON.parse(localStorage.getItem(key)||'[]');if(!stack.length){document.getElementById('admin-config-status').textContent='There are no saved changes to undo.';return;}const previous=cleanSiteConfig(JSON.parse(stack.pop()));siteConfig=previous;localStorage.setItem(key,JSON.stringify(stack));if(activeAdminScope==='universal'){universalSiteConfig=cleanSiteConfig(previous);siteConfigDraftDirty=true;}else localStorage.setItem(activeAdminScope==='me'?siteConfigLocalKey:currentCharacterConfigKey(),JSON.stringify(previous));applySiteDefinitions();renderAdminBlocks();if(!document.getElementById('admin-page-tools').hidden)showAdminBlockList();document.getElementById('admin-undo').disabled=!stack.length;document.getElementById('admin-config-status').textContent='Last saved change undone.';});
     const closeInspector=()=>{document.getElementById('admin-inspector').hidden=true;window.adminInspectedSave=null;};document.getElementById('admin-inspector-close').addEventListener('click',closeInspector);document.getElementById('admin-inspector-cancel').addEventListener('click',closeInspector);
-    document.getElementById('admin-inspector-save').addEventListener('click',()=>{window.adminInspectedSave?.();closeInspector();});
+    document.getElementById('admin-inspector-save').addEventListener('click',()=>{if(!window.adminInspectedSave){document.getElementById('admin-config-status').textContent='Select text on the page first.';return;}window.adminInspectedSave();closeInspector();});
     function makeAdminPanelDraggable(panel,handle){let drag=null;handle.addEventListener('pointerdown',event=>{if(event.target.closest('button,select,input,textarea,a'))return;const rect=panel.getBoundingClientRect();panel.classList.add('admin-floating-panel');panel.style.left=`${rect.left}px`;panel.style.top=`${rect.top}px`;panel.style.right='auto';panel.style.bottom='auto';drag={x:event.clientX-rect.left,y:event.clientY-rect.top};handle.setPointerCapture(event.pointerId);});handle.addEventListener('pointermove',event=>{if(!drag)return;const x=Math.max(0,Math.min(innerWidth-panel.offsetWidth,event.clientX-drag.x));const y=Math.max(0,Math.min(innerHeight-48,event.clientY-drag.y));panel.style.left=`${x}px`;panel.style.top=`${y}px`;});handle.addEventListener('pointerup',()=>{drag=null;});}
     makeAdminPanelDraggable(document.getElementById('admin-inspector'),document.querySelector('#admin-inspector header'));makeAdminPanelDraggable(document.getElementById('admin-page-tools'),document.querySelector('#admin-page-tools .admin-tools-header'));makeAdminPanelDraggable(document.getElementById('admin-phase-dock'),document.querySelector('#admin-phase-dock .admin-dock-title'));
-    document.addEventListener('click',event=>{if(document.getElementById('admin-phase-dock').hidden||!document.querySelector('[data-admin-mode="edit"][aria-pressed="true"]'))return;const custom=event.target.closest('.admin-added-block,.admin-placed-block');if(custom){const block=siteConfig.blocks.find(item=>item.id===custom.dataset.adminBlockWrap);if(block){event.preventDefault();event.stopImmediatePropagation();document.getElementById('admin-page-tools').hidden=false;document.getElementById('admin-target-page').value=block.page;showAdminBlockList();fillAdminBlockForm(block);return;}}const node=event.target.closest('p,h1,h2,h3,h4,h5,span,td,th,li,legend,figcaption,label,button,.perk-node');if(!node||node.closest('#admin-phase-dock,#admin-page-tools,#admin-inspector,#admin-text-edit-banner')||node.querySelector('input,select,textarea'))return;event.preventDefault();event.stopImmediatePropagation();adminTextEditRoot=document.getElementById('print-sheet').contains(node)?'print-sheet':currentAdminPage();const root=document.getElementById(adminTextEditRoot);const selector=adminTextSelector(root,node);if(!selector)return;window.adminInspectedSave=()=>{const text=document.getElementById('admin-inspector-text').value;node.textContent=text;const id=`text-${btoa(unescape(encodeURIComponent(`${adminTextEditRoot}|${selector}`))).replace(/[^a-z0-9]/gi,'').slice(0,70).toLowerCase()}`;const entry=siteConfig.textOverrides.find(item=>item.id===id);if(entry)entry.text=text;else siteConfig.textOverrides.push({id,root:adminTextEditRoot,selector,text});persistCurrentScope(false);};document.getElementById('admin-inspector-title').textContent='Edit selected text';document.getElementById('admin-inspector-help').textContent='Edit the selected item in the left panel.';const fields=document.getElementById('admin-inspector-fields');fields.replaceChildren();const label=document.createElement('label');label.textContent='Text or description';const input=document.createElement('textarea');input.id='admin-inspector-text';input.rows=8;input.value=node.textContent.trim();label.append(input);fields.append(label);document.getElementById('admin-inspector').hidden=false;},true);
+    document.addEventListener('click',event=>{if(document.getElementById('admin-phase-dock').hidden||!document.querySelector('[data-admin-mode="edit"][aria-pressed="true"]'))return;const custom=event.target.closest('.admin-added-block,.admin-placed-block');if(custom){const block=siteConfig.blocks.find(item=>item.id===custom.dataset.adminBlockWrap);if(block){event.preventDefault();event.stopImmediatePropagation();document.getElementById('admin-page-tools').hidden=false;document.getElementById('admin-target-page').value=block.page;showAdminBlockList();fillAdminBlockForm(block);return;}}const node=event.target.closest('p,h1,h2,h3,h4,h5,span,td,th,li,legend,figcaption,label,button,.perk-node');if(!node||node.closest('#admin-phase-dock,#admin-page-tools,#admin-inspector,#admin-text-edit-banner')||node.querySelector('input,select,textarea'))return;event.preventDefault();event.stopImmediatePropagation();const rootId=document.getElementById('print-sheet').contains(node)?'print-sheet':currentAdminPage();openTextInspector(node,rootId);},true);
     let placingAdminBlockId='';document.getElementById('admin-placement-cancel').addEventListener('click',()=>{placingAdminBlockId='';document.getElementById('admin-placement-banner').hidden=true;});
     document.addEventListener('click',event=>{if(!placingAdminBlockId||event.target.closest('#admin-page-tools'))return;const pageId=currentAdminPage(),page=document.getElementById(pageId);if(!page||event.target.closest('aside'))return;const rect=page.getBoundingClientRect();if(!rect.width||!rect.height)return;event.preventDefault();event.stopImmediatePropagation();const block=siteConfig.blocks.find(item=>item.id===placingAdminBlockId);if(block){block.position={x:Math.max(2,Math.min(98,(event.clientX-rect.left)/rect.width*100)),y:Math.max(2,Math.min(98,(event.clientY-rect.top)/rect.height*100))};placingAdminBlockId='';document.getElementById('admin-placement-banner').hidden=true;persistCurrentScope(false);}},true);
     document.getElementById('admin-built-in-cancel').addEventListener('click',()=>document.getElementById('admin-built-in-dialog').close());
