@@ -2,18 +2,6 @@
   "version": 1,
   "blocks": [],
   "pageParts": [],
-  "textOverrides": [],
-  "perkOverrides": [
-    {
-      "id": "dose-makes-poison",
-      "name": "The dosage makes the poison",
-      "description": "You can expend a use from your medical kit to deal 1d6 poison damage.",
-      "cost": 5,
-      "requires": [
-        "added-potency"
-      ]
-    }
-  ],
   "inventoryItems": [],
   "perkItems": [],
   "stats": [],
@@ -22,5 +10,7 @@
   "removedItems": [],
   "statValues": [],
   "backgrounds": [],
-  "activeBackgroundId": ""
+  "activeBackgroundId": "",
+  "perkOverrides": [],
+  "textOverrides": []
 }

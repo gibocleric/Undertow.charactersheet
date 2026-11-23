@@ -1,22 +1,4 @@
 {
   "version": 1,
-  "trees": [
-    {
-      "id": "reactive",
-      "title": "Reactive",
-      "periods": [
-        "all"
-      ],
-      "perks": [
-        {
-          "id": "opportunity-attack",
-          "name": "Opportunity attack",
-          "description": "As a reaction when an enemy is in a square adjacent to yours and leaves that square, you can use your reaction to attack them",
-          "cost": 5,
-          "category": "reaction",
-          "requires": []
-        }
-      ]
-    }
-  ]
+  "trees": []
 }

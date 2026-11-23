@@ -837,6 +837,7 @@
         </div>
       </div>
       <p id="perk-status" class="perk-status" aria-live="polite"></p>
+      <p id="community-load-status" class="perk-status" role="status" aria-live="polite"></p>
       <div class="cryptex-picker" role="group" aria-label="Skill tree selector">
         <button class="tree-choice-button" type="button" data-tree-index="0" aria-pressed="true">Bludgeon</button>
         <button class="tree-choice-button" type="button" data-tree-index="1" aria-pressed="false">Throw</button>
@@ -885,6 +886,7 @@
             <label>Choose a shared tree<select id="community-tree-select"><option value="">Create a new tree</option></select></label>
             <div class="community-admin-fields">
               <label>Tree title<input id="community-title" maxlength="80"></label>
+              <label><input id="community-tree-private" type="checkbox"> Keep this tree private to this device</label>
               <fieldset><legend>Available time periods</legend><div id="community-periods"></div></fieldset>
             </div>
             <div class="community-admin-actions">
@@ -900,6 +902,8 @@
               <label>Category<select id="community-perk-category"><option value="passive">Passive benefit</option><option value="stress">Uses Stress dice</option><option value="reaction">Used on a reaction</option><option value="action">Used on an action</option><option value="move">Move perk</option><option value="other">Other</option></select></label>
             </div>
             <label>Perk description<textarea id="community-perk-description" maxlength="1200" rows="3"></textarea></label>
+            <label class="community-item-toggle"><input id="community-perk-has-items" type="checkbox"> This perk lets the player choose an inventory item</label>
+            <label id="community-perk-items-wrap" hidden>Available inventory items for this perk<select id="community-perk-items" multiple size="5"></select></label>
             <label>Prerequisites<select id="community-perk-requires" multiple size="4" aria-label="Perk prerequisites"></select></label>
             <p class="intro">Choose where this perk comes from by clicking one or more perk names in this tree. Leave them unselected for a starting perk.</p>
             <div id="community-prereq-visualizer" aria-label="Skill tree prerequisite visualizer"></div>
@@ -1300,6 +1304,7 @@
       <h1>Inventory</h1>
       <p class="intro">Items granted by your selected perks appear here.</p>
       <div id="perk-inventory-list" class="inventory-list" aria-live="polite"></div>
+      <section id="points-shop" class="admin-manager-card" aria-label="Equipment shop"><h2>Equipment shop</h2><p>Spend reserved points on available equipment. Purchases are saved with this character.</p><label for="shop-search">Search equipment</label><input id="shop-search" type="search" placeholder="Search items"><div id="shop-list" class="inventory-list"></div><p id="shop-points" role="status"></p></section>
       <section id="inventory-admin-panel" class="admin-manager-card" hidden aria-label="Universal inventory manager">
         <header class="admin-surface-header"><div><span class="admin-kicker">UNIVERSAL ADMIN</span><h2>Inventory manager</h2></div></header>
         <p>Manage shared items and attach your items to perks. Changes are saved in the shared site settings file.</p>
@@ -1592,6 +1597,7 @@
     let customPerks = [];
     let selectedPerks = new Set();
     let inventoryChoices = {};
+    let purchasedShopItems = [];
     let prerequisiteHintTarget = null;
 
     function perkPointsSpent() {
@@ -1618,12 +1624,13 @@
         const sourceName = document.querySelector(`.perk-node[data-perk="${link.perkId}"] .perk-name`)?.textContent.trim() || perkNameById(link.perkId) || 'Perk';
         acquiredItems.push({ name: item.label, description: item.description || '', damageDice: item.damage || '', range: item.range || '', tags: item.tags || '', quantity: item.quantity, special: item.special || '', weapon: item.kind === 'weapon' || item.kind === 'attachment', attachment: item.kind === 'attachment', ammunition: item.kind === 'ammunition', sourceName });
       });
+      communityCatalog.trees.forEach(tree=>tree.perks.forEach(perk=>{const perkId=communityPerkDomId(tree,perk);if(!selectedPerks.has(perkId)||!perk.itemSelection)return;const item=siteConfig.inventoryItems.find(entry=>entry.id===inventoryChoices[`perk-item-${perkId}`]);if(item)acquiredItems.push({name:item.label,description:item.description||'',damageDice:item.damage||'',range:item.range||'',tags:item.tags||'',quantity:item.quantity,special:item.special||'',weapon:['weapon','attachment'].includes(item.kind),attachment:item.kind==='attachment',ammunition:item.kind==='ammunition',sourceName:perk.name});}));
+      purchasedShopItems.forEach(entry=>{const id=typeof entry==='string'?entry:entry.itemId;const item=siteConfig.inventoryItems.find(value=>value.id===id);if(item)acquiredItems.push({name:item.label,description:item.description||'',damageDice:item.damage||'',range:item.range||'',tags:item.tags||'',quantity:item.quantity,special:item.special||'',weapon:['weapon','attachment'].includes(item.kind),attachment:item.kind==='attachment',ammunition:item.kind==='ammunition',sourceName:'Equipment shop'});});
       if (!acquiredItems.length) {
         const empty = document.createElement('p');
         empty.className = 'inventory-empty';
         empty.textContent = 'No inventory items have been granted by your selected perks yet.';
         list.append(empty);
-        return;
       }
       acquiredItems.forEach((item) => {
         const card = document.createElement('article');
@@ -1691,6 +1698,14 @@
         card.append(description);
         list.append(card);
       });
+      const shop=document.getElementById('shop-list'); const query=(document.getElementById('shop-search')?.value||'').trim().toLowerCase(); shop.replaceChildren();
+      const owned=new Set(purchasedShopItems.map(entry=>typeof entry==='string'?entry:entry.itemId));
+      const spentOnShop=purchasedShopItems.reduce((sum,entry)=>sum+(typeof entry==='string'?Number(siteConfig.inventoryItems.find(i=>i.id===entry)?.price)||5:Number(entry.paid)||0),0);
+      const shopBalance=Math.max(0,(Number(reserveInput.value)||0)-perkPointsSpent()-spentOnShop);
+      siteConfig.inventoryItems.filter(item=>!item.private && (!query||`${item.label} ${item.description||''} ${item.tags||''}`.toLowerCase().includes(query))).forEach(item=>{
+        const row=document.createElement('article');row.className='inventory-card';const title=document.createElement('h3');title.textContent=item.label;const desc=document.createElement('p');desc.textContent=item.description||'';const price=Number.isInteger(Number(item.price))?Number(item.price):5;const buy=document.createElement('button');buy.type='button';buy.textContent=owned.has(item.id)?'Purchased':`Purchase · ${price} points`;buy.disabled=owned.has(item.id)||price>shopBalance;buy.addEventListener('click',()=>{if(owned.has(item.id))return;if(!confirm(`Purchase ${item.label} for ${price} reserved points?`))return;purchasedShopItems.push({itemId:item.id,paid:price});renderPerkInventory();});row.append(title,desc,buy);shop.append(row);
+      });
+      document.getElementById('shop-points').textContent=`Available to spend: ${shopBalance} points`;
     }
 
     function perkNameById(perkId) {
@@ -2920,6 +2935,7 @@
         reserve: Number(finalReserve.value) || 0,
         perks: [...selectedPerks],
         inventoryChoices: { ...inventoryChoices },
+        purchasedShopItems: [...purchasedShopItems],
         adminBlockValues: { ...adminBlockValues },
         customPerks: customPerks.map((perk) => ({ ...perk })),
         savedAt: new Date().toISOString()
@@ -2976,6 +2992,7 @@
       customPerks.forEach(registerCustomPerk);
       selectedPerks = new Set((character.perks || []).filter((perk) => perkDefinitions[perk]));
       inventoryChoices = { ...(character.inventoryChoices || {}) };
+      purchasedShopItems = [...(character.purchasedShopItems || [])];
       const savedPerkCost = perkPointsSpent();
       initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
       updateUniqueOptions(statsFields);
@@ -3028,6 +3045,7 @@
       buildFinalPage();
       document.getElementById('final-screen').scrollIntoView({ block: 'start' });
     });
+    document.getElementById('shop-search').addEventListener('input', renderPerkInventory);
 
     document.getElementById('print-button').addEventListener('click', () => {
       updateFinalPage();
@@ -3057,7 +3075,7 @@
 
     function communitySafeId(text) { return String(text).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || `tree-${Date.now()}`; }
     function communityPerkDomId(tree, perk) { return `community-${tree.id}-${perk.id}`; }
-    function communityCleanCatalog(data = communityCatalog) { return { version: 1, trees: (data.trees || []).map(tree => ({ id: tree.id, title: tree.title, periods: [...(tree.periods || ['all'])], perks: (tree.perks || []).map(perk => ({ id: perk.id, name: perk.name, description: perk.description, cost: perk.cost, category: perk.category || 'passive', requires: [...(perk.requires || [])] })) })) }; }
+    function communityCleanCatalog(data = communityCatalog) { return { version: 1, trees: (data.trees || []).map(tree => ({ id: tree.id, title: tree.title, private: tree.private === true, periods: [...(tree.periods || ['all'])], perks: (tree.perks || []).map(perk => ({ id: perk.id, name: perk.name, description: perk.description, cost: perk.cost, category: perk.category || 'passive', requires: [...(perk.requires || [])], itemSelection: perk.itemSelection === true, itemIds: [...(perk.itemIds || [])] })) })) }; }
     function communitySnapshot() { communityUndoStack.push(JSON.stringify(communityCleanCatalog())); if (communityUndoStack.length > 30) communityUndoStack.shift(); document.getElementById('community-undo').disabled = false; }
     function communitySetDirty() { communityDraftDirty = true; document.getElementById('community-admin-status').textContent = 'Unpublished changes. Publish them to share these trees with everyone.'; }
     function communityPeriodLabel(id) { return communityPeriods.find(([key]) => key === id)?.[1] || id; }
@@ -3097,7 +3115,9 @@
           const name = document.createElement('span'); name.className = 'perk-name'; name.textContent = perk.name;
           const desc = document.createElement('span'); desc.className = 'perk-description'; desc.textContent = perk.description;
           const cost = document.createElement('span'); cost.className = 'perk-cost'; cost.textContent = `Cost: ${perk.cost} points`;
-          node.append(name, desc, cost); (lanes.length === 1 ? lanes[0] : lanes[index % 2]).append(node); bindPerkNode(node);
+          node.append(name, desc, cost);
+          if(perk.itemSelection&&perk.itemIds?.length){const picker=document.createElement('select');picker.className='community-perk-item-select';picker.setAttribute('aria-label',`Choose an item for ${perk.name}`);picker.add(new Option('Choose item',''));perk.itemIds.forEach(itemId=>{const item=siteConfig.inventoryItems.find(entry=>entry.id===itemId);if(item)picker.add(new Option(item.label,item.id));});picker.value=inventoryChoices[`perk-item-${id}`]||'';picker.addEventListener('click',event=>event.stopPropagation());picker.addEventListener('change',event=>{inventoryChoices[`perk-item-${id}`]=event.target.value;renderPerkInventory();});node.append(picker);}
+          (lanes.length === 1 ? lanes[0] : lanes[index % 2]).append(node); bindPerkNode(node);
         });
         tree._panel.append(row);
       });
@@ -3108,7 +3128,7 @@
       activePerkTreeIndex = Math.min(activePerkTreeIndex, 10);
       const validPerkIds = new Set(communityCatalog.trees.flatMap(tree => tree.perks.map(perk => communityPerkDomId(tree, perk))));
       Object.keys(perkDefinitions).filter(id => id.startsWith('community-')).forEach(id => { delete perkDefinitions[id]; if (!validPerkIds.has(id)) selectedPerks.delete(id); });
-      communityCatalog.trees.forEach(communityRenderTree);
+      communityCatalog.trees.forEach(tree => { if (!tree.private) communityRenderTree(tree); });
       choosePerkTree(activePerkTreeIndex);
       updatePerkTree();
       if(typeof applyPageParts==='function')applyPageParts();
@@ -3123,7 +3143,7 @@
       const select = document.getElementById('community-tree-select'); if (!select) return;
       const keep = communityCurrentTreeId;
       select.replaceChildren(new Option('Create a new tree', ''));
-      communityCatalog.trees.forEach(tree => select.add(new Option(tree.title, tree.id)));
+      communityCatalog.trees.forEach(tree => select.add(new Option(`${tree.private ? '🔒 ' : ''}${tree.title}`, tree.id)));
       select.value = communityCatalog.trees.some(tree => tree.id === keep) ? keep : '';
       communityLoadEditorTree(select.value);
     }
@@ -3141,6 +3161,7 @@
       communityCurrentTreeId = id || '';
       const tree = communityCatalog.trees.find(item => item.id === id);
       document.getElementById('community-title').value = tree?.title || '';
+      document.getElementById('community-tree-private').checked = tree?.private === true;
       communitySetPeriodChecks(tree?.periods || ['all']);
       document.getElementById('community-delete-tree').disabled = !tree;
       document.getElementById('community-save-tree').textContent = tree ? 'Save tree details' : 'Add this tree';
@@ -3149,6 +3170,8 @@
     function communityRenderAdminPerks(tree) {
       const list = document.getElementById('community-perk-list'); list.replaceChildren();
       const prereq = document.getElementById('community-perk-requires'); prereq.replaceChildren();
+      const itemPicker=document.getElementById('community-perk-items'); itemPicker.replaceChildren();
+      siteConfig.inventoryItems.forEach(item=>itemPicker.add(new Option(item.label,item.id)));
       (tree?.perks || []).forEach(perk => {
         prereq.add(new Option(perk.name, perk.id));
         const row = document.createElement('div'); row.className = 'community-perk-row';
@@ -3221,6 +3244,9 @@
       document.getElementById('community-perk-cost').value = String(perk.cost);
       document.getElementById('community-perk-description').value = perk.description;
       document.getElementById('community-perk-category').value = perk.category || 'passive';
+      document.getElementById('community-perk-has-items').checked = perk.itemSelection === true;
+      document.getElementById('community-perk-items-wrap').hidden = !perk.itemSelection;
+      [...document.getElementById('community-perk-items').options].forEach(option=>option.selected=(perk.itemIds||[]).includes(option.value));
       [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = (perk.requires || []).includes(option.value));
       communityRenderPrereqVisualizer(tree);
       document.getElementById('community-perk-form-title').textContent = 'Edit perk';
@@ -3233,6 +3259,9 @@
       document.getElementById('community-perk-cost').value = '5';
       document.getElementById('community-perk-description').value = '';
       document.getElementById('community-perk-category').value = 'passive';
+      document.getElementById('community-perk-has-items').checked = false;
+      document.getElementById('community-perk-items-wrap').hidden = true;
+      [...document.getElementById('community-perk-items').options].forEach(option=>option.selected=false);
       [...document.getElementById('community-perk-requires').options].forEach(option => option.selected = false);
       communityRenderPrereqVisualizer(communityCatalog.trees.find(tree => tree.id === communityCurrentTreeId));
       document.getElementById('community-perk-form-title').textContent = 'Add a perk';
@@ -3257,8 +3286,8 @@
       const promptText = existing ? `Save changes to the “${title}” skill tree?` : `Add the “${title}” skill tree to the shared catalog?`;
       if (!window.confirm(promptText)) return;
       communitySnapshot();
-      if (existing) { existing.title = title; existing.periods = communitySelectedPeriods(); }
-      else { const id = communitySafeId(title); if (communityCatalog.trees.some(tree => tree.id === id)) return alert('A tree with a similar title already exists.'); const tree = { id, title, periods: communitySelectedPeriods(), perks: [] }; communityCatalog.trees.push(tree); communityCurrentTreeId = id; }
+      if (existing) { existing.title = title; existing.periods = communitySelectedPeriods(); existing.private=document.getElementById('community-tree-private').checked; }
+      else { const id = communitySafeId(title); if (communityCatalog.trees.some(tree => tree.id === id)) return alert('A tree with a similar title already exists.'); const tree = { id, title, private:document.getElementById('community-tree-private').checked, periods: communitySelectedPeriods(), perks: [] }; communityCatalog.trees.push(tree); communityCurrentTreeId = id; }
       communityLoadCatalog(communityCatalog); document.getElementById('community-tree-select').value = communityCurrentTreeId; communityLoadEditorTree(communityCurrentTreeId); communitySetDirty();
     });
     document.getElementById('community-delete-tree').addEventListener('click', () => {
@@ -3272,12 +3301,13 @@
       if (!name || !description || !Number.isInteger(cost) || cost < 0 || cost > 500) return alert('Enter a perk name, description, and valid point cost.');
       const isEdit = Boolean(communityEditingPerkId); if (!window.confirm(isEdit ? `Save changes to “${name}”?` : `Add “${name}” to “${tree.title}”?`)) return;
       communitySnapshot();
-      const perk = { id: communityEditingPerkId || communitySafeId(name), name, description, cost, category: document.getElementById('community-perk-category').value, requires: [...document.getElementById('community-perk-requires').selectedOptions].map(option => option.value).filter(id => id !== communityEditingPerkId) };
+      const perk = { id: communityEditingPerkId || communitySafeId(name), name, description, cost, category: document.getElementById('community-perk-category').value, itemSelection:document.getElementById('community-perk-has-items').checked, itemIds:document.getElementById('community-perk-has-items').checked?[...document.getElementById('community-perk-items').selectedOptions].map(option=>option.value):[], requires: [...document.getElementById('community-perk-requires').selectedOptions].map(option => option.value).filter(id => id !== communityEditingPerkId) };
       if (!isEdit && tree.perks.some(item => item.id === perk.id)) perk.id += `-${Date.now().toString(36)}`;
       if (isEdit) tree.perks = tree.perks.map(item => item.id === communityEditingPerkId ? perk : item); else tree.perks.push(perk);
       communityLoadCatalog(communityCatalog); communityCurrentTreeId = tree.id; communityRenderAdminTreeSelect(); communityClearPerkForm(); communitySetDirty();
     });
     document.getElementById('community-cancel-perk-edit').addEventListener('click', communityClearPerkForm);
+    document.getElementById('community-perk-has-items').addEventListener('change',event=>{document.getElementById('community-perk-items-wrap').hidden=!event.target.checked;});
     document.getElementById('community-undo').addEventListener('click', () => {
       const previous = communityUndoStack.pop(); if (!previous) return;
       communityCatalog = JSON.parse(previous); document.getElementById('community-undo').disabled = !communityUndoStack.length;
@@ -3307,7 +3337,7 @@
       if(!communityAuthToken){statusNode.textContent='Sign in to the Undertow admin account first.';return;}
       if(!confirm('Publish all universal perk trees, inventory, and site settings to the GitHub Pages folder for everyone?'))return;
       statusNode.textContent='Sending both shared data files to GitHub…';
-      try{const response=await fetch('/api/publish-universal',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify({catalog:communityCleanCatalog(),siteConfig:cleanSiteConfig(siteConfig)})});const result=await response.json();if(!response.ok)throw new Error(result.error||'Publishing failed.');if(result.published!==true){statusNode.textContent=`NOT PUBLISHED. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;window.alert(statusNode.textContent);return;}universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;communityDraftDirty=false;siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();renderAdminBlocks();statusNode.textContent=`GitHub accepted the shared changes. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;}catch(error){statusNode.textContent=`NOT PUBLISHED. ${error.message}`;window.alert(statusNode.textContent);}
+      try{const publicConfig=cleanSiteConfig(siteConfig);publicConfig.inventoryItems=publicConfig.inventoryItems.filter(item=>!item.private);const publicIds=new Set(publicConfig.inventoryItems.map(item=>item.id));publicConfig.perkItems=publicConfig.perkItems.filter(link=>publicIds.has(link.itemId));const publicCatalog=communityCleanCatalog();publicCatalog.trees=publicCatalog.trees.filter(tree=>!tree.private);const response=await fetch('/api/publish-universal',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Token':communityAuthToken},body:JSON.stringify({catalog:publicCatalog,siteConfig:publicConfig})});const result=await response.json();if(!response.ok)throw new Error(result.error||'Publishing failed.');if(result.published!==true){statusNode.textContent=`NOT PUBLISHED. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;window.alert(statusNode.textContent);return;}universalSiteConfig=cleanSiteConfig(siteConfig);siteConfigDraftDirty=false;communityDraftDirty=false;siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();renderAdminBlocks();statusNode.textContent=`GitHub accepted the shared changes. ${result.message}`;document.getElementById('community-admin-status').textContent=statusNode.textContent;document.getElementById('inventory-admin-status').textContent=statusNode.textContent;}catch(error){statusNode.textContent=`NOT PUBLISHED. ${error.message}`;window.alert(statusNode.textContent);}
     }
     document.getElementById('universal-publish-all').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('inventory-admin-status')));
     document.getElementById('universal-publish-perks').addEventListener('click',()=>publishUniversalSiteSettings(document.getElementById('community-admin-status')));
@@ -3358,14 +3388,26 @@
     }, true);
 
     communityReady = (async function loadCommunityTrees() {
+      const errors = [];
       try {
-        let response = await fetch('/api/community-trees', { cache: 'no-store' });
-        let data;
-        if (response.ok) { data = await response.json(); communityAdminAvailable = data.adminAvailable === true; communityGitReady=data.gitReady===true; communityPublishBranch=String(data.publishBranch||''); }
-        else throw new Error('Local admin API unavailable');
+        const response = await fetch('/api/community-trees', { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Local admin data returned HTTP ${response.status}`);
+        const data = await response.json();
+        communityAdminAvailable = data.adminAvailable === true; communityGitReady = data.gitReady === true; communityPublishBranch = String(data.publishBranch || '');
+        communityLoadCatalog(data); return;
+      } catch (error) { errors.push(error.message || 'Local admin data could not be loaded.'); }
+      try {
+        const response = await fetch(new URL('community-trees.json', document.baseURI), { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Shared tree file returned HTTP ${response.status} (${response.url})`);
+        const data = await response.json();
+        if (!Array.isArray(data?.trees)) throw new Error('Shared tree file is missing its trees list.');
         communityLoadCatalog(data);
-      } catch {
-        try { const response = await fetch(`./community-trees.json?v=${Date.now()}`, { cache: 'no-store' }); if (response.ok) communityLoadCatalog(await response.json()); } catch { communityLoadCatalog({ trees: [] }); }
+        if (data.trees.length && document.querySelectorAll('.community-tree-choice').length !== data.trees.length) throw new Error('Tree data loaded, but not all tree buttons were created.');
+        document.getElementById('community-load-status').textContent = '';
+      } catch (error) {
+        communityCatalog = { version: 1, trees: [] };
+        document.getElementById('community-load-status').textContent = `Shared trees could not be loaded: ${error.message || 'unknown error'}. Check that community-trees.json is beside index.html in the published GitHub Pages folder.`;
+        console.error('Undertow shared tree load failed:', errors, error);
       }
     })();
     const siteConfigDefaults = { version: 1, blocks: [], pageParts: [], textOverrides: [], perkOverrides: [], inventoryItems: [], perkItems: [], stats: [], skills: [], removedSkills: [], removedItems: [], statValues: [], backgrounds: [], activeBackgroundId: '' };
@@ -3528,10 +3570,11 @@
         heading.textContent = 'Inventory item manager'; host.append(heading);
         const form = document.createElement('form'); form.className = 'community-admin-fields';
         const makeField = (label, type='text') => { const wrap=document.createElement('label'); wrap.append(document.createTextNode(label)); const input=document.createElement('input'); input.type=type; input.required=label==='Item name'; wrap.append(input); form.append(wrap); return input; };
-        const name=makeField('Item name'), description=makeField('Description'), damage=makeField('Damage dice'), range=makeField('Range'), tags=makeField('Tags'), quantity=makeField('Quantity','number'), special=makeField('Notes / special effect');quantity.min='0';quantity.step='1';
+        const name=makeField('Item name'), description=makeField('Description'), damage=makeField('Damage dice'), range=makeField('Range'), tags=makeField('Tags'), quantity=makeField('Quantity','number'), special=makeField('Notes / special effect'), price=makeField('Shop cost in points','number');quantity.min='0';quantity.step='1';price.min='0';price.max='500';price.step='1';price.value='5';
         const kindWrap=document.createElement('label');kindWrap.append(document.createTextNode('Item type'));const kind=document.createElement('select');[['equipment','Equipment'],['weapon','Weapon'],['attachment','Weapon attachment'],['ammunition','Ammunition']].forEach(([value,label])=>kind.add(new Option(label,value)));kindWrap.append(kind);form.append(kindWrap);
         const add=document.createElement('button'); add.type='submit'; add.textContent='Add inventory item'; form.append(add);
-        form.addEventListener('submit',event=>{event.preventDefault(); const label=name.value.trim(); if(!label||!confirm(`Add “${label}” to the inventory catalog for this scope?`))return;if(quantity.value!==''&&(!Number.isInteger(Number(quantity.value))||Number(quantity.value)<0))return alert('Quantity must be a non-negative whole number.');const id=siteItemId('item');clearSiteItemRemoval('inventoryItems',id);siteConfig.inventoryItems.push({id,label,description:description.value.trim(),damage:damage.value.trim(),range:range.value.trim(),tags:tags.value.trim(),quantity:quantity.value===''?'':Number(quantity.value),special:special.value.trim(),kind:kind.value});persistCurrentScope(false); }); host.append(form);
+        const privateWrap=document.createElement('label');privateWrap.textContent='Private to this device';const isPrivate=document.createElement('input');isPrivate.type='checkbox';privateWrap.append(isPrivate);form.append(privateWrap);
+        form.addEventListener('submit',event=>{event.preventDefault(); const label=name.value.trim(); if(!label||!confirm(`Add “${label}” to the inventory catalog for this scope?`))return;if(quantity.value!==''&&(!Number.isInteger(Number(quantity.value))||Number(quantity.value)<0))return alert('Quantity must be a non-negative whole number.');const id=siteItemId('item');clearSiteItemRemoval('inventoryItems',id);siteConfig.inventoryItems.push({id,label,description:description.value.trim(),damage:damage.value.trim(),range:range.value.trim(),tags:tags.value.trim(),quantity:quantity.value===''?'':Number(quantity.value),special:special.value.trim(),kind:kind.value,price:Number(price.value)||0,private:isPrivate.checked});persistCurrentScope(false); }); host.append(form);
         siteConfig.inventoryItems.forEach(item=>{
           const row=document.createElement('div');row.className='admin-page-block';row.append(document.createTextNode(`${item.label}${item.damage?` · ${item.damage}`:''}${item.range?` · Range ${item.range}`:''} · ${item.kind||'equipment'}`));
           const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.addEventListener('click',()=>{const label=prompt('Item name:',item.label);if(label===null||!label.trim())return;if(!confirm(`Save changes to “${label.trim()}”?`))return;const description=prompt('Description:',item.description||'');if(description===null)return;const damage=prompt('Damage dice (leave blank if none):',item.damage||'');if(damage===null)return;const range=prompt('Range (leave blank if none):',item.range||'');if(range===null)return;const tags=prompt('Tags (comma separated):',item.tags||'');if(tags===null)return;const quantity=prompt('Quantity (leave blank if not applicable):',item.quantity??'');if(quantity===null)return;if(quantity!==''&&!/^\d+$/.test(quantity))return alert('Quantity must be a whole number.');const special=prompt('Notes / special effect:',item.special||'');if(special===null)return;const kind=prompt('Type: equipment, weapon, attachment, or ammunition',item.kind||'equipment');if(!['equipment','weapon','attachment','ammunition'].includes(kind))return alert('Choose equipment, weapon, attachment, or ammunition.');Object.assign(item,{label:label.trim(),description,damage,range,tags,quantity:quantity===''?'':Number(quantity),special,kind});persistCurrentScope(false);});
