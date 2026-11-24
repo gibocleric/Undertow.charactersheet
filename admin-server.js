@@ -127,26 +127,6 @@ function writeJsonAtomically(file, value) {
   fs.writeFileSync(temp, JSON.stringify(value, null, 2) + '\n', 'utf8');
   fs.renameSync(temp, file);
 }
-function mergeCatalogData(remote, local) {
-  const trees = new Map((remote?.trees || []).map(tree => [tree.id, tree]));
-  for (const tree of local?.trees || []) {
-    const old = trees.get(tree.id);
-    if (!old) { trees.set(tree.id, tree); continue; }
-    const perks = new Map((old.perks || []).map(perk => [perk.id, perk]));
-    for (const perk of tree.perks || []) perks.set(perk.id, perk);
-    trees.set(tree.id, { ...old, ...tree, perks: [...perks.values()] });
-  }
-  return { version: 1, trees: [...trees.values()] };
-}
-function mergeConfigData(remote, local) {
-  const result = { ...remote, ...local, version: 1 };
-  for (const key of ['blocks','pageParts','textOverrides','perkOverrides','inventoryItems','perkItems','stats','skills','removedSkills','removedItems','statValues','backgrounds']) {
-    const merged = new Map((remote?.[key] || []).map(item => [typeof item === 'object' ? item.id : String(item), item]));
-    for (const item of local?.[key] || []) merged.set(typeof item === 'object' ? item.id : String(item), item);
-    result[key] = [...merged.values()];
-  }
-  return result;
-}
 function publishSharedData(catalog, config) {
   const normalizedCatalog = { version: 1, trees: catalog.trees };
   const normalizedConfig = {
@@ -160,48 +140,16 @@ function publishSharedData(catalog, config) {
   const details = publishDetails();
   if (!details) return { published: false, saved: true, message: 'Saved on this computer only. The selected folder is not on a publishable GitHub branch with a GitHub origin. Start the editor again and select the Pages folder inside your GitHub checkout, then try Apply again.' };
   try {
-    // Recover from an interrupted synchronization attempt from an older publisher version.
-    try { git(['rebase', '--abort']); } catch {}
-    try { git(['merge', '--abort']); } catch {}
     const trackedPaths = ['community-trees.json', 'site-config.json'];
     git(['add', '--force', '--', ...trackedPaths]);
     const status = git(['status', '--porcelain', '--', ...trackedPaths]);
     if (status) git(['commit', '--only', '-m', 'Publish Undertow shared character data', '--', ...trackedPaths]);
+    const localCommit = git(['rev-parse', 'HEAD']);
     const repoRelative = details.relativeDir ? `${details.relativeDir}/` : '';
     for (const file of trackedPaths) {
       const inCommit = git(['ls-tree', '-r', '--name-only', 'HEAD', '--', `${repoRelative}${file}`]);
       if (!inCommit.split(/\r?\n/).includes(`${repoRelative}${file}`)) throw new Error(`${file} is missing from the commit; the publishing folder may not be the website's tracked folder.`);
     }
-    // Temporarily preserve unrelated checkout edits while synchronizing.
-    const dirtyBeforeSync = git(['status', '--porcelain']);
-    const stashBefore = gitOptional(['rev-parse', '--verify', 'refs/stash']);
-    if (dirtyBeforeSync) git(['stash', 'push', '--include-untracked', '-m', 'Undertow publisher temporary sync stash']);
-    git(['fetch', 'origin', details.branch]);
-    const remoteRef = `refs/remotes/origin/${details.branch}`;
-    try { git(['merge-base', '--is-ancestor', remoteRef, 'HEAD']); }
-    catch {
-      let mergeFailed = false;
-      try { git(['merge', '--no-commit', '--no-ff', remoteRef]); }
-      catch { mergeFailed = true; }
-      if (mergeFailed) {
-        const unresolved = gitOptional(['diff', '--name-only', '--diff-filter=U']).split(/\r?\n/).filter(Boolean);
-        const dataPaths = new Set([`${repoRelative}community-trees.json`, `${repoRelative}site-config.json`]);
-        if (!unresolved.length || unresolved.some(file => !dataPaths.has(file))) {
-          try { git(['merge', '--abort']); } catch {}
-          throw new Error(`GitHub has newer commits and there is a conflict outside the two shared-data files (${unresolved.join(', ') || 'unknown files'}). Your data is preserved; resolve that conflict in GitHub Desktop, then publish again.`);
-        }
-      }
-      const remoteCatalog = JSON.parse(git(['show', `${remoteRef}:${repoRelative}community-trees.json`]));
-      const remoteConfig = JSON.parse(git(['show', `${remoteRef}:${repoRelative}site-config.json`]));
-      writeJsonAtomically(DATA_FILE, mergeCatalogData(remoteCatalog, normalizedCatalog));
-      writeJsonAtomically(SITE_CONFIG_FILE, mergeConfigData(remoteConfig, normalizedConfig));
-      git(['add', '--force', '--', ...trackedPaths]);
-      if (mergeFailed) git(['commit', '-m', 'Merge GitHub shared data with Undertow changes']);
-      else if (git(['status', '--porcelain', '--', ...trackedPaths])) git(['commit', '-m', 'Merge GitHub shared data with Undertow changes']);
-    }
-    const stashAfter = gitOptional(['rev-parse', '--verify', 'refs/stash']);
-    if (dirtyBeforeSync && stashAfter && stashAfter !== stashBefore) git(['stash', 'pop']);
-    const localCommit = git(['rev-parse', 'HEAD']);
     git(['push', 'origin', `HEAD:refs/heads/${details.branch}`]);
     for (const pushRemote of details.pushRemotes) {
       const remoteLine = git(['ls-remote', '--heads', pushRemote, `refs/heads/${details.branch}`]).split(/\r?\n/).find(Boolean) || '';
