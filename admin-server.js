@@ -155,7 +155,7 @@ function publishSharedData(catalog, config) {
     const remoteRef = `refs/remotes/origin/${details.branch}`;
     try { git(['merge-base', '--is-ancestor', remoteRef, 'HEAD']); }
     catch {
-      try { git(['rebase', remoteRef]); }
+      try { git(['rebase', '--autostash', remoteRef]); }
       catch (error) {
         try { git(['rebase', '--abort']); } catch {}
         throw new Error(`GitHub has newer commits. The publisher fetched them, but could not safely rebase because the same files changed on both sides. Your local files are preserved. Resolve the conflict in GitHub Desktop (or sync the checkout), then publish again. Details: ${error.message}`);
