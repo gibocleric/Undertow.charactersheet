@@ -879,6 +879,7 @@
             <label>Password<input id="community-password" type="password" autocomplete="current-password" required></label>
             <button type="submit">Sign in</button>
           </form>
+          <p id="community-login-status" role="status" aria-live="polite"></p>
           <div id="community-editor" hidden>
             <p class="intro">Universal perk tools. Changes are saved to the shared site data files and remain when the app HTML is updated.</p>
             <section id="builtin-perk-admin-panel" class="admin-manager-card"></section>
@@ -3328,12 +3329,13 @@
     });
     document.getElementById('perks-screen').append(document.getElementById('community-admin'));
     document.getElementById('community-login').addEventListener('submit', async event => {
-      event.preventDefault(); await Promise.all([siteConfigReady,communityReady]); const status = document.getElementById('community-admin-status'); status.textContent = 'Signing in…';
+      event.preventDefault(); const status = document.getElementById('community-login-status'); status.textContent = 'Signing in…';
       try {
+        await Promise.all([siteConfigReady,communityReady]);
         const response = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ account: document.getElementById('community-account').value, password: document.getElementById('community-password').value }) });
         const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Sign in failed.');
-        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');status.textContent = communityGitReady?`Signed in. GitHub publishing is connected to branch ${communityPublishBranch}. Check that this is the branch and folder GitHub Pages serves.`:'Signed in, but no GitHub publishing folder is connected. Universal edits stay local until you start the editor and choose the folder that GitHub Pages serves.';
-      } catch (error) { status.textContent = error.message; }
+        communityAuthToken = result.token; activeAdminScope='universal';siteConfig=cleanSiteConfig(universalSiteConfig);applySiteDefinitions();document.getElementById('community-password').value = ''; document.getElementById('community-login').hidden = true; document.getElementById('community-editor').hidden = false; document.getElementById('inventory-admin-panel').hidden=false;renderBuiltInPerkManager(document.getElementById('builtin-perk-admin-panel'));renderAdminPageSpecific('inventory-screen');const message=communityGitReady?`Signed in. GitHub publishing is connected to branch ${communityPublishBranch}. Check that this is the branch and folder GitHub Pages serves.`:'Signed in, but no GitHub publishing folder is connected. Universal edits stay local until you start the editor and choose the folder that GitHub Pages serves.';status.textContent=message;document.getElementById('community-admin-status').textContent=message;
+      } catch (error) { status.textContent = error.message || 'Sign in failed. Check that the local Undertow service is running.'; }
     });
     document.getElementById('community-hide-admin').addEventListener('click', () => {
       if (communityDraftDirty && !window.confirm('Hide the admin editor? Your unpublished changes will remain in this tab until you publish or leave it.')) return;
