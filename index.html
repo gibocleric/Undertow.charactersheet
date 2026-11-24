@@ -788,6 +788,7 @@
       <section class="category saved-library" aria-labelledby="saved-heading">
         <h2 id="saved-heading">Saved Characters</h2>
         <p class="intro" id="saved-library-note">Saved on this browser and device.</p>
+        <p id="character-load-status" class="intro" role="status" aria-live="polite"></p>
         <div id="saved-character-list" class="saved-list"></div>
       </section>
     </section>
@@ -2834,7 +2835,10 @@
     }
 
     function readSavedCharacters() {
-      try { return JSON.parse(localStorage.getItem(savedCharactersKey) || '[]'); }
+      try {
+        const saved = JSON.parse(localStorage.getItem(savedCharactersKey) || '[]');
+        return Array.isArray(saved) ? saved.filter((character) => character && typeof character === 'object' && !Array.isArray(character)) : [];
+      }
       catch { return []; }
     }
     function writeSavedCharacters(characters) { localStorage.setItem(savedCharactersKey, JSON.stringify(characters)); }
@@ -2908,7 +2912,7 @@
         const loadButton = document.createElement('button');
         loadButton.type = 'button';
         loadButton.textContent = 'Load';
-        loadButton.addEventListener('click', () => loadSavedCharacter(character));
+        loadButton.addEventListener('click', () => { void loadSavedCharacter(character); });
         const exportButton = document.createElement('button');
         exportButton.type = 'button';
         exportButton.textContent = 'Export file';
@@ -2974,56 +2978,95 @@
     }
 
     async function loadSavedCharacter(character) {
-      await communityReady;
-      await siteConfigReady;
-      activeSaveId = character.id;
-      if(activeAdminScope==='character'){siteConfig=readScopedConfig('character');applySiteDefinitions();renderAdminBlocks();}
-      adminBlockValues = { ...(character.adminBlockValues || {}) };
-      const storedPeriod = character.timePeriod;
-      if (storedPeriod?.id === 'custom') {
-        customPeriodName.value = storedPeriod.label || 'Custom';
-        updateTimePeriod({ id: 'custom', label: storedPeriod.label || 'Custom' });
-      } else {
-        const storedPreset = timePeriods.find((period) => period.id === storedPeriod?.id) || timePeriods[0];
-        timePeriodSlider.value = String(timePeriods.indexOf(storedPreset));
-        updateTimePeriod(storedPreset);
-      }
-      document.getElementById('name').value = character.name;
-      document.getElementById('occupation').value = character.occupation;
-      document.getElementById('age').value = character.age;
-      const difficulty = document.querySelector(`#character-form input[name="difficulty"][value="${character.difficulty}"]`);
-      if (difficulty) difficulty.checked = true;
-      categoryKeys.forEach((key) => { stats[key] = Number(character.stats[key]); });
-      clearCustomPerks();
-      customPerks = (character.customPerks || []).map((perk) => ({ ...perk }));
-      customPerks.forEach(registerCustomPerk);
-      selectedPerks = new Set((character.perks || []).filter((perk) => perkDefinitions[perk]));
-      inventoryChoices = { ...(character.inventoryChoices || {}) };
-      purchasedShopItems = [...(character.purchasedShopItems || [])];
-      const savedPerkCost = perkPointsSpent();
-      initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
-      updateUniqueOptions(statsFields);
-      buildSkills();
-      skillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
-      reserveInput.value = String((Number(character.reserve) || 0) + savedPerkCost);
-      updateSkills();
-      updatePerkTree();
-      if (finalReady) {
-        document.getElementById('final-name').value = character.name;
-        document.getElementById('final-occupation').value = character.occupation;
-        document.getElementById('final-age').value = String(character.age);
+      const loadStatus = document.getElementById('character-load-status');
+      const displayName = String(character?.name || 'character');
+      loadStatus.classList.remove('error');
+      loadStatus.textContent = `Loading ${displayName}…`;
+      try {
+        if (!character || typeof character !== 'object' || !character.stats || typeof character.stats !== 'object') {
+          throw new Error('This saved entry is incomplete. Import a valid character file or create a new save.');
+        }
+        await Promise.allSettled([communityReady, siteConfigReady]);
+        if (activeAdminScope === 'character') { siteConfig = readScopedConfig('character'); applySiteDefinitions(); renderAdminBlocks(); }
+
+        const usedStatValues = new Set();
+        categoryKeys.forEach((key, index) => {
+          const savedValue = Number(character.stats[key]);
+          let value = Number.isFinite(savedValue) && statValues.includes(String(savedValue)) && !usedStatValues.has(String(savedValue))
+            ? savedValue
+            : Number(statValues.find((candidate) => !usedStatValues.has(candidate)) || statValues[index] || statValues[0]);
+          if (!Number.isFinite(value)) value = Number(statValues[0]);
+          stats[key] = value;
+          usedStatValues.add(String(value));
+        });
+
+        const period = timePeriods.find((item) => item.id === character.timePeriod?.id);
+        if (character.timePeriod?.id === 'custom') {
+          customPeriodName.value = character.timePeriod.label || 'Custom';
+          updateTimePeriod({ id: 'custom', label: customPeriodName.value });
+        } else {
+          const storedPreset = period || timePeriods[0];
+          timePeriodSlider.value = String(timePeriods.indexOf(storedPreset));
+          updateTimePeriod(storedPreset);
+        }
+
+        document.getElementById('name').value = String(character.name || '');
+        document.getElementById('occupation').value = String(character.occupation || '');
+        document.getElementById('age').value = String(Number.isFinite(Number(character.age)) ? Number(character.age) : 0);
+        const difficultyValue = ['Easy', 'Moderate', 'Normal', 'Difficult', 'Extreme'].includes(character.difficulty) ? character.difficulty : 'Normal';
+        const difficulty = document.querySelector(`#character-form input[name="difficulty"][value="${difficultyValue}"]`);
+        if (difficulty) difficulty.checked = true;
+
+        clearCustomPerks();
+        customPerks = Array.isArray(character.customPerks) ? character.customPerks.filter((perk) => perk && typeof perk === 'object').map((perk) => ({ ...perk })) : [];
+        customPerks.forEach(registerCustomPerk);
+        selectedPerks = new Set((Array.isArray(character.perks) ? character.perks : []).filter((perk) => typeof perk === 'string' && perkDefinitions[perk]));
+        inventoryChoices = character.inventoryChoices && typeof character.inventoryChoices === 'object' && !Array.isArray(character.inventoryChoices) ? { ...character.inventoryChoices } : {};
+        purchasedShopItems = Array.isArray(character.purchasedShopItems) ? [...character.purchasedShopItems] : [];
+        adminBlockValues = character.adminBlockValues && typeof character.adminBlockValues === 'object' && !Array.isArray(character.adminBlockValues) ? { ...character.adminBlockValues } : {};
+
+        initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
+        updateUniqueOptions(statsFields);
+        buildSkills();
+        const savedSkills = character.skills && typeof character.skills === 'object' ? character.skills : {};
+        skillInputs.forEach((input) => {
+          const raw = savedSkills[input.name];
+          const value = raw !== undefined && Number.isFinite(Number(raw)) ? Math.round(Number(raw)) : Number(stats[input.dataset.category]);
+          input.value = String(value);
+        });
+        const savedPerkCost = perkPointsSpent();
+        const savedReserve = Math.max(0, Math.round(Number(character.reserve) || 0));
+        reserveInput.value = String(savedReserve + savedPerkCost);
+        updateSkills();
+        updatePerkTree();
+
+        finalReady = false;
+        buildFinalPage();
+        document.getElementById('final-name').value = String(character.name || '');
+        document.getElementById('final-occupation').value = String(character.occupation || '');
+        document.getElementById('final-age').value = String(Number.isFinite(Number(character.age)) ? Number(character.age) : 0);
         finalStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
-        finalSkillInputs.forEach((input) => { input.value = String(character.skills[input.name] ?? stats[input.dataset.category]); });
-        finalReserve.value = String(character.reserve || 0);
+        finalSkillInputs.forEach((input) => {
+          const raw = savedSkills[input.name];
+          input.value = String(raw !== undefined && Number.isFinite(Number(raw)) ? Math.round(Number(raw)) : Number(stats[input.dataset.category]));
+        });
+        finalReserve.value = String(savedReserve);
         finalPerkPointSnapshot = perkPointsSpent();
         updateFinalPage();
-      } else {
-        buildFinalPage();
+
+        activeSaveId = character.id || `character-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        document.querySelectorAll('main > section').forEach((section) => { section.hidden = true; });
+        document.getElementById('final-screen').hidden = false;
+        document.getElementById('save-status').textContent = `Loaded ${displayName}.`;
+        loadStatus.textContent = `Loaded ${displayName}.`;
+        document.getElementById('final-screen').scrollIntoView({ block: 'start' });
+      } catch (error) {
+        const message = error?.message || 'Unexpected loading error.';
+        loadStatus.textContent = `Could not load ${displayName}: ${message}`;
+        loadStatus.classList.add('error');
+        document.getElementById('save-status').textContent = `Could not load ${displayName}: ${message}`;
+        console.error('Undertow character load failed:', error);
       }
-      document.querySelectorAll('main > section').forEach((section) => { section.hidden = true; });
-      document.getElementById('final-screen').hidden = false;
-      document.getElementById('save-status').textContent = `Loaded ${character.name}.`;
-      document.getElementById('final-screen').scrollIntoView({ block: 'start' });
     }
 
     document.getElementById('save-character-button').addEventListener('click', saveCurrentCharacter);
