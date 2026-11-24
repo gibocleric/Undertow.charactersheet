@@ -859,7 +859,7 @@
             <label for="custom-perk-cost">Point cost<select id="custom-perk-cost" required></select></label>
             <label for="custom-perk-category">Category<select id="custom-perk-category" required>
               <option value="" selected disabled>Choose a category</option>
-              <option value="stress">Uses Stress dice</option>
+              <option value="stress">Uses Adrenaline dice</option>
               <option value="reaction">Used on a reaction</option>
               <option value="action">Used on an action</option>
               <option value="move">Move perk</option>
@@ -900,13 +900,13 @@
             <div class="community-admin-fields">
               <label>Perk name<input id="community-perk-name" maxlength="80"></label>
               <label>Point cost<input id="community-perk-cost" type="number" min="0" max="500" step="5" value="5"></label>
-              <label>Category<select id="community-perk-category"><option value="passive">Passive benefit</option><option value="stress">Uses Stress dice</option><option value="reaction">Used on a reaction</option><option value="action">Used on an action</option><option value="move">Move perk</option><option value="other">Other</option></select></label>
+              <label>Category<select id="community-perk-category"><option value="passive">Passive benefit</option><option value="stress">Uses Adrenaline dice</option><option value="reaction">Used on a reaction</option><option value="action">Used on an action</option><option value="move">Move perk</option><option value="other">Other</option></select></label>
             </div>
             <label>Perk description<textarea id="community-perk-description" maxlength="1200" rows="3"></textarea></label>
             <label class="community-item-toggle"><input id="community-perk-has-items" type="checkbox"> This perk lets the player choose an inventory item</label>
             <label id="community-perk-items-wrap" hidden>Available inventory items for this perk<select id="community-perk-items" multiple size="5"></select></label>
             <label>Prerequisites<select id="community-perk-requires" multiple size="4" aria-label="Perk prerequisites"></select></label>
-            <p class="intro">Choose where this perk comes from by clicking one or more perk names in this tree. Leave them unselected for a starting perk.</p>
+            <p class="intro">Add perks one at a time. Click one or more perk names below to set prerequisites: one creates a branch, multiple join paths. After saving, the form clears for the next perk while keeping this tree selected.</p>
             <div id="community-prereq-visualizer" aria-label="Skill tree prerequisite visualizer"></div>
             <button id="community-save-perk" type="button">Add perk</button>
             <button id="community-cancel-perk-edit" type="button" hidden>Cancel perk edit</button>
@@ -929,20 +929,20 @@
         </div>
         <div class="perk-trifork">
           <div class="perk-lane">
-            <button class="perk-node" type="button" data-perk="spin-strike" aria-pressed="false"><span class="perk-name">Spin strike</span><span class="perk-description">Roll stress. On a success, you damage anyone in any square adjacent to yours.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="spin-strike" aria-pressed="false"><span class="perk-name">Spin strike</span><span class="perk-description">roll Adrenaline. On a success, you damage anyone in any square adjacent to yours.</span><span class="perk-cost">Cost: 5 points</span></button>
             <button class="perk-node" type="button" data-perk="bludgeon-knockback" aria-pressed="false"><span class="perk-name">Knockback</span><span class="perk-description">When you hit someone with a melee attack, you can choose to knock them one square in any direction.</span><span class="perk-cost">Cost: 5 points</span></button>
             <button class="perk-node" type="button" data-perk="crushing-strike" aria-pressed="false"><span class="perk-name">Crushing strike</span><span class="perk-description">On a hit, halve armor points before dealing damage.</span><span class="perk-cost">Cost: 5 points</span></button>
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="improvise" aria-pressed="false"><span class="perk-name">Improvise</span><span class="perk-description">You can use things around you to your advantage. Attack with an improvised weapon to deal 1d4 damage.</span><span class="perk-cost">Cost: 5 points</span></button>
-            <button class="perk-node" type="button" data-perk="yes-and" aria-pressed="false"><span class="perk-name">Yes and</span><span class="perk-description">After you are hit with an attack, you can roll stress to hit with an improvised weapon.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="yes-and" aria-pressed="false"><span class="perk-name">Yes and</span><span class="perk-description">After you are hit with an attack, you can roll Adrenaline to hit with an improvised weapon.</span><span class="perk-cost">Cost: 5 points</span></button>
             <button class="perk-node" type="button" data-perk="damage-increase" aria-pressed="false"><span class="perk-name">Damage increase</span><span class="perk-description">You now deal 1d6 with improvised weapons.</span><span class="perk-cost">Cost: 5 points</span></button>
             <button class="perk-node" type="button" data-perk="no-but" aria-pressed="false"><span class="perk-name">No but</span><span class="perk-description">When you miss an attack with an improvised weapon, you can use your reaction to throw the weapon.</span><span class="perk-cost">Cost: 5 points</span></button>
           </div>
           <div class="perk-lane">
-            <button class="perk-node" type="button" data-perk="concuss" aria-pressed="false"><span class="perk-name">Concuss</span><span class="perk-description">You can roll stress to stun your enemy with a blunt weapon, making them lose one of their pairs of reaction dice.</span><span class="perk-cost">Cost: 5 points</span></button>
-            <button class="perk-node" type="button" data-perk="sweep-the-leg" aria-pressed="false"><span class="perk-name">Sweep the leg</span><span class="perk-description">Roll stress. On a success, you can knock them prone. They can then only move one square per turn and have a penalty die to Throw and melee attacks.</span><span class="perk-cost">Cost: 5 points</span></button>
-            <button class="perk-node" type="button" data-perk="weaken" aria-pressed="false"><span class="perk-name">Weaken</span><span class="perk-description">Succeed on a stress roll to weaken an enemy. They deal half damage on their next turn.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="concuss" aria-pressed="false"><span class="perk-name">Concuss</span><span class="perk-description">You can roll Adrenaline to stun your enemy with a blunt weapon, making them lose one of their pairs of reaction dice.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="sweep-the-leg" aria-pressed="false"><span class="perk-name">Sweep the leg</span><span class="perk-description">roll Adrenaline. On a success, you can knock them prone. They can then only move one square per turn and have a penalty die to Throw and melee attacks.</span><span class="perk-cost">Cost: 5 points</span></button>
+            <button class="perk-node" type="button" data-perk="weaken" aria-pressed="false"><span class="perk-name">Weaken</span><span class="perk-description">Succeed on a Adrenaline roll to weaken an enemy. They deal half damage on their next turn.</span><span class="perk-cost">Cost: 5 points</span></button>
           </div>
         </div>
       </div>
@@ -955,18 +955,18 @@
         <div class="perk-fork">
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="not-sharpest-tool" aria-pressed="false">
-              <span class="perk-name">Not the sharpest tool</span><span class="perk-description">When you hit with a thrown blunt weapon, you can roll stress to stun the enemy.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Not the sharpest tool</span><span class="perk-description">When you hit with a thrown blunt weapon, you can roll Adrenaline to stun the enemy.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="reflexive-throw" aria-pressed="false">
               <span class="perk-name">Reflexive throw</span><span class="perk-description">You can roll Throw instead of Brawl to counterattack.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="knockback" aria-pressed="false">
-              <span class="perk-name">Knockback</span><span class="perk-description">On a successful throw you can roll a stress die to knock your target prone.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Knockback</span><span class="perk-description">On a successful throw you can roll a Adrenaline die to knock your target prone.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="sharpest-tool" aria-pressed="false">
-              <span class="perk-name">Sharpest tool</span><span class="perk-description">If you are wielding a sharp offhand weapon, you can roll stress. On a success, you regain your action dice to throw the weapon in your offhand.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Sharpest tool</span><span class="perk-description">If you are wielding a sharp offhand weapon, you can roll Adrenaline. On a success, you regain your action dice to throw the weapon in your offhand.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="precise-throw" aria-pressed="false">
               <span class="perk-name">Precise throw</span><span class="perk-description">You have -10 to targeting shots with sharp objects.</span><span class="perk-cost">Cost: 5 points</span>
@@ -1017,7 +1017,7 @@
               </div>
               <div class="perk-level">
                 <button class="perk-node" type="button" data-perk="sniper-mastery" aria-pressed="false">
-                  <span class="perk-name">Sniper Mastery</span><span class="perk-description">Roll a stress die. If you make a sniper-rifle head shot, it deals an extra 1d12 damage.</span><span class="perk-cost">Cost: 10 points</span>
+                  <span class="perk-name">Sniper Mastery</span><span class="perk-description">Roll a Adrenaline die. If you make a sniper-rifle head shot, it deals an extra 1d12 damage.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
               </div>
             </div>
@@ -1035,7 +1035,7 @@
                   <span class="perk-name">Quick aim</span><span class="perk-description">On a firearm with multiple shots per round you can switch targets between shots.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
                 <button class="perk-node" type="button" data-perk="smg-mastery" aria-pressed="false">
-                  <span class="perk-name">SMG Mastery</span><span class="perk-description">If you miss one SMG shot, roll a stress die and roll each bullet separately to see if it hits.</span><span class="perk-cost">Cost: 10 points</span>
+                  <span class="perk-name">SMG Mastery</span><span class="perk-description">If you miss one SMG shot, roll a Adrenaline die and roll each bullet separately to see if it hits.</span><span class="perk-cost">Cost: 10 points</span>
                 </button>
               </div>
               <div class="perk-lane">
@@ -1113,7 +1113,7 @@
               <span class="perk-name">Advanced Gunsmith</span><span class="perk-description">You can apply one advanced mod and two earlier mods to a weapon. Advanced mods include: Secondary (a gadget such as a flashlight or laser dot sight, which gives -5 to shoot with that weapon), Slings (carry the weapon across your back without penalty), or Bipods (take a round to set up and aim with, then add -25 to a firearm roll). All mods take 2 hours to install.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="secondary-weapon-attachment" aria-pressed="false">
-              <span class="perk-name">Secondary Weapon Attachment</span><span class="perk-description">You can attach a secondary weapon to your gun: a grenade launcher, melee weapon attachment, non-lethal secondary, or under-barrel shotgun. You gain any benefits of these secondaries, and you can roll two stress dice to attack with it.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Secondary Weapon Attachment</span><span class="perk-description">You can attach a secondary weapon to your gun: a grenade launcher, melee weapon attachment, non-lethal secondary, or under-barrel shotgun. You gain any benefits of these secondaries, and you can roll two Adrenaline dice to attack with it.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="on-the-fly" aria-pressed="false">
               <span class="perk-name">On the Fly</span><span class="perk-description">You can swap out any of these things on your turn.</span><span class="perk-cost">Cost: 10 points</span>
@@ -1130,7 +1130,7 @@
         <div class="perk-fork">
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="graceful-movement" aria-pressed="false">
-              <span class="perk-name">Graceful movement</span><span class="perk-description">You can roll an SD and add it to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Graceful movement</span><span class="perk-description">You can roll an Adrenaline die and add it to your move die this turn.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="artful-dodge" aria-pressed="false">
               <span class="perk-name">Artful dodge</span><span class="perk-description">You can roll Acrobatics to attempt to dodge an attack, and you can move when you do.</span><span class="perk-cost">Cost: 5 points</span>
@@ -1141,13 +1141,13 @@
           </div>
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="damaging-fall" aria-pressed="false">
-              <span class="perk-name">Damaging fall</span><span class="perk-description">If you are falling on a person, you can roll SD and they will take your fall damage along with your weapon damage.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Damaging fall</span><span class="perk-description">If you are falling on a person, you can roll Adrenaline die and they will take your fall damage along with your weapon damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="charging-attack" aria-pressed="false">
               <span class="perk-name">Charging attack</span><span class="perk-description">If you move at least two squares before attacking someone, you deal an extra 1d6 damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="tumbler" aria-pressed="false">
-              <span class="perk-name">Tumbler</span><span class="perk-description">Roll SD. On a success, you take no fall damage.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Tumbler</span><span class="perk-description">Roll Adrenaline die. On a success, you take no fall damage.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
           </div>
         </div>
@@ -1164,10 +1164,10 @@
               <span class="perk-name">Stopping strike</span><span class="perk-description">If an enemy attempts to move from a square not adjacent to yours, you can use your reaction to roll an attack, deal damage, and stop them one square away.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="double-strike" aria-pressed="false">
-              <span class="perk-name">Double strike</span><span class="perk-description">After you miss a strike, you can roll stress to make another attack.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Double strike</span><span class="perk-description">After you miss a strike, you can roll Adrenaline to make another attack.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="distancing-strike" aria-pressed="false">
-              <span class="perk-name">Distancing strike</span><span class="perk-description">You can roll stress to make a strike which, if it hits, pushes the attacker one square back. They can't enter that space until the start of your next turn.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Distancing strike</span><span class="perk-description">You can roll Adrenaline to make a strike which, if it hits, pushes the attacker one square back. They can't enter that space until the start of your next turn.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
           </div>
           <div class="perk-lane">
@@ -1208,10 +1208,10 @@
         <div class="perk-fork">
           <div class="perk-lane">
             <button class="perk-node" type="button" data-perk="spicy-dish" aria-pressed="false">
-              <span class="perk-name">Spicy dish</span><span class="perk-description">Gain one stress die after eating this dish.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Spicy dish</span><span class="perk-description">Gain one Adrenaline die after eating this dish.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="energising-dish" aria-pressed="false">
-              <span class="perk-name">Energising dish</span><span class="perk-description">You gain one additional SD at the start of combat.</span><span class="perk-cost">Cost: 5 points</span>
+              <span class="perk-name">Energising dish</span><span class="perk-description">You gain one additional Adrenaline die at the start of combat.</span><span class="perk-cost">Cost: 5 points</span>
             </button>
             <button class="perk-node" type="button" data-perk="soothing-tea" aria-pressed="false">
               <span class="perk-name">Soothing tea</span><span class="perk-description">Remove 1 Stress point.</span><span class="perk-cost">Cost: 5 points</span>
@@ -1277,7 +1277,7 @@
               </div>
               <div class="perk-lane">
                 <button class="perk-node" type="button" data-perk="life-saver" aria-pressed="false">
-                  <span class="perk-name">Life saver</span><span class="perk-description">When an ally is reduced to 0 hp within three squares of you, you can roll stress to expend a charge of your healers kit, run over and stabilize them.</span><span class="perk-cost">Cost: 5 points</span>
+                  <span class="perk-name">Life saver</span><span class="perk-description">When an ally is reduced to 0 hp within three squares of you, you can roll Adrenaline to expend a charge of your healers kit, run over and stabilize them.</span><span class="perk-cost">Cost: 5 points</span>
                 </button>
               </div>
             </div>
@@ -1816,11 +1816,12 @@
         choice.panel.hidden = i !== activePerkTreeIndex;
         if (i === activePerkTreeIndex) { choice.panel.classList.remove('cryptex-reveal'); void choice.panel.offsetWidth; choice.panel.classList.add('cryptex-reveal'); }
       });
-      document.querySelectorAll('.tree-choice-button').forEach((button) => {
-        const choiceIndex = Number(button.dataset.treeIndex);
-        const choice = perkTreeChoices[choiceIndex];
+      perkTreeChoices.forEach((choice, choiceIndex) => {
+        const button = choice.button;
+        if (!button) return;
         const availableForPeriod = choice.periods.includes('all') || choice.periods.includes(activeTimePeriod.id);
         button.disabled = !availableForPeriod;
+        button.dataset.treeIndex = String(choiceIndex);
         button.setAttribute('aria-pressed', String(choiceIndex === activePerkTreeIndex));
       });
       requestAnimationFrame(drawAllPerkBranches);
@@ -1830,7 +1831,7 @@
       const position = available.indexOf(activePerkTreeIndex);
       choosePerkTree(available[(position + direction + available.length) % available.length]);
     }
-    document.querySelectorAll('.tree-choice-button').forEach((choice) => choice.addEventListener('click', () => choosePerkTree(Number(choice.dataset.treeIndex))));
+    perkTreeChoices.forEach((choice,index)=>{choice.button=document.querySelector(`.tree-choice-button[data-tree-index="${index}"]`);choice.button?.addEventListener('click',()=>choosePerkTree(perkTreeChoices.indexOf(choice)));});
     const timePeriodSlider = document.getElementById('time-period-slider');
     const customPeriodEditor = document.getElementById('custom-period-editor');
     const customPeriodName = document.getElementById('custom-period-name');
@@ -2366,7 +2367,7 @@
       derivedTitle.textContent = 'Derived values';
       derived.append(derivedTitle);
       const statRef=(key)=>categories[key]?.short||categories[key]?.label||'removed stat';
-      [[`Reputation (${statRef('influence')})`, 'reputation'], [`Base health ((${statRef('resolve')} + ${statRef('strength')}) / 2)`, 'base-health'], [`Limb health ((${statRef('resolve')} + ${statRef('strength')}) / 4)`, 'limb-health'], ['Stress die', 'stress-die'], [`Move die (${statRef('perceive')})`, 'move-die']].forEach(([labelText, id]) => {
+      [[`Reputation (${statRef('influence')})`, 'reputation'], [`Base health ((${statRef('resolve')} + ${statRef('strength')}) / 2)`, 'base-health'], [`Limb health ((${statRef('resolve')} + ${statRef('strength')}) / 4)`, 'limb-health'], ['Adrenaline die', 'stress-die'], [`Move die (${statRef('perceive')})`, 'move-die']].forEach(([labelText, id]) => {
         const row = document.createElement('div');
         row.className = 'derived-row';
         const label = document.createElement('span');
@@ -2580,15 +2581,15 @@
       trackerGroup.className = 'print-tracker-group';
       const stress = document.createElement('section');
       stress.className = 'print-stress-tracker';
-      const stressTitle = document.createElement('h2');
-      stressTitle.textContent = 'Stress tracker';
+      const adrenalineTitle = document.createElement('h2');
+      adrenalineTitle.textContent = 'Adrenaline tracker';
       const eyes = document.createElement('div');
       eyes.className = 'print-stress-eyes';
       for (let index = 0; index < 6; index += 1) {
         const eye = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         eye.setAttribute('viewBox', '0 0 100 50');
         eye.setAttribute('role', 'img');
-        eye.setAttribute('aria-label', `Stress marker ${index + 1}`);
+        eye.setAttribute('aria-label', `Adrenaline marker ${index + 1}`);
         const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         outline.setAttribute('d', 'M5 25C18 7 34 2 50 2s32 5 45 23C82 43 66 48 50 48S18 43 5 25Z');
         outline.setAttribute('fill', 'none');
@@ -2605,7 +2606,7 @@
         eye.append(outline, iris, pupil);
         eyes.append(eye);
       }
-      stress.append(stressTitle, eyes);
+      stress.append(adrenalineTitle, eyes);
       trackerGroup.append(stress);
       const baseHealthTracker = document.createElement('section');
       baseHealthTracker.className = 'print-base-health-tracker';
@@ -2760,7 +2761,7 @@
         const columns = document.createElement('div');
         columns.className = 'print-perk-columns';
         const perkBuckets = [
-          { key: 'stress', title: 'Stress dice', test: (text) => /\bstress\b|\bSD\b/i.test(text), entries: [] },
+          { key: 'stress', title: 'Adrenaline dice', test: (text) => /\bstress\b|\bSD\b/i.test(text), entries: [] },
           { key: 'reaction', title: 'Reactions', test: (text) => /\breaction\b|counter.attack|counter attack|opportunity attack/i.test(text), entries: [] },
           { key: 'action', title: 'Actions', test: (text) => /\b(?:you can|you may|roll|make an attack|attack with|strike|throw|shoot|fire|block)\b/i.test(text), entries: [] },
           { key: 'move', title: 'Move perks', test: (text) => /\b(?:move|movement|squares?|dodge|prone|fall|tumbling|getaway|footwork)\b/i.test(text), entries: [] },
@@ -3091,12 +3092,13 @@
         tree._panel = document.createElement('div'); tree._panel.className = 'perk-tree community-perk-tree'; tree._panel.id = `community-tree-${tree.id}`; tree._panel.setAttribute('aria-label', `${tree.title} perk tree`);
         tree._button = document.createElement('button'); tree._button.type = 'button'; tree._button.className = 'tree-choice-button community-tree-choice'; tree._button.dataset.treeIndex = String(perkTreeChoices.length); tree._button.textContent = tree.title;
         document.querySelector('.cryptex-picker').append(tree._button);
-        perkTreeChoices.push({ label: tree.title, panel: tree._panel, periods: tree.periods?.includes('all') ? ['all'] : (tree.periods || []), community: true });
+        const choice = { label: tree.title, panel: tree._panel, button: tree._button, periods: tree.periods?.includes('all') ? ['all'] : (tree.periods || []), community: true, treeId: tree.id };
+        perkTreeChoices.push(choice);
         document.getElementById('perks-screen').insertBefore(tree._panel, document.getElementById('custom-perk-panel').nextSibling);
-        tree._button.addEventListener('click', () => choosePerkTree(Number(tree._button.dataset.treeIndex)));
+        tree._button.addEventListener('click', () => choosePerkTree(perkTreeChoices.indexOf(choice)));
       }
       tree._button.textContent = tree.title;
-      const choice = perkTreeChoices[Number(tree._button.dataset.treeIndex)];
+      const choice = perkTreeChoices.find(entry=>entry.treeId===tree.id);
       if (choice) { choice.label = tree.title; choice.periods = tree.periods?.includes('all') ? ['all'] : (tree.periods || []); }
       tree._panel.replaceChildren();
       const byId = new Map((tree.perks || []).map(perk => [perk.id, perk]));
@@ -3133,14 +3135,17 @@
       const picker=document.querySelector('.cryptex-picker');
       const customChoice=perkTreeChoices.find(choice=>choice.panel?.id==='custom-perk-panel');
       const builtIns=perkTreeChoices.filter(choice=>choice.panel?.id!=='custom-perk-panel'&&!choice.community).slice(0,10);
+      const staticButtons=[...picker.querySelectorAll('.tree-choice-button:not(.community-tree-choice)')];
+      builtIns.forEach((choice,index)=>choice.button=staticButtons.find(button=>button.textContent.trim()===choice.label)||staticButtons[index]);
+      if(customChoice)customChoice.button=staticButtons.find(button=>button.textContent.trim()==='Custom');
       perkTreeChoices.splice(0,perkTreeChoices.length,...builtIns);
       document.querySelectorAll('.community-tree-choice, .community-perk-tree').forEach(element => element.remove());
       activePerkTreeIndex = Math.min(activePerkTreeIndex, 9);
       const validPerkIds = new Set(communityCatalog.trees.flatMap(tree => tree.perks.map(perk => communityPerkDomId(tree, perk))));
       Object.keys(perkDefinitions).filter(id => id.startsWith('community-')).forEach(id => { delete perkDefinitions[id]; if (!validPerkIds.has(id)) selectedPerks.delete(id); });
       communityCatalog.trees.forEach(tree => { if (!tree.private) communityRenderTree(tree); });
-      if(customChoice){perkTreeChoices.push(customChoice);const customButton=[...picker.querySelectorAll('.tree-choice-button')].find(button=>button.textContent.trim()==='Custom');if(customButton)picker.append(customButton);}
-      perkTreeChoices.forEach((choice,index)=>{const button=picker.querySelectorAll('.tree-choice-button')[index];if(button)button.dataset.treeIndex=String(index);});
+      if(customChoice)perkTreeChoices.push(customChoice);
+      perkTreeChoices.forEach((choice,index)=>{if(choice.button){choice.button.dataset.treeIndex=String(index);picker.append(choice.button);}});
       choosePerkTree(activePerkTreeIndex);
       updatePerkTree();
       if(typeof applyPageParts==='function')applyPageParts();

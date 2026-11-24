@@ -1,4 +1,19 @@
 {
   "version": 1,
-  "trees": []
+  "trees": [
+    {
+      "id": "reaction",
+      "title": "Reaction",
+      "periods": ["all"],
+      "perks": [
+        {"id":"opportunity-attack","name":"Opportunity attack","description":"When an enemy leaves a square adjacent to yours, you may roll a reaction to make an attack against them.","cost":5,"category":"reaction","requires":[]},
+        {"id":"sentinel","name":"Sentinel","description":"When you make an opportunity attack, it reduces the enemy's speed to zero for this round.","cost":5,"category":"reaction","requires":["opportunity-attack"]},
+        {"id":"cover-fire","name":"Cover Fire","description":"An ally can call on you to provide cover fire. If they call you, you can roll Bluff against their Psychology to force them not to attack your ally while they are moving.","cost":5,"category":"reaction","requires":["sentinel"]},
+        {"id":"return-fire","name":"Return fire","description":"When targeted with a ranged attack, you can now roll Firearm or, for a bow, succeed by beating their level of success by 1.","cost":5,"category":"reaction","requires":["cover-fire"]},
+        {"id":"drop-prone","name":"Drop Prone","description":"When targeted by a ranged attack, you can expend a set of reaction dice to drop prone, which gives ranged shots a penalty die.","cost":5,"category":"reaction","requires":["opportunity-attack"]},
+        {"id":"dive-for-cover","name":"Dive for cover","description":"When targeted by an attack, you can roll Acrobatics to try to dive for cover within 3 squares of you.","cost":5,"category":"reaction","requires":["drop-prone"]},
+        {"id":"human-shield","name":"Human shield","description":"When there is an enemy in a square adjacent to yours, and you are being targeted by an attack not made by that person, you can roll Brawl to grapple them and use their health as armor points for you.","cost":5,"category":"reaction","requires":["dive-for-cover"]}
+      ]
+    }
+  ]
 }
