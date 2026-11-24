@@ -3130,14 +3130,15 @@
     }
     function communityRenderAllTrees() {
       const picker=document.querySelector('.cryptex-picker');
-      const customChoice=perkTreeChoices.splice(10,1)[0];
-      perkTreeChoices.splice(10);
+      const customChoice=perkTreeChoices.find(choice=>choice.panel?.id==='custom-perk-panel');
+      const builtIns=perkTreeChoices.filter(choice=>choice.panel?.id!=='custom-perk-panel'&&!choice.community).slice(0,10);
+      perkTreeChoices.splice(0,perkTreeChoices.length,...builtIns);
       document.querySelectorAll('.community-tree-choice, .community-perk-tree').forEach(element => element.remove());
-      activePerkTreeIndex = Math.min(activePerkTreeIndex, Math.max(0,perkTreeChoices.length-1));
+      activePerkTreeIndex = Math.min(activePerkTreeIndex, 9);
       const validPerkIds = new Set(communityCatalog.trees.flatMap(tree => tree.perks.map(perk => communityPerkDomId(tree, perk))));
       Object.keys(perkDefinitions).filter(id => id.startsWith('community-')).forEach(id => { delete perkDefinitions[id]; if (!validPerkIds.has(id)) selectedPerks.delete(id); });
       communityCatalog.trees.forEach(tree => { if (!tree.private) communityRenderTree(tree); });
-      if(customChoice){perkTreeChoices.push(customChoice);const customButton=picker.querySelector('.tree-choice-button[data-tree-index="10"]');if(customButton)picker.append(customButton);}
+      if(customChoice){perkTreeChoices.push(customChoice);const customButton=[...picker.querySelectorAll('.tree-choice-button')].find(button=>button.textContent.trim()==='Custom');if(customButton)picker.append(customButton);}
       perkTreeChoices.forEach((choice,index)=>{const button=picker.querySelectorAll('.tree-choice-button')[index];if(button)button.dataset.treeIndex=String(index);});
       choosePerkTree(activePerkTreeIndex);
       updatePerkTree();
