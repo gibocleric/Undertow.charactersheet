@@ -2435,6 +2435,7 @@
       const cookPerks = perkNames(cookPerkIds);
       const vehiclePerks = perkNames(vehiclePerkIds);
       const doctorPerks = perkNames(doctorPerkIds);
+      const reactionPerks = perkNames(reactionPerkIds);
       const communityPerkSummary = communityCatalog.trees.map(tree => {
         const names = perkNames(tree.perks.map(perk => communityPerkDomId(tree, perk)));
         return names.length ? `${tree.title} perks: ${names.join(', ')}` : '';
