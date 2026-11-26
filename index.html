@@ -3007,9 +3007,20 @@
       if (!character || typeof character !== 'object' || !character.stats || typeof character.stats !== 'object') {
         throw new Error('This save is missing its major stats. Import a complete character file or create a new save.');
       }
-      const missingStat = categoryKeys.find((key) => !Number.isFinite(Number(character.stats[key])));
-      if (missingStat) throw new Error(`This save is missing the ${categories[missingStat].label} value.`);
-      activeSaveId = character.id;
+      if (!Array.isArray(character.skills) && (!character.skills || typeof character.skills !== 'object')) {
+        throw new Error('This save is missing its skill values. Import a complete character file or create a new save.');
+      }
+      const usedStats = new Set();
+      const restoredStats = {};
+      categoryKeys.forEach((key) => {
+        const requested = String(Number(character.stats[key]));
+        const value = statValues.includes(requested) && !usedStats.has(requested)
+          ? requested
+          : statValues.find((candidate) => !usedStats.has(candidate));
+        if (!value) throw new Error('This version of the character builder does not have enough unique stat values to restore this save.');
+        restoredStats[key] = Number(value);
+        usedStats.add(value);
+      });
       adminBlockValues = { ...(character.adminBlockValues || {}) };
       const storedPeriod = character.timePeriod;
       if (storedPeriod?.id === 'custom') {
@@ -3025,13 +3036,12 @@
       document.getElementById('age').value = character.age ?? '';
       const difficulty = [...document.querySelectorAll('#character-form input[name="difficulty"]')].find((input) => input.value === character.difficulty);
       if (difficulty) difficulty.checked = true;
-      categoryKeys.forEach((key) => { stats[key] = Number(character.stats[key]); });
+      categoryKeys.forEach((key) => { stats[key] = restoredStats[key]; });
       clearCustomPerks();
       customPerks = (character.customPerks || []).map((perk) => ({ ...perk }));
       customPerks.forEach(registerCustomPerk);
       selectedPerks = new Set((character.perks || []).filter((perk) => perkDefinitions[perk]));
       inventoryChoices = { ...(character.inventoryChoices || {}) };
-      const savedPerkCost = perkPointsSpent();
       initialStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
       updateUniqueOptions(statsFields);
       buildSkills();
@@ -3040,27 +3050,42 @@
         const fallback = stats[input.dataset.category];
         input.value = String(Number.isFinite(storedValue) ? Math.max(fallback, Math.min(80, Math.round(storedValue))) : fallback);
       });
-      reserveInput.value = String((Number(character.reserve) || 0) + savedPerkCost);
+      const savedPerkCost = perkPointsSpent();
+      const skillBudget = Math.max(0, budgetFor(stats) - savedPerkCost);
+      let skillBonusTotal = skillInputs.reduce((sum, input) => sum + bonusOf(input), 0);
+      // Older saves may have stale totals. Trim excess bonus points from the
+      // end of the list, never below the category's starting stat or above 80.
+      for (let index = skillInputs.length - 1; skillBonusTotal > skillBudget && index >= 0; index -= 1) {
+        const input = skillInputs[index];
+        const removable = Math.min(skillBonusTotal - skillBudget, bonusOf(input));
+        input.value = String(Number(input.value) - removable);
+        skillBonusTotal -= removable;
+      }
+      const restoredReserve = Math.max(0, skillBudget - skillBonusTotal);
+      reserveInput.value = String(restoredReserve + savedPerkCost);
       updateSkills();
       updatePerkTree();
-      if (finalReady) {
-        document.getElementById('final-name').value = character.name || '';
-        document.getElementById('final-occupation').value = character.occupation || '';
-        document.getElementById('final-age').value = String(character.age);
-        finalStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
-        finalSkillInputs.forEach((input) => {
-          const storedValue = Number(character.skills?.[input.name]);
-          const fallback = stats[input.dataset.category];
-          input.value = String(Number.isFinite(storedValue) ? Math.max(fallback, Math.min(80, Math.round(storedValue))) : fallback);
-        });
-        finalReserve.value = String(character.reserve || 0);
-        finalPerkPointSnapshot = perkPointsSpent();
-        updateFinalPage();
-      } else {
-        buildFinalPage();
+      // Rebuild the final form from the restored state so a previously opened
+      // character cannot leave stale inputs or disabled save/print controls.
+      finalReady = false;
+      buildFinalPage();
+      document.getElementById('final-name').value = character.name || '';
+      document.getElementById('final-occupation').value = character.occupation || '';
+      document.getElementById('final-age').value = String(character.age ?? '');
+      finalStatSelects.forEach((select) => { select.value = String(stats[select.name]); });
+      finalSkillInputs.forEach((input) => {
+        const source = skillInputs.find((skill) => skill.name === input.name);
+        input.value = source?.value ?? String(stats[input.dataset.category]);
+      });
+      finalReserve.value = String(restoredReserve);
+      finalPerkPointSnapshot = perkPointsSpent();
+      updateFinalPage();
+      if (document.getElementById('save-character-button').disabled || document.getElementById('print-button').disabled) {
+        throw new Error('The character loaded, but its details or point totals are invalid. Check the highlighted fields on Final Changes.');
       }
       document.querySelectorAll('main > section').forEach((section) => { section.hidden = true; });
       document.getElementById('final-screen').hidden = false;
+      activeSaveId = character.id || null;
       document.getElementById('save-status').textContent = `Loaded ${character.name || 'character'}.`;
       document.getElementById('save-status').classList.remove('error');
       document.getElementById('final-screen').scrollIntoView({ block: 'start' });
