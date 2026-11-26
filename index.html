@@ -125,8 +125,8 @@
       body { display: block; padding: 0; background: white; }
       main { display: none; }
       #print-sheet { display: block !important; position: relative; font: 9pt/1.35 "Libre Baskerville", "Times New Roman", serif; color: #111; }
-      .print-page-frame { display: block !important; position: fixed; z-index: 0; top: .25in; left: .25in; width: calc(100% - .5in); height: calc(100% - .5in); object-fit: fill; pointer-events: none; }
-      #print-sheet > section:not(.print-page-frame) { position: relative; z-index: 1; min-width: 0; overflow: visible; margin: 0; padding: .75in; background: #fff; background-clip: content-box; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+      .print-page-frame { display: block !important; position: fixed; z-index: 0; top: .12in; left: .12in; width: calc(100% - .24in); height: calc(100% - .24in); object-fit: fill; pointer-events: none; }
+      #print-sheet > section:not(.print-page-frame) { position: relative; z-index: 1; min-width: 0; overflow: visible; margin: 0; padding: .9in; background: #fff; background-clip: content-box; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
       .print-page-one { break-after: page; page-break-after: always; }
       .print-head { display: flex; justify-content: flex-end; align-items: flex-start; margin-bottom: 12px; text-align: right; }
       .print-head h1 { margin: 2px 0 4px; font: 700 18pt "Libre Baskerville", "Times New Roman", serif; }
